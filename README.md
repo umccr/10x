@@ -1,45 +1,31 @@
-# 10x
-10X dumping ground
+# 10X Dumping Ground
 
-## FASTQ Generation - bcl2fastq
+Keep 10X notes, reports, results, (small) datasets etc. as you wish.
+Basically instead of dumping everything in the
+[Google doc](https://docs.google.com/document/d/1EhqPusGRCDKdK5tx5RpEhgwj_LCAi7plb2B62VvbaG4/edit),
+feel free to dump it in here.
 
-[Arthur]: I followed what 10X recommended to generate FASTQ files:
+You can either edit/add files online through GitHub, or clone this
+repo locally (`git clone https://github.com/umccr/10x`) and go nuts.
+Occasional `git pull`s are recommended. Ask around if you need help ;-)
 
-```
-# recommended bcl2fastq options (for SC3prime?) by 10x-genomics
-/usr/local/bin/bcl2fastq \
-        --use-bases-mask Y26n*,I8,Y* \
-        --create-fastq-for-index-reads \
-        --minimum-trimmed-read-length=8 \
-        --mask-short-adapter-reads=8 \
-        --ignore-missing-positions \
-        --ignore-missing-controls \
-        --ignore-missing-filter \
-        --ignore-missing-bcls \
-        -R ${IN} \
-        --sample-sheet ${IN}/SampleSheet.csv \
-        -o ${OUT}/ \
-        --no-lane-splitting
-```
+Just try not to add any 'big' files e.g. > 5Mb. I mean, you _can_, but maybe
+you _shouldn't_, since it will take its toll on the repo pulling/pushing
+times. I think. Instead you can upload to DropBox or something and
+simply link to it on Slack.
 
-Sample sheet generation was using 10X website’s [generator](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/using/bcl2fastq-direct)
+# Structure
 
-*PROBLEM:*
+## QC
 
-This sample sheet format generates FASTQs that are have these issues:
+## Challenging Regions
 
-a) organised by index `SI-GA-*` rather by sample; 
+## HLA
 
-b) we neglected lane number in sample sheet and bcl2fastq removed the `_L00*_` token from file name that is required by _CellRanger_ later.
+## Phasing
 
-*SOLUTION:*
+## Telomeres
 
-Create symbolic links for FASTQs to have names acceptable by _CellRanger_
+## SVs
 
-
-## Running LongRanger/CellRanger on Spartan
-
-A cluster scheduler template is created for _CellRanger_ AND _LongRanger_ cluster mode job submission (see [`slurm.template`](slurm.template)).
-
-
-
+## Insertions
