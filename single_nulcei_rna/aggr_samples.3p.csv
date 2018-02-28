@@ -1,0 +1,9 @@
+library_id,molecule_h5
+01-FACS-nc-3prime-mixR1,/data/cephfs/punim0010/projects/10X_scRNA-20180226/20180226_01-FACS-nc-3prime-mixR1/outs/molecule_info.h5
+02-FACS-nc-3prime-mixR2,/data/cephfs/punim0010/projects/10X_scRNA-20180226/20180226_02-FACS-nc-3prime-mixR2/outs/molecule_info.h5
+03-FACS-nc-3prime-mixR3,/data/cephfs/punim0010/projects/10X_scRNA-20180226/20180226_03-FACS-nc-3prime-mixR3/outs/molecule_info.h5
+04-FACS-nc-3prime-CUP-1184,/data/cephfs/punim0010/projects/10X_scRNA-20180226/20180226_04-FACS-nc-3prime-CUP-1184/outs/molecule_info.h5
+05-nc-3prime-mixR1,/data/cephfs/punim0010/projects/10X_scRNA-20180226/20180226_05-nc-3prime-mixR1/outs/molecule_info.h5
+06-nc-3prime-mixR2,/data/cephfs/punim0010/projects/10X_scRNA-20180226/20180226_06-nc-3prime-mixR2/outs/molecule_info.h5
+07-nc-3prime-mixR3,/data/cephfs/punim0010/projects/10X_scRNA-20180226/20180226_07-nc-3prime-mixR3/outs/molecule_info.h5
+08-nc-3prime-CUP-1184,/data/cephfs/punim0010/projects/10X_scRNA-20180226/20180226_08-nc-3prime-CUP-1184/outs/molecule_info.h5

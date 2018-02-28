@@ -1,0 +1,14 @@
+01-FACS-nc-3prime-mixR1
+02-FACS-nc-3prime-mixR2
+03-FACS-nc-3prime-mixR3
+04-FACS-nc-3prime-CUP-1184
+05-nc-3prime-mixR1
+06-nc-3prime-mixR2
+07-nc-3prime-mixR3
+08-nc-3prime-CUP-1184
+09-nc-5prime-mixR1
+10-nc-5prime-mixR2
+11-nc-5prime-mixR3
+12-nc-5prime-CUP-1184
+#13-nc-5prime-CUP-1184-B-cell
+#14-nc-5prime-CUP-1184-T-cell

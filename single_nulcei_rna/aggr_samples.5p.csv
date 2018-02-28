@@ -1,0 +1,5 @@
+library_id,molecule_h5
+09-nc-5prime-mixR1,/data/cephfs/punim0010/projects/10X_scRNA-20180226/20180226_09-nc-5prime-mixR1/outs/molecule_info.h5
+10-nc-5prime-mixR2,/data/cephfs/punim0010/projects/10X_scRNA-20180226/20180226_10-nc-5prime-mixR2/outs/molecule_info.h5
+11-nc-5prime-mixR3,/data/cephfs/punim0010/projects/10X_scRNA-20180226/20180226_11-nc-5prime-mixR3/outs/molecule_info.h5
+12-nc-5prime-CUP-1184,/data/cephfs/punim0010/projects/10X_scRNA-20180226/20180226_12-nc-5prime-CUP-1184/outs/molecule_info.h5
