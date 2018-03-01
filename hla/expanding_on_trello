@@ -5,6 +5,10 @@ Nanopore data is also available, and not assembled - https://figshare.com/articl
 
 Part 2 - generate germline HLA consensus
 
+The HLA region is
+6   29719561 32883508 
+(as defined by the HLA.hg19 data in GWASTools (https://rdrr.io/bioc/GWASTools/man/HLA.html))
+
 https://samtools.github.io/bcftools/howtos/consensus-sequence.html
 
 Input - 10X BAM
