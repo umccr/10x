@@ -1,9 +1,9 @@
-Part 1 - check for existing HLA assemblies
+## Part 1 - check for existing HLA assemblies
 
 PacBio HLA data is available, but not assembled - https://github.com/PacificBiosciences/DevNet/wiki/HLA-Multiplexed-GenDx-Amplicons-HLA-A-,-B,--C,--DQB1,-and--DRB1
 Nanopore data is also available, and not assembled - https://figshare.com/articles/Nanopore_reads_and_alignments/1289717 (ref https://f1000research.com/articles/4-17/v2)
 
-Part 2 - generate germline HLA consensus
+## Part 2 - generate germline HLA consensus
 
 The HLA region is
 6   29719561 32883508 
@@ -15,7 +15,7 @@ Input - 10X BAM
       - reference FASTA
 samtools mpileup -uf chr6_10X_reference.fasta chr6_10X.bam | bcftools call -c | vcfutils.pl vcf2fq > chr06_10X-cns.fastq
 
-Part 2 (optional) - generate de novo germline HLA assembly
+## Part 2 (optional) - generate de novo germline HLA assembly
 
 First suggestion, ARC, see here (https://github.com/ibest/ARC) and here (http://ibest.github.io/ARC/)
 
@@ -24,6 +24,7 @@ Instructions below include some dependencies specific for this new installation 
 
 ARC needs a mapper (bowtie) and an assembler (spades)
 
+```
 sudo apt install bowtie2
 
 wget http://cab.spbu.ru/files/release3.11.1/SPAdes-3.11.1.tar.gz
@@ -51,6 +52,8 @@ sudo python setup.py install
 cd ARC/test_data
 ./runarc
 cat log.txt
+```
 
-Part 3 - call somatic variants against new HLA reference
-Part 4 - compare standard somatic calls vs 10X calls vs new reference calls
+## Part 3 - call somatic variants against new HLA reference
+
+## Part 4 - compare standard somatic calls vs 10X calls vs new reference calls
