@@ -1,4 +1,13 @@
-# Other stuff
+# Brief background on telomeres.
+
+Telomeres are nucleoprotein structures at the ends of all linear
+eukaryotic chromosomes. In mammals, telomeres are composed
+of the shelterin protein complex and a double-stranded
+tract of short tandem repeats of TTAGGG that ends in a singlestranded
+3 overhang on the G-strand. Telomeres cap and
+protect chromosome ends from eliciting a DNA damage
+response and illegitimate recombination events.
+
 # Telomerecat output
 
 Working off [readthedocs](http://telomerecat.readthedocs.io/en/latest/understanding_output.html).
