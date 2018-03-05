@@ -1,7 +1,10 @@
 ## Part 1 - check for existing HLA assemblies
 
 PacBio HLA data is available, but not assembled - https://github.com/PacificBiosciences/DevNet/wiki/HLA-Multiplexed-GenDx-Amplicons-HLA-A-,-B,--C,--DQB1,-and--DRB1
+
 Nanopore data is also available, and not assembled - https://figshare.com/articles/Nanopore_reads_and_alignments/1289717 (ref https://f1000research.com/articles/4-17/v2)
+
+Both of these sets of data could be fed into part 2 (optional).
 
 ## Part 2 - generate germline HLA consensus
 
@@ -9,11 +12,16 @@ The HLA region is
 6   29719561 32883508 
 (as defined by the HLA.hg19 data in GWASTools (https://rdrr.io/bioc/GWASTools/man/HLA.html))
 
+Test data downloaded from 10X (https://support.10xgenomics.com/genome-exome/datasets/2.0.0/HCC1954N_WGS)
+
+bcftools creates a consensus by applying VCF variants
 https://samtools.github.io/bcftools/howtos/consensus-sequence.html
 
 Input - 10X BAM
       - reference FASTA
 samtools mpileup -uf chr6_10X_reference.fasta chr6_10X.bam | bcftools call -c | vcfutils.pl vcf2fq > chr06_10X-cns.fastq
+
+samtools faidx ref.fa 6:29719561-32883508 | bcftools consensus in.vcf.gz -o out.fa
 
 ## Part 2 (optional) - generate de novo germline HLA assembly
 
@@ -53,6 +61,8 @@ cd ARC/test_data
 ./runarc
 cat log.txt
 ```
+ARC needs a target/set of targets to map reads against for assembly.  
+1. Begin with the HLA region as defined above
 
 ## Part 3 - call somatic variants against new HLA reference
 
