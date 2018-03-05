@@ -10,10 +10,10 @@ COLO829_TGEN_bwa-ready.bam|38605|8012|2528|2.573|397.0|96.979|112|112|5484|5484|
 sample name | \# of reads which are completely telomeric | \# of reads where one end is completely telomeric, and the other is not, and telomeric end is CCCTAA | as previous column, and end is TTAGGG | Measure of fidelity | Insert size | SD of insert size | | | F2 - F4
  
 
- F2-F4 = F2a, the estimated number of reads covering the boundary between telomere and nontelomere.
+F2-F4 = F2a, the estimated number of reads covering the boundary between telomere and nontelomere.
  
-  The greater the measure of fidelity, the more we believe the observed measurement of F2a.
+The greater the measure of fidelity, the more we believe the observed measurement of F2a. (Question - so how large can this value be?, how large is this value with a clean sample?)
  
- F2a value after undergoing correction (see paper).
+F2a value after undergoing correction (see paper).
  
- Length - telomere length as estimated by telomerecat.
+Length - telomere length as estimated by telomerecat.
