@@ -45,6 +45,16 @@ kBases/sec:20.71
 
 5. grep -oP 'NH:i:\K.*' 10x_telomeres.sam | sort | uniq -c > grep.results
 
+1190 1
+
+6654 2
+
+1329 3
+
+1280 4
+
+4635 5
+
 # Telomerecat output
 
 Working off [readthedocs](http://telomerecat.readthedocs.io/en/latest/understanding_output.html).
