@@ -21,22 +21,28 @@ How to find the positions of telomeres? - https://genome.ucsc.edu/FAQ/FAQtracks#
 3. samtools bam2fq 10x.telomeres.sam.bam > 10x.telomeres.fq
 4. bbmap.sh ambiguous=all ref=/data/projects/punim0010/local/share/bcbio/genomes/Hsapiens/GRCh37/seq/GRCh37.fa in=10x.telomeres.fq out=10x_telomeres_GRCh37.sam
 
-Read 1 data:            pct reads       num reads       pct bases          num bases
+Reads Used:9486(1299128 bases)
 
-mapped:                  65.4333%            6207        64.4140%             836820
-unambiguous:             12.0704%            1145        12.0475%             156513
-ambiguous:               53.3629%            5062        52.3664%             680307
-low-Q discards:           0.0000%               0         0.0000%                  0
+Mapping:   62.736 seconds.
+Reads/sec: 151.20
+kBases/sec:20.71
 
-perfect best site:        1.8659%             177         1.4290%              18564
-semiperfect site:         8.9922%             853         8.1521%             105906
 
-Match Rate:                   NA               NA        55.4591%             751906
-Error Rate:              59.2866%            5385        42.7044%             578980
-Sub Rate:                58.5930%            5322         4.1320%              56021
-Del Rate:                19.8723%            1805        38.2778%             518964
-Ins Rate:                15.0611%            1368         0.2947%               3995
-N Rate:                  21.8100%            1981         1.8364%              24898
+|Read 1 data |pct reads|num reads |pct bases|num bases|
+|---------------------------------------------------------
+|mapped| 65.4333 |     6207 | 64.4140 |      836820|
+|unambiguous| 12.0704 |     1145 | 12.0475 |      156513|
+|ambiguous| 53.3629 |     5062 | 52.3664 |      680307|
+|low-Q discards|  0.0000 |        0 |  0.0000 |           0|
+|perfect best site|  1.8659 |      177 |  1.4290 |       18564|
+|semiperfect site|  8.9922 |      853 |  8.1521 |      105906|
+|
+|Match Rate|      NA |       NA | 55.4591 |      751906|
+|Error Rate| 59.2866 |     5385 | 42.7044 |      578980|
+|Sub Rate| 58.5930 |     5322 |  4.1320 |       56021|
+|Del Rate| 19.8723 |     1805 | 38.2778 |      518964|
+|Ins Rate | 15.0611 |     1368 |  0.2947 |        3995|
+|N Rate| 21.8100 |     1981 |  1.8364 |       24898|
 
 5. grep -oP 'NH:i:\K.*' 10x_telomeres.sam | sort | uniq -c > grep.results
 
