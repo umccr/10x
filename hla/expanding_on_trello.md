@@ -61,6 +61,19 @@ cd ARC/test_data
 ./runarc
 cat log.txt
 ```
+
+Installed ARC on Spartan
+
+```
+Installed SPAdes (http://spades.bioinf.spbau.ru/release3.11.1/SPAdes-3.11.1-Linux.tar.gz)
+added SPAdes to PATH
+module load Bowtie2
+module load Biopthon
+cd /Opt/ARC/test_data
+./runarc
+cat log.txt
+```
+
 ARC needs a target/set of targets to map reads against for assembly.  
 1. Begin with the HLA region as defined above
 
