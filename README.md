@@ -52,21 +52,6 @@ Create symbolic links for FASTQs to have names acceptable by _CellRanger_
 
 ## Running LongRanger/CellRanger on Spartan
 
-A cluster scheduler template is created for _CellRanger_ AND _LongRanger_ cluster mode job submission (see [`slurm.template`](slurm.template)).
+A cluster scheduler template is created for _CellRanger_ AND _LongRanger_ cluster mode job submission (see [`slurm.template`](scripts/slurm.template)).
 
 
-# Structure
-
-## QC
-
-## Challenging Regions
-
-## HLA
-
-## Phasing
-
-## Telomeres
-
-## SVs
-
-## Insertions
