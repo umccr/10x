@@ -16,10 +16,10 @@ How to find the positions of telomeres? - https://genome.ucsc.edu/FAQ/FAQtracks#
 
 # Multimapping of telomeric regions
 
-1. samtools view -h -L telomere.bed 10x.bam > 10x.telomeres.sam
-2. samtools view -S -b 10x.telomeres.sam > 10x.telomeres.sam.bam
-3. samtools bam2fq 10x.telomeres.sam.bam > 10x.telomeres.fq
-4. bbmap.sh ambiguous=all ref=/data/projects/punim0010/local/share/bcbio/genomes/Hsapiens/GRCh37/seq/GRCh37.fa in=10x.telomeres.fq out=10x_telomeres_GRCh37.sam
+1. `samtools view -h -L telomere.bed 10x.bam > 10x.telomeres.sam`
+2. `samtools view -S -b 10x.telomeres.sam > 10x.telomeres.sam.bam`
+3. `samtools bam2fq 10x.telomeres.sam.bam > 10x.telomeres.fq`
+4. `bbmap.sh ambiguous=all ref=/data/projects/punim0010/local/share/bcbio/genomes/Hsapiens/GRCh37/seq/GRCh37.fa in=10x.telomeres.fq out=10x_telomeres_GRCh37.sam`
 
 Reads Used:9486(1299128 bases)
 
@@ -43,7 +43,7 @@ kBases/sec:20.71
 |N Rate| 21.8100 |     1981 |  1.8364 |       24898|
 
 
-5. grep -oP 'NH:i:\K.*' 10x_telomeres.sam | sort | uniq -c > grep.results
+5. `grep -oP 'NH:i:\K.*' 10x_telomeres.sam | sort | uniq -c > grep.results`
 
 1190 1
 
