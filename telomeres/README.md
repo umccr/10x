@@ -16,6 +16,8 @@ How to find the positions of telomeres? - https://genome.ucsc.edu/FAQ/FAQtracks#
 
 # Multimapping of telomeric regions
 
+The 10x dataset used (named 10x.bam here) is `/data/cephfs/punim0010/data/External/Reference/NA12878-10x-2018/NA12878_WGS_v2_phased_possorted_bam.bam`:
+
 1. `samtools view -h -L telomere.bed 10x.bam > 10x.telomeres.sam`
 2. `samtools view -S -b 10x.telomeres.sam > 10x.telomeres.sam.bam`
 3. `samtools bam2fq 10x.telomeres.sam.bam > 10x.telomeres.fq`
