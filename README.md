@@ -22,9 +22,9 @@ feel free to dump it in here.
 | Name             | Description                                                                        | Notes             |
 |------------------+------------------------------------------------------------------------------------+-------------------|
 | [bxtools][bxt]   | light-weight tools for 10X data                                                    | has conda package |
-| [longranger][lr] | 10X official pipeline for WGS/WES read alignment, SNP/Indel/SV calling and phasing |                   |
-| [HapCut2][hc2]   | haplotype assembly                                                                 |                   |
-| [EMA][ema]       | align 10X reads                                                                    |                   |
+| [longranger][lr] | 10X official pipeline for WGS/WES read alignment, SNP/Indel/SV calling and phasing | -                 |
+| [HapCut2][hc2]   | haplotype assembly                                                                 | -                 |
+| [EMA][ema]       | align 10X reads                                                                    | -                 |
 
 [bxt]: https://github.com/walaj/bxtools
 [lr]: https://support.10xgenomics.com/genome-exome/software/pipelines/latest/what-is-long-ranger
