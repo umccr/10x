@@ -7,6 +7,7 @@
 * [SV Dot Plots in R](#sv-dot-plots-in-r)
 * [DNA Molecule Length Distribution](#dna-molecule-length-distribution)
 * [Loupe](#loupe)
+* [IGV](#igv)
 
 <!-- vim-markdown-toc -->
 
@@ -59,3 +60,12 @@ Loupe
 
 * [Application Examples](https://community.10xgenomics.com/t5/Genome-Exome-Forum/Application-examples-using-Loupe-to-visualize-and-interpret/m-p/34#M46)
 
+IGV
+---
+* [10X blog video](https://community.10xgenomics.com/t5/10x-Blog/10x-pert-Workshop-Structural-Variant-and-Haplotype-Analysis-with/ba-p/563)
+* If you want to see small variants and how they link to each other, use IGV
+* Two versions:
+    - beta: supports linked reads. Right click on read groups, then visualise by
+      linked reads/barcode. Thin line represents barcode, with reads aligned to it.
+    - old: colour by tag (HP or haplotype tag) and it will show how they are phased
+      relatively to each other (blue and pink, vs grey). Can also group by tag.
