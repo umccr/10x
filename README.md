@@ -19,12 +19,14 @@ feel free to dump it in here.
 
 ## Tools
 
-| Name             | Description                                                               | Notes |
-|------------------+---------------------------------------------------------------------------+-------|
-| [bxtools][bxt]   |                                                                           |       |
-| [longranger][lr] | 10X pipeline for WGS/WES read alignment, SNP/Indel/SV calling and phasing |       |
-| [HapCut2][hc2]   |                                                                           |       |
+| Name             | Description                                                                        | Notes             |
+|------------------+------------------------------------------------------------------------------------+-------------------|
+| [bxtools][bxt]   | light-weight tools for 10X data                                                    | has conda package |
+| [longranger][lr] | 10X official pipeline for WGS/WES read alignment, SNP/Indel/SV calling and phasing |                   |
+| [HapCut2][hc2]   | haplotype assembly                                                                 |                   |
+| [EMA][ema]       | align 10X reads                                                                    |                   |
 
 [bxt]: https://github.com/walaj/bxtools
 [lr]: https://support.10xgenomics.com/genome-exome/software/pipelines/latest/what-is-long-ranger
 [hc2]: https://github.com/vibansal/HapCUT2
+[ema]: https://github.com/arshajii/ema
