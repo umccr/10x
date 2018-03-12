@@ -18,6 +18,7 @@ feel free to dump it in here.
 
 [wfu]: https://support.10xgenomics.com/de-novo-assembly/datasets/2.0.0/wfu
 [wg1]: https://support.10xgenomics.com/genome-exome/datasets/2.1.4/NA12878_WGS_v2
+[wes]: https://support.10xgenomics.com/genome-exome/datasets/2.1.4/NA12878_WES_v2
 
 ## Tools
 
