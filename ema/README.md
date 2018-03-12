@@ -41,8 +41,8 @@ seqtk sample -s100 ori_ungz_fq/NA12878_WGS_v2_S1_L001_R2_001.fastq 10000 > subse
 Preprocessing
 
 ```
-cat 40k_L001_R*_001.fastq | ema count -1 - -w barcode_whitelist.txt -o counts_file
-cat 40k_L001_R*_001.fastq | ema preproc -1 - -w barcode_whitelist.txt -c counts_file -n 2
+cat subset10k_L001_R*_001.fastq | ema count -1 - -w barcode_whitelist.txt -o counts_file
+cat subset10k_L001_R*_001.fastq | ema preproc -1 - -w barcode_whitelist.txt -c counts_file -n 2
 ```
 
 Sort buckets
