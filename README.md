@@ -26,6 +26,7 @@ feel free to dump it in here.
 | [HapCut2][hc2]   | haplotype assembly                                                                 | -                 |
 | [EMA][ema]       | align 10X reads                                                                    | -                 |
 
+
 [bxt]: https://github.com/walaj/bxtools
 [lr]: https://support.10xgenomics.com/genome-exome/software/pipelines/latest/what-is-long-ranger
 [hc2]: https://github.com/vibansal/HapCUT2
