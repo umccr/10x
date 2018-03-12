@@ -20,7 +20,7 @@ feel free to dump it in here.
 ## Tools
 
 | Name             | Description                                                                        | Notes             |
-|------------------+------------------------------------------------------------------------------------+-------------------|
+|------------------|------------------------------------------------------------------------------------|-------------------|
 | [bxtools][bxt]   | light-weight tools for 10X data                                                    | has conda package |
 | [longranger][lr] | 10X official pipeline for WGS/WES read alignment, SNP/Indel/SV calling and phasing | -                 |
 | [HapCut2][hc2]   | haplotype assembly                                                                 | -                 |
