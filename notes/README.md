@@ -64,7 +64,7 @@ IGV
 ---
 * [10X blog video](https://community.10xgenomics.com/t5/10x-Blog/10x-pert-Workshop-Structural-Variant-and-Haplotype-Analysis-with/ba-p/563)
 * If you want to see small variants and how they link to each other, use IGV
-* Two versions:
+* Two versions (beta 2.4.0 [released in September 2017](https://software.broadinstitute.org/software/igv/ReleaseNotes/2.4.x)):
     - beta: supports linked reads. Right click on read groups, then visualise by
       linked reads/barcode. Thin line represents barcode, with reads aligned to it.
     - old: colour by tag (HP or haplotype tag) and it will show how they are phased
