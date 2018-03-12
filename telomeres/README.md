@@ -64,7 +64,7 @@ Working off [readthedocs](http://telomerecat.readthedocs.io/en/latest/understand
 
 Sample|F1|F2|F4|Psi|Insert_mean|Insert_sd|Read_length|Initial_read_length|F2a|F2a_c|Length
 ------|--|--|--|---|-----------|---------|-----------|-------------------|---|-----|-------
-COLO829_TGEN_bwa-ready_except_telomere_regions_no_overlap-output.bam|6702|1819|392|1.421|393.0|109.359|112|112|1427|1427|1701.3
+~COLO829_TGEN_bwa-ready_except_telomere_regions_no_overlap-output.bam|6702|1819|392|1.421|393.0|109.359|112|112|1427|1427|1701.3~
 COLO829_TGEN_bwa-ready.bam|38605|8012|2528|2.573|397.0|96.979|112|112|5484|5484|2403.0
 COLO829BL_TGEN_bwa-ready.bam|49507|7545|3066|2.9960000000000004|346.0|84.266|112|112|4479|4479|2928.2
 sample name | \# of reads which are completely telomeric | \# of reads where one end is completely telomeric, and the other is not, and telomeric end is CCCTAA | as previous column, and end is TTAGGG | Measure of fidelity | Insert size | SD of insert size | | | F2 - F4 
