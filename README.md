@@ -7,15 +7,17 @@ feel free to dump it in here.
 
 ## Data Paths
 
-| Description                      | Path                                                                    | Cluster   |
-| ----------------------           | ----------------------------------------------------------------------- | --------- |
-| NA12878 WGS from [10X][1]        | `/data/cephfs/punim0010/data/External/Reference/NA12878-10x-2018/wfu`   | Spartan   |
-| NA12878 WGS from [10X][1] re-run | `/data/cephfs/punim0010/projects/10X_WGS-test`                          | Spartan   |
-| NA12878 WGS from [10X][1] re-run | `/g/data3/gx8/projects/Hsu_10X_WGS/NA12878-10X-WFU`                     | Raijin    |
-| LongRanger + References          | `/data/projects/punim0010/opt/`                                         | Spartan   |
+| Description                            | Path                                                                             | Cluster   |
+| ----------------------                 | -----------------------------------------------------------------------          | --------- |
+| NA12878 WGS from [10X-wfu][wfu]        | `/data/cephfs/punim0010/data/External/Reference/NA12878-10x-2018/wfu`            | Spartan   |
+| NA12878 WGS from [10X-wg1][wg1] re-run | `/data/cephfs/punim0010/data/External/Reference/NA12878-10x-2018/NA12878_WGS_v2` | Spartan   |
+| NA12878 WGS from [10X-wfu][wfu] re-run | `/g/data3/gx8/projects/Hsu_10X_WGS/NA12878-10X-WFU`                              | Raijin    |
+| NA12878 WES from [10X-wes][wes]        | `/data/cephfs/punim0010/data/External/Reference/NA12878-10x-2018/WES`            | Spartan   |
+| LongRanger + References                | `/data/projects/punim0010/opt/`                                                  | Spartan   |
 
 
-[1]: https://support.10xgenomics.com/de-novo-assembly/datasets/2.0.0/wfu
+[wfu]: https://support.10xgenomics.com/de-novo-assembly/datasets/2.0.0/wfu
+[wg1]: https://support.10xgenomics.com/genome-exome/datasets/2.1.4/NA12878_WGS_v2
 
 ## Tools
 
