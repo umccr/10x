@@ -53,22 +53,6 @@ rule blast:
 
 
 
-bedtools bamtofastq -i COLO829-10x.sorted.bam -fq COLO829-10x.R1.fq -fq2 COLO829-10x.R2.fq 2>COLO829-10x.unmpaired
-
-bxtools split NA12878_WGS.sorted.bam -a NA12878_WGS -m 100 | sort -k 2 -r -n > NA12878_WGS_bx_counts.txt
-
-sambamba view -f bam -F "unmapped" -t 10 NA12878_WGS.sorted.bam > ../unmapped/NA12878_WGS.sorted.bam
-
-bxtools split COLO829-10x_phased_possorted_bam.bam -a bx_split/COLO829-10x -m 1000 > bx_split/COLO829-10x_bx_counts.txt
-
-
-
-
-
-
-
-
-
 
 
 
