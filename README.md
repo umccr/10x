@@ -14,6 +14,7 @@ feel free to dump it in here.
 | NA12878 WGS from [10X-wfu][wfu] re-run | `/g/data3/gx8/projects/Hsu_10X_WGS/NA12878-10X-WFU`                              | Raijin    |
 | NA12878 WES from [10X-wes][wes]        | `/data/cephfs/punim0010/data/External/Reference/NA12878-10x-2018/WES`            | Spartan   |
 | LongRanger + References                | `/data/projects/punim0010/opt/`                                                  | Spartan   |
+| GRCh37 non-decoy Reference             | `/data/cephfs/punim0010/extras/10x/refdata-GRCh37`                               | Spartan   |
 
 
 [wfu]: https://support.10xgenomics.com/de-novo-assembly/datasets/2.0.0/wfu
