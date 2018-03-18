@@ -1,0 +1,76 @@
+SAMPLES = ['COLO829-10x']
+
+BLAST_DB = "../../tools/blast/nt"
+
+THREADS_MAX = 30
+
+rule all:
+    input:
+        expand('assembled/{sample}/blasted.txt', sample=SAMPLES)
+
+rule extract_unmapped:
+    input:
+        bam='{sample}_phased_possorted_bam.bam'
+    output:
+        fq1='unmapped/{sample}.R1.fq',
+        fq2='unmapped/{sample}.R2.fq'
+    threads: THREADS_MAX
+    shell:
+        'sambamba view -f bam -F "unmapped or mate_is_unmapped" -t {threads} {input.bam} |'
+        ' sambamba sort -n -t {threads} -m 100G /dev/stdin --show-progress |'
+        ' bedtools bamtofastq -i - -fq {output.fq1} -fq2 {output.fq2}'
+
+rule assemble:
+    input:
+        fq1=rules.extract_unmapped.output.fq1,
+        fq2=rules.extract_unmapped.output.fq2
+    output:
+        'assembled/{sample}/contigs.fasta'
+    params:
+        folder = 'assembled/{sample}'
+    threads: THREADS_MAX
+    shell:
+        'spades.py -o {params.folder} --meta -1 {input.fq1} -2 {input.fq2}'
+        ' -t {threads}'
+
+rule extract_long_contigs:
+    input:
+        rules.assemble.output[0]
+    output:
+        'assembled/{sample}_contigs_1kb.fasta'
+    shell:
+        'bioawk -c fastx \'(length($seq) > 1000) {{ print ">"$name"\\n"$seq }}\''
+        ' {input} > {output}'
+
+rule blast:
+    input:
+        rules.extract_long_contigs.output[0]
+    output:
+        'assembled/{sample}/blasted.txt'
+    shell:
+        'touch {output}'
+        #'blastn -db {BLAST_DB} -query {input} > {output}'
+
+
+
+bedtools bamtofastq -i COLO829-10x.sorted.bam -fq COLO829-10x.R1.fq -fq2 COLO829-10x.R2.fq 2>COLO829-10x.unmpaired
+
+bxtools split NA12878_WGS.sorted.bam -a NA12878_WGS -m 100 | sort -k 2 -r -n > NA12878_WGS_bx_counts.txt
+
+sambamba view -f bam -F "unmapped" -t 10 NA12878_WGS.sorted.bam > ../unmapped/NA12878_WGS.sorted.bam
+
+bxtools split COLO829-10x_phased_possorted_bam.bam -a bx_split/COLO829-10x -m 1000 > bx_split/COLO829-10x_bx_counts.txt
+
+
+
+
+
+
+
+
+
+
+
+
+
+
