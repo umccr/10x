@@ -10,83 +10,81 @@ response and illegitimate recombination events.
 
 As a cell begins to become cancerous, it divides more often and its telomeres are shortened at a higher rate. Cancerous cells escape senescence/death and conversely, they become immortal with the ability to indefinitely replicate, even with shortened telomeres, resulting in uncontrolled tumor growth. It has been demonstrated that this ability to escape the natural cell outcome happens because cancer cells prevent telomeres from becoming critically short by the reactivation of telomerase (phenomenon occurring in 85% of cancers) or by ALT (alternative lengthening of telomeres; 15%).
 
-# Notes
+# Telomeric regions (BED file)
 
 How to find the positions of telomeres? - https://genome.ucsc.edu/FAQ/FAQtracks#tracks20
 
-# Multimapping of telomeric regions
+# Research question(s)
 
-The 10x dataset used (named 10x.bam here) is `/data/cephfs/punim0010/data/External/Reference/NA12878-10x-2018/NA12878_WGS_v2_phased_possorted_bam.bam`:
+1. Using 10X, is it possible to find the telomere length and/or structure on a chromosome level basis?
 
-1. `samtools view -h -L telomere.bed 10x.bam > 10x.telomeres.sam`
-2. `samtools view -S -b 10x.telomeres.sam > 10x.telomeres.sam.bam`
-3. `samtools bam2fq 10x.telomeres.sam.bam > 10x.telomeres.fq`
-4. `bbmap.sh ambiguous=all ref=/data/projects/punim0010/local/share/bcbio/genomes/Hsapiens/GRCh37/seq/GRCh37.fa in=10x.telomeres.fq out=10x_telomeres_GRCh37.sam`
+Context: Current tools like TelomereHunter et al assess the length on a whole genome basis when using (traditional?) Illumina Truseq sequencing, but we might be able to have a closer view of those by using [linked reads][linked_reads].
 
-Reads Used:9486(1299128 bases)
+# Project organization
 
-Mapping:   62.736 seconds.
-Reads/sec: 151.20
-kBases/sec:20.71
+There are two directories available from:
 
-|Read 1 data|pct reads|num reads|pct bases|num bases|
-|-----------|---------|---------|---------|---------|
-|mapped| 65.4333 |     6207 | 64.4140 |      836820|
-|unambiguous| 12.0704 |     1145 | 12.0475 |      156513|
-|ambiguous| 53.3629 |     5062 | 52.3664 |      680307|
-|low-Q discards|  0.0000 |        0 |  0.0000 |           0|
-|perfect best site|  1.8659 |      177 |  1.4290 |       18564|
-|semiperfect site|  8.9922 |      853 |  8.1521 |      105906|
-|Match Rate|      NA |       NA | 55.4591 |      751906|
-|Error Rate| 59.2866 |     5385 | 42.7044 |      578980|
-|Sub Rate| 58.5930 |     5322 |  4.1320 |       56021|
-|Del Rate| 19.8723 |     1805 | 38.2778 |      518964|
-|Ins Rate | 15.0611 |     1368 |  0.2947 |        3995|
-|N Rate| 21.8100 |     1981 |  1.8364 |       24898|
+`/data/cephfs/punim0010/projects/Valls_10X_Telomeres/*`
 
-
-5. `grep -oP 'NH:i:\K.*' 10x_telomeres.sam | sort | uniq -c > grep.results`
-
-1190 1
-
-6654 2
-
-1329 3
-
-1280 4
-
-4635 5
-
-# BBMAP's `pileup.sh` coverage
+`software`: Containing locally edited/patched software `pip install -e .`, like telomerecat. All conda-installed on root environment.
+`work`: Data processing and batch scripts, with the following structure (partly resembling bcbio):
 
 ```
-$ head COLO829_TGEN_bwa-ready_except_telomere_regions-output.bbmap_coverage
-#ID     Avg_fold        Length  Ref_GC  Covered_percent Covered_bases   Plus_reads      Minus_reads     Read_GC Median_fold     Std_Dev
-1       78.3707 249250621       0.0000  90.1977 224818427       88049200        87993233        0.4090  65      160.34
-2       86.6427 243199373       0.0000  97.8991 238089979       95298296        95600531        0.3980  84      343.57
-3       104.8785        198022430       0.0000  98.3519 194758850       93407852        93372869        0.3910  109     63.17
-4       100.0256        191154276       0.0000  98.0499 187426510       87635386        87647137        0.3777  102     380.29
-5       55.8516 180915260       0.0000  98.1176 177509692       45512490        45505018        0.3902  56      35.78
-6       70.0852 171115067       0.0000  97.7692 167297822       53974270        53982658        0.3934  64      275.87
-7       114.2343        159138663       0.0000  97.5917 155306175       81960373        81974789        0.4005  112     226.43
-8       89.4962 146364022       0.0000  97.5911 142838265       60115957        60130863        0.3826  84      293.91
-9       74.3349 141213431       0.0000  85.0412 120089528       47342464        47359013        0.4107  82      199.85
-
-
-$ head COLO829BL_TGEN_bwa-ready_except_telomere_regions-output.bbmap_coverage
-#ID     Avg_fold        Length  Ref_GC  Covered_percent Covered_bases   Plus_reads      Minus_reads     Read_GC Median_fold     Std_Dev
-1       80.8254 249250621       0.0000  90.3430 225180539       91288844        91215087        0.4102  82      163.86
-2       85.8845 243199373       0.0000  97.8725 238025419       94910965        95200781        0.3968  83      335.98
-3       82.4909 198022430       0.0000  98.3520 194758966       73909292        73869763        0.3912  83      48.80
-4       85.6878 191154276       0.0000  98.0497 187426168       75340085        75360032        0.3790  82      323.10
-5       82.4009 180915260       0.0000  98.1990 177657056       67466386        67447485        0.3892  83      37.43
-6       83.2797 171115067       0.0000  97.7710 167300907       64466919        64473102        0.3901  83      273.40
-7       82.4560 159138663       0.0000  97.6000 155319315       59537310        59544839        0.3999  82      209.52
-8       87.9029 146364022       0.0000  97.5910 142838157       59420561        59416795        0.3812  82      288.08
-9       71.8934 141213431       0.0000  85.0513 120103828       46017017        46053224        0.4058  79      201.66
+$ ls -alh
+total 4.0K
+drwxr-xr-x 1 brainstorm vho 534G Mar 19 15:32 .
+drwxr-xr-x 1 brainstorm vho 534G Mar 19 15:29 ..
+drwxr-xr-x 1 brainstorm vho 534G Mar 19 15:17 bams             <--- intermediate bams
+drwxr-xr-x 1 brainstorm vho 7.1K Mar 19 15:07 bed              <--- intermediate beds
+drwxr-xr-x 1 brainstorm vho  13M Mar 19 15:32 in               <--- original input datasets
+drwxr-xr-x 1 brainstorm vho 5.5M Mar 19 15:33 final            <--- "final" results
+drwxr-xr-x 1 brainstorm vho 3.0K Mar 19 15:21 scripts          <--- slurm scripts used to generate above data
+drwxr-xr-x 1 brainstorm vho  14K Mar 19 15:15 slurm_out_err    <--- output/error results from slurm jobs from scripts
 ```
 
-# Telomerecat output
+The input datafiles used **will** be 10X, but we are using COLO829 Truseq to assess current tools:
+
+```
+$ ls -alh in/
+total 13M
+drwxr-xr-x 1 brainstorm vho  13M Mar 19 15:32 .
+drwxr-xr-x 1 brainstorm vho 534G Mar 19 15:35 ..
+lrwxrwxrwx 1 brainstorm vho  101 Feb 28 11:04 17MHP002Bld-ready.bam -> /data/cephfs/punim0010/data/Results/Avner/2016.249.17.MH.P002/final/17MHP002Bld/17MHP002Bld-ready.bam
+-rw-r--r-- 1 brainstorm vho  13M Feb 28 13:38 17MHP002Bld-ready.bam.bai
+lrwxrwxrwx 1 brainstorm vho  118 Feb 28 14:24 COLO829BL_TGEN_bwa-ready.bam -> /data/cephfs/punim0010/projects/Saveliev_COLO829_Craig/bcbio_bwa/final/COLO829BL_TGEN_bwa/COLO829BL_TGEN_bwa-ready.bam
+lrwxrwxrwx 1 brainstorm vho  122 Feb 28 14:25 COLO829BL_TGEN_bwa-ready.bam.bai -> /data/cephfs/punim0010/projects/Saveliev_COLO829_Craig/bcbio_bwa/final/COLO829BL_TGEN_bwa/COLO829BL_TGEN_bwa-ready.bam.bai
+lrwxrwxrwx 1 brainstorm vho  114 Feb 28 14:27 COLO829_TGEN_bwa-ready.bam -> /data/cephfs/punim0010/projects/Saveliev_COLO829_Craig/bcbio_bwa/final/COLO829_TGEN_bwa/COLO829_TGEN_bwa-ready.bam
+lrwxrwxrwx 1 brainstorm vho  118 Feb 28 14:27 COLO829_TGEN_bwa-ready.bam.bai -> /data/cephfs/punim0010/projects/Saveliev_COLO829_Craig/bcbio_bwa/final/COLO829_TGEN_bwa/COLO829_TGEN_bwa-ready.bam.bai
+lrwxrwxrwx 1 brainstorm vho   83 Mar  8 13:09 GRCh37.fa.fai -> /data/cephfs/punim0010/local/stable/bcbio/genomes/Hsapiens/GRCh37/seq/GRCh37.fa.fai
+```
+
+TODO: Migrate SLURM scripts to proper Snakemake for reproducibility.
+
+# Plan
+
+At least as Roman imagines it goes at this point... XXX's represent gaps/doubts.
+
+## Calculate number of reads in telomeric regions (absolute, relative to coverage)
+
+XXX: bedtoolsCov/mosdepth/samtools/bbmap/bamutils... is there a tool that just does that and fast?
+
+XXX: Regarding input datasets, we have COLO829, `17MHP002Bld-ready.bam`, any preference on which to attack first?
+
+## Use kmers if the above looks good
+
+XXX: Why?
+
+## Run counts for 10X dataset
+
+XXX: Not sure how to leverage/use the linked reads info, need to read up on tools enabling this analysis
+
+## Segment/mask the 10X dataset per chromosome and run telomerecat and other tools against those segments/bams?
+
+XXX: Not possible since telomerecat needs context, then we should just use a "mask and re-run" approach **per chromosome and telomere region(s)**, computationally too expensive on big BAM files?
+XXX: Again, can we leverage some 10X trick to make this easier?
+
+
+# Telomerecat output reference
 
 Working off [readthedocs](http://telomerecat.readthedocs.io/en/latest/understanding_output.html).
 
@@ -106,3 +104,6 @@ The greater the measure of fidelity, the more we believe the observed measuremen
 F2a value after undergoing correction (see paper).
  
 Length - telomere length as estimated by telomerecat.
+
+
+[linked_reads]: https://www.10xgenomics.com/linked-reads/
