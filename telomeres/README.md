@@ -81,6 +81,7 @@ XXX: Not sure how to leverage/use the linked reads info, need to read up on tool
 ## Segment/mask the 10X dataset per chromosome and run telomerecat and other tools against those segments/bams?
 
 XXX: Not possible since telomerecat needs context, then we should just use a "mask and re-run" approach **per chromosome and telomere region(s)**, computationally too expensive on big BAM files?
+
 XXX: Again, can we leverage some 10X trick to make this easier?
 
 
