@@ -60,7 +60,7 @@ kBases/sec:20.71
 # BBMAP's `pileup.sh` coverage
 
 ```
-(base) -bash-4.2$ head COLO829_TGEN_bwa-ready_except_telomere_regions-output.bbmap_coverage
+$ head COLO829_TGEN_bwa-ready_except_telomere_regions-output.bbmap_coverage
 #ID     Avg_fold        Length  Ref_GC  Covered_percent Covered_bases   Plus_reads      Minus_reads     Read_GC Median_fold     Std_Dev
 1       78.3707 249250621       0.0000  90.1977 224818427       88049200        87993233        0.4090  65      160.34
 2       86.6427 243199373       0.0000  97.8991 238089979       95298296        95600531        0.3980  84      343.57
@@ -71,7 +71,9 @@ kBases/sec:20.71
 7       114.2343        159138663       0.0000  97.5917 155306175       81960373        81974789        0.4005  112     226.43
 8       89.4962 146364022       0.0000  97.5911 142838265       60115957        60130863        0.3826  84      293.91
 9       74.3349 141213431       0.0000  85.0412 120089528       47342464        47359013        0.4107  82      199.85
-(base) -bash-4.2$ head COLO829BL_TGEN_bwa-ready_except_telomere_regions-output.bbmap_coverage
+
+
+$ head COLO829BL_TGEN_bwa-ready_except_telomere_regions-output.bbmap_coverage
 #ID     Avg_fold        Length  Ref_GC  Covered_percent Covered_bases   Plus_reads      Minus_reads     Read_GC Median_fold     Std_Dev
 1       80.8254 249250621       0.0000  90.3430 225180539       91288844        91215087        0.4102  82      163.86
 2       85.8845 243199373       0.0000  97.8725 238025419       94910965        95200781        0.3968  83      335.98
