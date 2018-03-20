@@ -1,0 +1,86 @@
+details:
+  - analysis: variant2
+    algorithm:
+        aligner: bwa
+        recalibrate: false
+        realign: false
+        mark_duplicates: true
+        remove_lcr: false
+        maxcov_downsample: false
+        coverage: /data/cephfs/punim0010/extras/2018-02-16_PMCC_Panel_Regions.bed
+        tools_on: [gatk4, qualimap_full, noalt_calling]
+        tools_off: [gemini, upload_alignment]
+
+    description: bwa
+    files: /data/cephfs/punim0010/projects/Saveliev_10X/NA12878-10x/bcbio_grch37/bams/longranger_pos_sorted.bam
+    genome_build: GRCh37
+
+  - analysis: variant2
+    algorithm:
+        aligner: minimap2
+        recalibrate: false
+        realign: false
+        mark_duplicates: true
+        remove_lcr: false
+        maxcov_downsample: false
+        coverage: /data/cephfs/punim0010/extras/2018-02-16_PMCC_Panel_Regions.bed
+        tools_on: [gatk4, qualimap_full, noalt_calling]
+        tools_off: [gemini, upload_alignment]
+
+    description: minimap2
+    files: /data/cephfs/punim0010/projects/Saveliev_10X/NA12878-10x/bcbio_grch37/bams/longranger_pos_sorted.bam
+    genome_build: GRCh37
+
+  - analysis: variant2
+    algorithm:
+        aligner: none
+        recalibrate: false
+        realign: false
+        mark_duplicates: false
+        remove_lcr: false
+        maxcov_downsample: false
+        coverage: /data/cephfs/punim0010/extras/2018-02-16_PMCC_Panel_Regions.bed
+        tools_on: [gatk4, qualimap_full, noalt_calling]
+        tools_off: [gemini, upload_alignment]
+        bam_clean: fixrg
+
+    description: longranger_pos_sorted
+    files: /data/cephfs/punim0010/projects/Saveliev_10X/NA12878-10x/bcbio_grch37/bams/longranger_pos_sorted.bam
+    genome_build: GRCh37
+
+  - analysis: variant2
+    algorithm:
+        aligner: none
+        recalibrate: false
+        realign: false
+        mark_duplicates: false
+        remove_lcr: false
+        maxcov_downsample: false
+        coverage: /data/cephfs/punim0010/extras/2018-02-16_PMCC_Panel_Regions.bed
+        tools_on: [gatk4, qualimap_full, noalt_calling]
+        tools_off: [gemini, upload_alignment]
+        bam_clean: fixrg
+
+    description: longranger_decoy_pos_sorted.bam
+    files: /data/cephfs/punim0010/projects/Saveliev_10X/NA12878-10x/bcbio_grch37/bams/longranger_decoy_pos_sorted.bam
+    genome_build: GRCh37
+
+  - analysis: variant2
+    algorithm:
+        aligner: none
+        recalibrate: false
+        realign: false
+        mark_duplicates: false
+        remove_lcr: false
+        maxcov_downsample: false
+        coverage: /data/cephfs/punim0010/extras/2018-02-16_PMCC_Panel_Regions.bed
+        tools_on: [gatk4, qualimap_full, noalt_calling]
+        tools_off: [gemini, upload_alignment]
+        bam_clean: fixrg
+
+    description: ema_final
+    files: /data/cephfs/punim0010/projects/Saveliev_10X/NA12878-10x/bcbio_grch37/bams/ema_final.bam
+    genome_build: GRCh37
+
+upload:
+  dir: ../final

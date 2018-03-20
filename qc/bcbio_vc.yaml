@@ -1,0 +1,103 @@
+details:
+  - analysis: variant2
+    algorithm:
+        aligner: none
+        recalibrate: false
+        realign: false
+        mark_duplicates: false
+        remove_lcr: false
+        maxcov_downsample: false
+        tools_on: [gatk4, noalt_calling]
+        tools_off: [gemini, upload_alignment]
+
+        # Variant calling, 2-out-of-3. All callers handle InDels
+        variantcaller: [vardict, strelka2, gatk-haplotype]
+        ensemble:
+          numpass: 2
+
+    description: bwa
+    files: /data/cephfs/punim0010/projects/Saveliev_10X/NA12878-10x/bcbio_grch37/bams/bwa-sort.bam
+    genome_build: GRCh37
+
+  - analysis: variant2
+    algorithm:
+        aligner: none
+        recalibrate: false
+        realign: false
+        mark_duplicates: false
+        remove_lcr: false
+        maxcov_downsample: false
+        tools_on: [gatk4, noalt_calling]
+        tools_off: [gemini, upload_alignment]
+
+        # Variant calling, 2-out-of-3. All callers handle InDels
+        variantcaller: [vardict, strelka2, gatk-haplotype]
+        ensemble:
+          numpass: 2
+
+    description: minimap2
+    files: /data/cephfs/punim0010/projects/Saveliev_10X/NA12878-10x/bcbio_grch37/bams/minimap2-sort.bam
+    genome_build: GRCh37
+
+  - analysis: variant2
+    algorithm:
+        aligner: none
+        recalibrate: false
+        realign: false
+        mark_duplicates: false
+        remove_lcr: false
+        maxcov_downsample: false
+        tools_on: [gatk4, noalt_calling]
+        tools_off: [gemini, upload_alignment]
+
+        # Variant calling, 2-out-of-3. All callers handle InDels
+        variantcaller: [vardict, strelka2, gatk-haplotype]
+        ensemble:
+          numpass: 2
+
+    description: longranger_decoy_pos_sorted_bam
+    files: /data/cephfs/punim0010/projects/Saveliev_10X/NA12878-10x/bcbio_grch37/bams/longranger_decoy_pos_sorted_bam-ready.bam
+    genome_build: GRCh37
+
+  - analysis: variant2
+    algorithm:
+        aligner: none
+        recalibrate: false
+        realign: false
+        mark_duplicates: false
+        remove_lcr: false
+        maxcov_downsample: false
+        tools_on: [gatk4, noalt_calling]
+        tools_off: [gemini, upload_alignment]
+
+        # Variant calling, 2-out-of-3. All callers handle InDels
+        variantcaller: [vardict, strelka2, gatk-haplotype]
+        ensemble:
+          numpass: 2
+
+    description: longranger_pos_sorted
+    files: /data/cephfs/punim0010/projects/Saveliev_10X/NA12878-10x/bcbio_grch37/bams/longranger_pos_sorted-ready.bam
+    genome_build: GRCh37
+
+  - analysis: variant2
+    algorithm:
+        aligner: none
+        recalibrate: false
+        realign: false
+        mark_duplicates: false
+        remove_lcr: false
+        maxcov_downsample: false
+        tools_on: [gatk4, noalt_calling]
+        tools_off: [gemini, upload_alignment]
+
+        # Variant calling, 2-out-of-3. All callers handle InDels
+        variantcaller: [vardict, strelka2, gatk-haplotype]
+        ensemble:
+          numpass: 2
+
+    description: ema_final
+    files: /data/cephfs/punim0010/projects/Saveliev_10X/NA12878-10x/bcbio_grch37/work/bamclean/ema_final/ema_final-fixrg.bam
+    genome_build: GRCh37
+
+upload:
+  dir: ../final
