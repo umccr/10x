@@ -247,6 +247,7 @@ for fq in ../ori_fq/* ; do
 done
 ```
 
+
 ### Not merged version
 
 Create a file `interleave_fq.sh`:
@@ -287,11 +288,9 @@ date
 ```
 
 
-
-
-
 ### Extract BAMs to explore challenging regions
 
+```
 for s in bwa-sort ema_final longranger_decoy_pos_sorted longranger_pos_sorted minimap2-sort
 do
 	sambamba slice $s.bam 22:42522501-42526883 > $s.CYP2D6.bam
@@ -321,10 +320,13 @@ do
 	scp -r spa:/data/cephfs/punim0010/projects/Saveliev_10X/NA12878-10x/bcbio_grch37/bams/$s.regions.bam .
 	scp -r spa:/data/cephfs/punim0010/projects/Saveliev_10X/NA12878-10x/bcbio_grch37/bams/$s.regions.bam.bai .
 done
+```
 
+### Run bcbio for QC and variant calling on Raijin:
 
+`cd /g/data3/gx8/projects/Saveliev_10X/COLO829-10x/bcbio_10x/work` ad use this [yaml](bcbio_colo829_raijin_10x.yaml)
 
-
+Separately produce BWA alignments `cd /g/data3/gx8/projects/Saveliev_10X/COLO829-10x/bcbio_bwa` with [yaml](bcbio_colo829_raijin_bwa.yaml)
 
 
 

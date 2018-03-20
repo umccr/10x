@@ -1,0 +1,28 @@
+details:
+  - analysis: variant2
+    algorithm:
+        aligner: bwa
+        recalibrate: false
+        realign: false
+        mark_duplicates: true
+        remove_lcr: false
+        maxcov_downsample: false
+        coverage: /data/cephfs/punim0010/extras/2018-02-16_PMCC_Panel_Regions.bed
+        tools_on: [gatk4, qualimap_full, noalt_calling]
+        tools_off: [gemini, upload_alignment]
+        # Variant calling, 2-out-of-3. All callers handle InDels
+        variantcaller:
+            germline: [vardict, strelka2, gatk-haplotype]
+            somatic: [vardict, strelka2, mutect2]
+        ensemble:
+            numpass: 2
+    description: Colo829_80pc_BWA
+    files: /g/data3/gx8/projects/Saveliev_10X/COLO829-10x/bams/Colo829_80pc_LongRanger.bam
+    genome_build: GRCh37
+    metadata:
+        batch: Colo829_80pc_BWA_batch
+        phenotype: tumor
+
+upload:
+  dir: ../final
+
