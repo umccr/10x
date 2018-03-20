@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Session genome="hg19" hasGeneTrack="true" hasSequenceTrack="true" locus="chr2:71844818-71845848" nextAutoscaleGroup="2" path="/Users/vsaveliev/git/umccr/10x/insertions/img/NA12878_WGS_v2_chr2_breakpoint.png.xml" version="8">
+    <Resources>
+        <Resource path="/Users/vsaveliev/Analysis/10x/insertions/NA12878_WGS_v2_phased_possorted_chr2_breakpoint.bam"/>
+        <Resource path="/Users/vsaveliev/Analysis/10x/insertions/NA12878_WGS_v2_phased_possorted_CEBPA.bam"/>
+    </Resources>
+    <Panel height="101" name="Panel1521357522738" width="1663">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;52.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/Analysis/10x/insertions/NA12878_WGS_v2_phased_possorted_CEBPA.bam_coverage" name="NA12878_WGS_v2_phased_possorted_CEBPA.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="10.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="60" id="/Users/vsaveliev/Analysis/10x/insertions/NA12878_WGS_v2_phased_possorted_CEBPA.bam_junctions" name="NA12878_WGS_v2_phased_possorted_CEBPA.bam Junctions" sortable="false" visible="false" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="60.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="SQUISHED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/Analysis/10x/insertions/NA12878_WGS_v2_phased_possorted_CEBPA.bam" name="NA12878_WGS_v2_phased_possorted_CEBPA.bam" sortable="true" visible="true">
+            <RenderOptions colorByTag="BX" colorOption="TAG" groupByOption="TAG" groupByTag="BX" linkByTag="BX" linkedReads="true" sortByTag="BX"/>
+        </Track>
+    </Panel>
+    <Panel height="4311" name="Panel1521357679482" width="1663">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;10.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/Analysis/10x/insertions/NA12878_WGS_v2_phased_possorted_chr2_breakpoint.bam_coverage" name="NA12878_WGS_v2_phased_possorted_chr2_breakpoint.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="16432.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="60" id="/Users/vsaveliev/Analysis/10x/insertions/NA12878_WGS_v2_phased_possorted_chr2_breakpoint.bam_junctions" name="NA12878_WGS_v2_phased_possorted_chr2_breakpoint.bam Junctions" sortable="false" visible="false" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="60.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="SQUISHED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/Analysis/10x/insertions/NA12878_WGS_v2_phased_possorted_chr2_breakpoint.bam" name="NA12878_WGS_v2_phased_possorted_chr2_breakpoint.bam" sortable="true" visible="true">
+            <RenderOptions colorByTag="BX" colorOption="TAG" groupByOption="TAG" groupByTag="BX" linkByTag="BX" linkedReads="true" sortByTag="BX"/>
+        </Track>
+    </Panel>
+    <Panel height="70" name="FeaturePanel" width="1663">
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="Reference sequence" name="Reference sequence" sortable="false" visible="true"/>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" colorScale="ContinuousColorScale;0.0;423.0;255,255,255;0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="35" id="hg19_genes" name="RefSeq Genes" renderer="BASIC_FEATURE" sortable="false" visible="true" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="423.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+    </Panel>
+    <PanelLayout dividerFractions="0.007352941176470588,0.01838235294117647,0.9080882352941176"/>
+    <HiddenAttributes>
+        <Attribute name="DATA FILE"/>
+        <Attribute name="DATA TYPE"/>
+        <Attribute name="NAME"/>
+    </HiddenAttributes>
+</Session>
