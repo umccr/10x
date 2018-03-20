@@ -143,9 +143,6 @@ PICARDPATH=/g/data3/gx8/extras/10x/miniconda/share/picard-2.17.11-0/picard.jar \
 ```
 
 
-
-
-
 ## New version
 
 Install on Spartan:
@@ -173,7 +170,7 @@ Enter interactive session:
 qsub -I -P gx8 -q normalsp -l walltime=96:00:00 -l ncpus=32 -l wd -l mem=128G
 ```
 
-#### Preprocess
+### Preprocess
 
 ```
 cd /data/cephfs/punim0010/extras/vlad/synced/umccr/10x/ema/full
@@ -186,7 +183,7 @@ ema count -w ../4M-with-alts-february-2016.txt -o NA12878_WGS_v2_S1_L001 < NA128
 
 # Preproc
 THREADS=29  # Spartan
-THREADS=30  # Raijin
+THREADS=32  # Raijin
 
 ema preproc -w ../4M-with-alts-february-2016.txt -n 500 -t $THREADS -o output_dir *.ema-ncnt < NA12878_WGS_v2_S1_L001.fastq 2>&1 | tee preproc.log
 ```
@@ -195,18 +192,135 @@ ema preproc -w ../4M-with-alts-february-2016.txt -n 500 -t $THREADS -o output_di
 
 ```
 THREADS=30  # Raijin
-ema align -t $THREADS -d -r  -s  | samtools sort -@ 4 -O bam -l 0 -m 4G -o NA12878_WGS_v2.bam -
 
-parallel --bar -j8 "ema align -R $'@RG\tID:NA12878_10x_EMA\tSM:NA12878_10x_EMA' -t 4 -d -r /g/data3/gx8/projects/Saveliev_10X/NA12878-10x/ema/ref/GRCh37.fa -s {} | samtools sort -@ 4 -O bam -l 0 -m 4G -o {}.bam -" ::: output_dir/ema-bin-???
+parallel -j8 "ema align -R $'@RG\tID:NA12878_10x_EMA\tSM:NA12878_10x_EMA' -t 4 -d -r /g/data3/gx8/projects/Saveliev_10X/NA12878-10x/ema/ref/GRCh37.fa -s {} | samtools sort -@ 4 -O bam -l 0 -m 4G -o {}.bam -" ::: output_dir_2/ema-bin-???
 
 bwa mem -p -t 32 -M -R "@RG\tID:NA12878_10x_EMA\tSM:NA12878_10x_EMA" /g/data3/gx8/projects/Saveliev_10X/NA12878-10x/ema/ref/GRCh37.fa output_dir/ema-bin-nobc |\
   samtools sort -@ 4 -O bam -l 0 -m 4G -o output_dir/ema-bin-nobc.bam
+
+sambamba markdup -t 32 -p -l 0 output_dir/ema-bin-nobc.bam output_dir/ema-bin-nobc-dupsmarked.bam
+
+sambamba merge -t 32 -p ema_final.bam output_dir/*.bam
+
+samtools stats -@ 32 ema_final.bam > ema_final.stats.txt
+```
+
+
+#### Full pipeline for COLO829
+
+```
+module load gcc/6.2.0
+export PATH=/g/data3/gx8/extras/10x/miniconda/bin:/home/563/vs2870/bin:$PATH
+
+cd /g/data3/gx8/projects/Saveliev_10X/COLO829-10x/ema
+ln -s /g/data3/gx8/projects/Hsu_10X_WGS/FASTQ-UMCCR/COLO829-80pc/Colo829_80pc_S1 ori_fq
+
+for fp in ori_fq/*_R1_001.fastq.gz
+do
+	paste <(pigz -c -d $fp | paste - - - -) <(pigz -c -d ${fp/_R1_/_R2_} | paste - - - -) | awk -F '\t' 'length($2) >= 40' | tr "\t" "\n" >> Colo829_80pc.fastq
+done
+
+cat Colo829_80pc.fastq | paste - - - - | awk 'length($2) >= 30 && length($2)' | sed 's/\t/\n/g' | ema count -w 4M-with-alts-february-2016.txt -o Colo829_80pc 2> ema_count.log
+
+ema count -w 4M-with-alts-february-2016.txt -o Colo829_80pc < Colo829_80pc.fastq 2> ema_count.log
+
+ema preproc -w 4M-with-alts-february-2016.txt -n 500 -t 32 -o ema_work *.ema-ncnt < Colo829_80pc.fastq 2>&1 | tee ema_preproc.log
+
+parallel -j8 "ema align -R $'@RG\tID:Colo829_80pc_EMA\tSM:Colo829_80pc_EMA' -t 4 -d -r ref/GRCh37.fa -s {} | samtools sort -@ 4 -O bam -l 0 -m 4G -o {}.bam -" ::: ema_work/ema-bin-???
+
+bwa mem -p -t 32 -M -R "@RG\tID:Colo829_80pc_EMA\tSM:Colo829_80pc_EMA" ref/GRCh37.fa ema_work/ema-bin-nobc |\
+  samtools sort -@ 4 -O bam -l 0 -m 4G -o ema_work/ema-bin-nobc.bam
+
+sambamba markdup -t 32 -p -l 0 ema_work/ema-bin-nobc.bam ema_work/ema-bin-nobc-dupsmarked.bam && rm ema_work/ema-bin-nobc.bam
+
+sambamba merge -t 32 -p Colo829_80pc_EMA.bam ema_work/*.bam
+
+samtools stats -@ 32 Colo829_80pc_EMA.bam > Colo829_80pc_EMA.stats.txt
+```
+
+
+#### Subsampling:
+
+```
+for fq in ../ori_fq/* ; do
+	gunzip -c $fq | head -n682 | gzip -c > ori_fq/$(basename $fq)
+done
+```
+
+### Not merged version
+
+Create a file `interleave_fq.sh`:
+
+```
+paste <(pigz -c -d $1 | paste - - - - | awk -F '\t' 'length($2) >= 40') <(pigz -c -d ${1/_R1_/_R2_} | paste - - - - | awk -F '\t' 'length($2) >= 40') | tr '\t' '\n'
+```
+
+Run
+
+```
+module load gcc/6.2.0
+export PATH=/g/data3/gx8/extras/10x/miniconda/bin:/home/563/vs2870/bin:$PATH
+
+date
+parallel -j32 --bar "bash interleave_fq.sh {} | ema count -w 4M-with-alts-february-2016.txt -o {/.} 2>{/.}.log" ::: ori_fq/*_R1_*.gz
+
+date
+pigz -c -d *RA*.gz | ema preproc -w 4M-with-alts-february-2016.txt -n 500 -t 32 -o ema_work *.ema-ncnt 2>&1 | tee ema_preproc.log
+
+date
+parallel -j8 "ema align -R $'@RG\tID:Colo829_80pc_EMA\tSM:Colo829_80pc_EMA' -t 4 -d -r ref/GRCh37.fa -s {} | samtools sort -@ 4 -O bam -l 0 -m 4G -o {}.bam -" ::: ema_work/ema-bin-???
+
+date
+bwa mem -p -t 32 -M -R "@RG\tID:Colo829_80pc_EMA\tSM:Colo829_80pc_EMA" ref/GRCh37.fa ema_work/ema-bin-nobc |\
+  samtools sort -@ 4 -O bam -l 0 -m 4G -o ema_work/ema-bin-nobc.bam
+
+date
+sambamba markdup -t 32 -p -l 0 ema_work/ema-bin-nobc.bam ema_work/ema-bin-nobc-dupsmarked.bam && rm ema_work/ema-bin-nobc.bam
+
+date
+sambamba merge -t 32 -p Colo829_80pc_EMA.bam ema_work/*.bam
+
+date
+samtools stats -@ 32 Colo829_80pc_EMA.bam > Colo829_80pc_EMA.stats.txt
+
+date
 ```
 
 
 
 
 
+### Extract BAMs to explore challenging regions
+
+for s in bwa-sort ema_final longranger_decoy_pos_sorted longranger_pos_sorted minimap2-sort
+do
+	sambamba slice $s.bam 22:42522501-42526883 > $s.CYP2D6.bam
+	sambamba index $s.CYP2D6.bam
+done
+
+for s in bwa-sort ema_final longranger_decoy_pos_sorted longranger_pos_sorted minimap2-sort
+do
+	scp -r spa:/data/cephfs/punim0010/projects/Saveliev_10X/NA12878-10x/bcbio_grch37/bams/$s.CYP2D6.bam .
+	scp -r spa:/data/cephfs/punim0010/projects/Saveliev_10X/NA12878-10x/bcbio_grch37/bams/$s.CYP2D6.bam.bai .
+done
+
+
+regions.bed:
+1	104090000	104310000	AMY1/2
+6	31940000	32010000	C4A/B
+22	42521302	42549900	CY2D6/7
+
+for s in bwa-sort ema_final longranger_decoy_pos_sorted longranger_pos_sorted minimap2-sort
+do
+	~/bin/sambamba slice $s.bam -L regions.bed > $s.regions.bam
+	sambamba index $s.regions.bam
+done
+
+for s in bwa-sort ema_final longranger_decoy_pos_sorted longranger_pos_sorted minimap2-sort
+do
+	scp -r spa:/data/cephfs/punim0010/projects/Saveliev_10X/NA12878-10x/bcbio_grch37/bams/$s.regions.bam .
+	scp -r spa:/data/cephfs/punim0010/projects/Saveliev_10X/NA12878-10x/bcbio_grch37/bams/$s.regions.bam.bai .
+done
 
 
 
