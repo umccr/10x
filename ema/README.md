@@ -243,7 +243,7 @@ samtools stats -@ 32 Colo829_80pc_EMA.bam > Colo829_80pc_EMA.stats.txt
 
 ```
 for fq in ../ori_fq/* ; do
-	gunzip -c $fq | head -n682 | gzip -c > ori_fq/$(basename $fq)
+	gunzip -c $fq | head -n684 | gzip -c > ori_fq/$(basename $fq)
 done
 ```
 
@@ -256,33 +256,33 @@ Create a file `interleave_fq.sh`:
 paste <(pigz -c -d $1 | paste - - - - | awk -F '\t' 'length($2) >= 40') <(pigz -c -d ${1/_R1_/_R2_} | paste - - - - | awk -F '\t' 'length($2) >= 40') | tr '\t' '\n'
 ```
 
-Run
-
 ```
 module load gcc/6.2.0
 export PATH=/g/data3/gx8/extras/10x/miniconda/bin:/home/563/vs2870/bin:$PATH
 
-date
-parallel -j32 --bar "bash interleave_fq.sh {} | ema count -w 4M-with-alts-february-2016.txt -o {/.} 2>{/.}.log" ::: ori_fq/*_R1_*.gz
+SAMPLE=Colo829Bl_10x_80pc
 
 date
-pigz -c -d *RA*.gz | ema preproc -w 4M-with-alts-february-2016.txt -n 500 -t 32 -o ema_work *.ema-ncnt 2>&1 | tee ema_preproc.log
+parallel -j32 "bash interleave_fq.sh {} | ema count -w 4M-with-alts-february-2016.txt -o {/.} 2>{/.}.log" ::: ori_fq/*_R1_*.gz
 
 date
-parallel -j8 "ema align -R $'@RG\tID:Colo829_80pc_EMA\tSM:Colo829_80pc_EMA' -t 4 -d -r ref/GRCh37.fa -s {} | samtools sort -@ 4 -O bam -l 0 -m 4G -o {}.bam -" ::: ema_work/ema-bin-???
+ls ori_fq/*R1*.gz | xargs -I '{}' bash interleave_fq.sh '{}' | ema preproc -w 4M-with-alts-february-2016.txt -n 500 -t 32 -o ema_work *.ema-ncnt 2>&1 | tee ema_preproc.log
 
 date
-bwa mem -p -t 32 -M -R "@RG\tID:Colo829_80pc_EMA\tSM:Colo829_80pc_EMA" ref/GRCh37.fa ema_work/ema-bin-nobc |\
+parallel -j8 "ema align -R $'@RG\tID:${SAMPLE}_EMA\tSM:${SAMPLE}_EMA' -t 4 -d -r ref/GRCh37.fa -s {} | samtools sort -@ 4 -O bam -l 0 -m 4G -o {}.bam -" ::: ema_work/ema-bin-???
+
+date
+bwa mem -p -t 32 -M -R "@RG\tID:${SAMPLE}_EMA\tSM:${SAMPLE}_EMA" ref/GRCh37.fa ema_work/ema-bin-nobc |\
   samtools sort -@ 4 -O bam -l 0 -m 4G -o ema_work/ema-bin-nobc.bam
 
 date
 sambamba markdup -t 32 -p -l 0 ema_work/ema-bin-nobc.bam ema_work/ema-bin-nobc-dupsmarked.bam && rm ema_work/ema-bin-nobc.bam
 
 date
-sambamba merge -t 32 -p Colo829_80pc_EMA.bam ema_work/*.bam
+sambamba merge -t 32 -p ${SAMPLE}_EMA.bam ema_work/*.bam
 
 date
-samtools stats -@ 32 Colo829_80pc_EMA.bam > Colo829_80pc_EMA.stats.txt
+samtools stats -@ 32 ${SAMPLE}_EMA.bam > ${SAMPLE}_EMA.stats.txt
 
 date
 ```

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Session genome="hg19" hasGeneTrack="true" hasSequenceTrack="true" locus="chr7:6009370-6014381" nextAutoscaleGroup="2" path="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/7:5989546-6069747/igv_session.xml" version="8">
+    <Resources>
+        <Resource path="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/ema__ema_clbl__bwa_low__truth.bam"/>
+        <Resource path="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/bwa__ema_clbl__bwa_low__truth.bam"/>
+        <Resource path="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/7:5989546-6069747/lr.bam"/>
+        <Resource path="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/lr__ema_clbl__bwa_low__truth.bam"/>
+        <Resource path="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/7:5989546-6069747/bwa.bam"/>
+        <Resource path="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/ema_clbl__bwa_low__truth.bed"/>
+        <Resource path="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/truth_regions.bed"/>
+        <Resource path="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/truth_small_variants.vcf.gz"/>
+        <Resource path="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/7:5989546-6069747/ema.bam"/>
+    </Resources>
+    <Panel height="98" name="DataPanel" width="3061">
+        <Track SQUISHED_ROW_HEIGHT="1" altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" colorMode="GENOTYPE" displayMode="EXPANDED" featureVisibilityWindow="1998000" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/truth_small_variants.vcf.gz" name="truth_small_variants.vcf.gz" renderer="BASIC_FEATURE" siteColorMode="ALLELE_FREQUENCY" sortable="false" visible="true" windowFunction="count"/>
+    </Panel>
+    <Panel height="101" name="Panel1521679985482" width="3061">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;22.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/bwa__ema_clbl__bwa_low__truth.bam_coverage" name="bwa__ema_clbl__bwa_low__truth.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="10.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="60" id="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/bwa__ema_clbl__bwa_low__truth.bam_junctions" name="bwa__ema_clbl__bwa_low__truth.bam Junctions" sortable="false" visible="false" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="60.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="SQUISHED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/bwa__ema_clbl__bwa_low__truth.bam" name="bwa__ema_clbl__bwa_low__truth.bam" sortable="true" visible="true">
+            <RenderOptions/>
+        </Track>
+    </Panel>
+    <Panel height="102" name="Panel1521679985503" width="3061">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;31.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/ema__ema_clbl__bwa_low__truth.bam_coverage" name="ema__ema_clbl__bwa_low__truth.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="10.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="60" id="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/ema__ema_clbl__bwa_low__truth.bam_junctions" name="ema__ema_clbl__bwa_low__truth.bam Junctions" sortable="false" visible="false" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="60.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/ema__ema_clbl__bwa_low__truth.bam" name="ema__ema_clbl__bwa_low__truth.bam" sortable="true" visible="true">
+            <RenderOptions/>
+        </Track>
+    </Panel>
+    <Panel height="101" name="Panel1521679985563" width="3061">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;21.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/lr__ema_clbl__bwa_low__truth.bam_coverage" name="lr__ema_clbl__bwa_low__truth.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="10.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="60" id="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/lr__ema_clbl__bwa_low__truth.bam_junctions" name="lr__ema_clbl__bwa_low__truth.bam Junctions" sortable="false" visible="false" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="60.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/lr__ema_clbl__bwa_low__truth.bam" name="lr__ema_clbl__bwa_low__truth.bam" sortable="true" visible="true">
+            <RenderOptions/>
+        </Track>
+    </Panel>
+    <Panel height="405" name="Panel1521682527971" width="3061">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;70.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/7:5989546-6069747/bwa.bam_coverage" name="bwa.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="47.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="60" id="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/7:5989546-6069747/bwa.bam_junctions" name="bwa.bam Junctions" sortable="false" visible="false" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="60.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="SQUISHED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/7:5989546-6069747/bwa.bam" name="bwa.bam" sortable="true" visible="true">
+            <RenderOptions/>
+        </Track>
+    </Panel>
+    <Panel height="394" name="Panel1521682528123" width="3061">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;65.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/7:5989546-6069747/ema.bam_coverage" name="ema.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="36.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="60" id="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/7:5989546-6069747/ema.bam_junctions" name="ema.bam Junctions" sortable="false" visible="false" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="60.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="SQUISHED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/7:5989546-6069747/ema.bam" name="ema.bam" sortable="true" visible="true">
+            <RenderOptions/>
+        </Track>
+    </Panel>
+    <Panel height="407" name="Panel1521682528249" width="3061">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;53.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/7:5989546-6069747/lr.bam_coverage" name="lr.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="40.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="60" id="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/7:5989546-6069747/lr.bam_junctions" name="lr.bam Junctions" sortable="false" visible="false" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="60.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="SQUISHED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/7:5989546-6069747/lr.bam" name="lr.bam" sortable="true" visible="true">
+            <RenderOptions/>
+        </Track>
+    </Panel>
+    <Panel height="293" name="FeaturePanel" width="3061">
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="Reference sequence" name="Reference sequence" sortable="false" visible="true"/>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" colorScale="ContinuousColorScale;0.0;423.0;255,255,255;0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="35" id="hg19_genes" name="RefSeq Genes" renderer="BASIC_FEATURE" sortable="false" visible="true" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="423.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/ema_clbl__bwa_low__truth.bed" name="ema_clbl__bwa_low__truth.bed" renderer="BASIC_FEATURE" sortable="false" visible="true" windowFunction="count"/>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/ema/igv_tricky/truth_regions.bed" name="truth_regions.bed" renderer="BASIC_FEATURE" sortable="false" visible="true" windowFunction="count"/>
+    </Panel>
+    <PanelLayout dividerFractions="0.05192107995846314,0.10539979231568017,0.16095534787123572,0.21131879543094495,0.4241952232606438,0.6313603322949117,0.8452751817237798"/>
+    <HiddenAttributes>
+        <Attribute name="DATA FILE"/>
+        <Attribute name="DATA TYPE"/>
+        <Attribute name="NAME"/>
+    </HiddenAttributes>
+</Session>

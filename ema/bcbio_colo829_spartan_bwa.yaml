@@ -1,0 +1,31 @@
+details:
+  - analysis: variant2
+    algorithm:
+        aligner: bwa
+        recalibrate: false
+        realign: false
+        mark_duplicates: true
+        remove_lcr: false
+        maxcov_downsample: false
+        tools_on: [gatk4, noalt_calling]
+        tools_off: [gemini]
+    description: Colo829_80pc_BWA
+    files: /data/cephfs/punim0010/projects/Saveliev_10X/COLO829-10x/bams/Colo829_10x_80pc_LongRanger.bam
+    genome_build: GRCh37
+
+  - analysis: variant2
+    algorithm:
+        aligner: bwa
+        recalibrate: false
+        realign: false
+        mark_duplicates: true
+        remove_lcr: false
+        maxcov_downsample: false
+        tools_on: [gatk4, noalt_calling]
+        tools_off: [gemini]
+    description: Colo829Bl_80pc_BWA
+    files: /data/cephfs/punim0010/projects/Saveliev_10X/COLO829-10x/bams/Colo829Bl_10x_80pc_LongRanger.bam
+    genome_build: GRCh37
+
+upload:
+  dir: ../final

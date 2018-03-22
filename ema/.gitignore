@@ -1,1 +1,6 @@
+*.bam
+*.bam.bai
+*.vcf.gz
+*.bed
+*.vcf.gz.tbi
 4M-with-alts-february-2016.txt
