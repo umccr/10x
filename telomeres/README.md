@@ -36,7 +36,6 @@ drwxr-xr-x 1 brainstorm vho 534G Mar 19 15:32 .
 drwxr-xr-x 1 brainstorm vho 534G Mar 19 15:29 ..
 drwxr-xr-x 1 brainstorm vho 534G Mar 19 15:17 bams             <--- intermediate bams
 drwxr-xr-x 1 brainstorm vho 7.1K Mar 19 15:07 bed              <--- intermediate beds
-drwxr-xr-x 1 brainstorm vho  13M Mar 19 15:32 in               <--- original input datasets
 drwxr-xr-x 1 brainstorm vho 5.5M Mar 19 15:33 final            <--- "final" results
 drwxr-xr-x 1 brainstorm vho 3.0K Mar 19 15:21 scripts          <--- slurm scripts used to generate above data
 drwxr-xr-x 1 brainstorm vho  14K Mar 19 15:15 slurm_out_err    <--- output/error results from slurm jobs from scripts
@@ -44,19 +43,6 @@ drwxr-xr-x 1 brainstorm vho  14K Mar 19 15:15 slurm_out_err    <--- output/error
 
 The input datafiles used **will** be 10X, but we are using COLO829 Truseq to assess current tools:
 
-```
-$ ls -alh in/
-total 13M
-drwxr-xr-x 1 brainstorm vho  13M Mar 19 15:32 .
-drwxr-xr-x 1 brainstorm vho 534G Mar 19 15:35 ..
-lrwxrwxrwx 1 brainstorm vho  101 Feb 28 11:04 17MHP002Bld-ready.bam -> /data/cephfs/punim0010/data/Results/Avner/2016.249.17.MH.P002/final/17MHP002Bld/17MHP002Bld-ready.bam
--rw-r--r-- 1 brainstorm vho  13M Feb 28 13:38 17MHP002Bld-ready.bam.bai
-lrwxrwxrwx 1 brainstorm vho  118 Feb 28 14:24 COLO829BL_TGEN_bwa-ready.bam -> /data/cephfs/punim0010/projects/Saveliev_COLO829_Craig/bcbio_bwa/final/COLO829BL_TGEN_bwa/COLO829BL_TGEN_bwa-ready.bam
-lrwxrwxrwx 1 brainstorm vho  122 Feb 28 14:25 COLO829BL_TGEN_bwa-ready.bam.bai -> /data/cephfs/punim0010/projects/Saveliev_COLO829_Craig/bcbio_bwa/final/COLO829BL_TGEN_bwa/COLO829BL_TGEN_bwa-ready.bam.bai
-lrwxrwxrwx 1 brainstorm vho  114 Feb 28 14:27 COLO829_TGEN_bwa-ready.bam -> /data/cephfs/punim0010/projects/Saveliev_COLO829_Craig/bcbio_bwa/final/COLO829_TGEN_bwa/COLO829_TGEN_bwa-ready.bam
-lrwxrwxrwx 1 brainstorm vho  118 Feb 28 14:27 COLO829_TGEN_bwa-ready.bam.bai -> /data/cephfs/punim0010/projects/Saveliev_COLO829_Craig/bcbio_bwa/final/COLO829_TGEN_bwa/COLO829_TGEN_bwa-ready.bam.bai
-lrwxrwxrwx 1 brainstorm vho   83 Mar  8 13:09 GRCh37.fa.fai -> /data/cephfs/punim0010/local/stable/bcbio/genomes/Hsapiens/GRCh37/seq/GRCh37.fa.fai
-```
 
 TODO: Migrate SLURM scripts to proper Snakemake for reproducibility.
 
@@ -66,9 +52,7 @@ At least as Roman imagines it goes at this point... XXX's represent gaps/doubts.
 
 ## Calculate number of reads in telomeric regions (absolute, relative to coverage)
 
-XXX: bedtoolsCov/mosdepth/samtools/bbmap/bamutils... is there a tool that just does that and fast?
-
-XXX: Regarding input datasets, we have COLO829, `17MHP002Bld-ready.bam`, any preference on which to attack first?
+`bedtools intersect -a data/telomere_regions_GRCh37.bed -b data/EGAZ00001226275_COLO_829_TGEN_IlluminaPipe.bam -c > telomer_counts.txt`
 
 ## Use kmers if the above looks good
 
