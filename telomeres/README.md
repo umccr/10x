@@ -26,8 +26,8 @@ There are two directories available from:
 
 `/data/cephfs/punim0010/projects/Valls_10X_Telomeres/*`
 
-`software`: Containing locally edited/patched software `pip install -e .`, like telomerecat. All conda-installed on root environment.
-`work`: Data processing and batch scripts, with the following structure (partly resembling bcbio):
+1. `software`: Containing locally edited/patched software `pip install -e .`, like telomerecat. All conda-installed.
+2. `work`: Data processing and batch scripts, with the following structure (partly resembling bcbio):
 
 ```
 $ ls -alh
@@ -43,6 +43,7 @@ drwxr-xr-x 1 brainstorm vho  14K Mar 19 15:15 slurm_out_err    <--- output/error
 
 The input datafiles used **will** be 10X, but we are using COLO829 Truseq to assess current tools:
 
+`/data/cephfs/punim0010/data/External/Reference/COLO829_Craig/bams/*ready.bam`
 
 TODO: Migrate SLURM scripts to proper Snakemake for reproducibility.
 
@@ -60,7 +61,10 @@ XXX: Why?
 
 ## Run counts for 10X dataset
 
-XXX: Not sure how to leverage/use the linked reads info, need to read up on tools enabling this analysis
+The hypothesis is that using 10X technology we can reduce the uncertainty of multimapped reads (`NH:i:n, n>2`).
+
+So having a base multimapping read count from Truseq will inform how good 10X performs.
+
 
 ## Segment/mask the 10X dataset per chromosome and run telomerecat and other tools against those segments/bams?
 
