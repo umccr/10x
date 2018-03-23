@@ -53,6 +53,9 @@ At least as Roman imagines it goes at this point... XXX's represent gaps/doubts.
 
 ## Calculate number of reads in telomeric regions (absolute, relative to coverage)
 
+1. We will use hg38 to avoid problems with [missing chromosome 17 and other assembly artifacts][chr17_hg19].
+2. The UCSC browser assumption that telomeric reads are within 1 to 10000bp is wrong. In reality telomeric hexamers are placed in varying positions after unmapped reads. Those should be determined first, disregarding UCSC's generated BED file.
+
 `bedtools intersect -a data/telomere_regions_GRCh37.bed -b data/EGAZ00001226275_COLO_829_TGEN_IlluminaPipe.bam -c > telomer_counts.txt`
 
 ## Use kmers if the above looks good
@@ -68,10 +71,7 @@ So having a base multimapping read count from Truseq will inform how good 10X pe
 
 ## Segment/mask the 10X dataset per chromosome and run telomerecat and other tools against those segments/bams?
 
-XXX: Not possible since telomerecat needs context, then we should just use a "mask and re-run" approach **per chromosome and telomere region(s)**, computationally too expensive on big BAM files?
-
-XXX: Again, can we leverage some 10X trick to make this easier?
-
+A "mask and re-run" approach **per chromosome and telomere region(s)** might be computationally too expensive on big BAM files. On the other hand, if we just focus on the multimapping of reads for QC purposes, for instance, it can run fast.
 
 # Telomerecat output reference
 
@@ -96,3 +96,4 @@ Length - telomere length as estimated by telomerecat.
 
 
 [linked_reads]: https://www.10xgenomics.com/linked-reads/
+[chr17_hg19]: https://www.biostars.org/p/72730/#72759
