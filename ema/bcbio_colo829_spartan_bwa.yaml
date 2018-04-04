@@ -1,31 +1,43 @@
 details:
   - analysis: variant2
     algorithm:
-        aligner: bwa
+        aligner: false
         recalibrate: false
         realign: false
-        mark_duplicates: true
+        mark_duplicates: false
         remove_lcr: false
         maxcov_downsample: false
         tools_on: [gatk4, noalt_calling]
         tools_off: [gemini]
+        variantcaller: [vardict, strelka2, mutect2]
+        ensemble:
+            numpass: 2
     description: Colo829_80pc_BWA
-    files: /data/cephfs/punim0010/projects/Saveliev_10X/COLO829-10x/bams/Colo829_10x_80pc_LongRanger.bam
+    files: /data/cephfs/punim0010/projects/Saveliev_10X/COLO829-10x/bams/Colo829_10x_80pc_BWA.bam
     genome_build: GRCh37
+    metadata:
+        batch: Colo829_80pc_BWA_batch
+        phenotype: tumor
 
   - analysis: variant2
     algorithm:
-        aligner: bwa
+        aligner: false
         recalibrate: false
         realign: false
-        mark_duplicates: true
+        mark_duplicates: false
         remove_lcr: false
         maxcov_downsample: false
         tools_on: [gatk4, noalt_calling]
         tools_off: [gemini]
+        variantcaller: [vardict, strelka2, mutect2]
+        ensemble:
+            numpass: 2
     description: Colo829Bl_80pc_BWA
-    files: /data/cephfs/punim0010/projects/Saveliev_10X/COLO829-10x/bams/Colo829Bl_10x_80pc_LongRanger.bam
+    files: /data/cephfs/punim0010/projects/Saveliev_10X/COLO829-10x/bams/Colo829Bl_10x_80pc_BWA.bam
     genome_build: GRCh37
+    metadata:
+        batch: Colo829_80pc_BWA_batch
+        phenotype: normal
 
 upload:
   dir: ../final

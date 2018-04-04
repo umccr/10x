@@ -24,3 +24,76 @@ details:
 upload:
   dir: ../final
 
+
+
+seq        len   reads
+CMV     235646  368081
+KSHV    137969   81574
+HIV-2    10359     333
+
+
+CMV     235646  368081  1.56200826664
+HPV71   8037    268404  33.3960432997
+HCV-2   9711    178789  18.4109772423
+HPV47   7726    170086  22.0147553715
+HCV-1   9646    110412  11.4464026539
+HPV82   7870    87949   11.1752223634
+KSHV    137969  81574   0.591248758779
+HIV-1   9181    28373   3.09040409541
+HPV42   7917    25999   3.28394593912
+HPV20   7757    25253   3.25551115122
+
+seq       len   reads       coverage
+HPV71    8037  268404  33.3960432997
+HPV47    7726  170086  22.0147553715
+HCV-2    9711  178789  18.4109772423
+HCV-1    9646  110412  11.4464026539
+HPV82    7870   87949  11.1752223634
+HPV42    7917   25999  3.28394593912
+HPV20    7757   25253  3.25551115122
+HIV-1    9181   28373  3.09040409541
+
+However if you count coverage, you would get ```seq       len   reads       coverage
+HPV71    8037  268404  33.3960432997
+HPV47    7726  170086  22.0147553715
+HCV-2    9711  178789  18.4109772423
+HCV-1    9646  110412  11.4464026539
+HPV82    7870   87949  11.1752223634
+HPV42    7917   25999   3.28394593912
+HPV20    7757   25253   3.25551115122
+HIV-1    9181   28373   3.09040409541
+``` with those 3 nowhere near
+
+
+seq      len    reads       coverage
+CMV    235646  368081   1.5620082666
+HPV71    8037  268404  33.3960432997
+HCV-2    9711  178789  18.4109772423
+HPV47    7726  170086  22.0147553715
+HCV-1    9646  110412  11.4464026539
+HPV82    7870   87949  11.1752223634
+KSHV   137969   81574   0.5912487587
+
+
+
+samtools view Colo829_10x_80pc_BWA.bam | grep A00130:39:H5GWHDMXX:1:1235:11026:33739
+A00130:39:H5GWHDMXX:1:1235:11026:33739  69      4       49275711        0       *           =       49275711        0       *                                                                                                                                                           *                                                                                                                                                                               AS:i:0  XS:i:0  RG:Z:Colo829_80pc_BWA   MQ:i:0  ms:i:2536       mc:i:49275695   MC:Z:16S52M83S
+A00130:39:H5GWHDMXX:1:1235:11026:33739  1161    4       49275711        0       16S52M83S   =       49275711        0       GGAGGCAAAAAAAAAAAAAAAAAAAAAAAAAAATAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAATAAGTATGGATGATTGGTTACGCGATGGCGTGAGTAGGTGGGCGGGAGGAGTGGTGGTGAGGGAGGGTGTCGGGGGGGTTG     :,,,,,,,:,F:,:FF,FFF,,F:,FFFFF,:F,:F:F,FFF,FFFFFFFF,FFFF,FF:::F,,FFF::,F,,F::,,,,,,,,,,,,,:,,F,,F,,,,,,,F,F:FFF,,,:,,,:,,,:,,FF,,,FF,:F,,FF,:,,,:,,,,,F NM:i:1  MD:Z:17A34      AS:i:47 XS:i:46       RG:Z:Colo829_80pc_BWA   SA:Z:21,41612277,-,121S30M,0,0; ms:i:0  mc:i:49275711
+A00130:39:H5GWHDMXX:1:1235:11026:33739  441     21      41612277        0       121H30M     =       41612277        0       TTTTTTTTTTTTTTTTTTTTTTTTGCCTCC                                                                                                                              FFFFF,:F,,FFF,FF:,:F,:,,,,,,,:                                                                                                                          NM:i:0  MD:Z:30 AS:i:30 XS:i:30 RG:Z:Colo829_80pc_BWASA:Z:4,49275711,+,16S52M83S,0,1; XA:Z:7,+19341757,30M121S,0;17,-986503,121S30M,0;3,+42546389,30M121S,0;9,+126560999,30M121S,0;
+
+samtools view Colo829_10x_80pc_LongRanger.bam | grep A00130:39:H5GWHDMXX:1:1235:11026:33739
+A00130:39:H5GWHDMXX:1:1235:11026:33739  137     chr4    49275711        24      16S52M83S   *       0               0       GGAGGCAAAAAAAAAAAAAAAAAAAAAAAAAAATAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAATAAGTATGGATGATTGGTTACGCGATGGCGTGAGTAGGTGGGCGGGAGGAGTGGTGGTGAGGGAGGGTGTCGGGGGGGTTG     :,,,,,,,:,F:,:FF,FFF,,F:,FFFFF,:F,:F:F,FFF,FFFFFFFF,FFFF,FF:::F,,FFF::,F,,F::,,,,,,,,,,,,,:,,F,,F,,,,,,,F,F:FFF,,,:,,,:,,,:,,FF,,,FF,:F,,FF,:,,,:,,,,,F QT:Z:,:FF,:F:   BC:Z:AGTAGTCT   QX:Z:########   AM:A:0  XM:A:0  RX:Z:NNNNNNNN   AS:f:-65.5      XS:f:-66        XT:i:1  OM:i:5     RG:Z:10X-COLO829:LibraryNotSpecified:1:unknown_fc:0
+
+
+
+
+
+
+
+
+
+
+
+
+
+

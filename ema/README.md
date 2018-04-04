@@ -2,6 +2,16 @@
 
 Based on the notebook https://github.com/arshajii/ema-paper-data/blob/master/experiments.ipynb
 
+### Install EMA
+
+```
+module load gcc/6.2.0  # Raijin
+git clone --recursive https://github.com/arshajii/ema
+cd ema
+make
+cp ema ~/bin/ema
+```
+
 ### Environment and data
 
 On Spartan:
@@ -16,21 +26,11 @@ Load conda environment (conda install -c bioconda seqtk parallel bwa picard -y):
 # raijin:   export PATH=/g/data3/gx8/extras/10x/miniconda/bin:$PATH
 ```
 
-Install EMA
-
-```
-git clone --recursive https://github.com/arshajii/ema
-cd ema
-make
-cp ema ~/bin/ema
-```
-
 Activate an interactive session
 
 ```
 sinteractive --time=80:00:00 --nodes=1 --ntasks=2 -p vccc --mem=30G -J ema
 ```
-
 
 ### Prep subsampled data
 
@@ -243,7 +243,7 @@ samtools stats -@ 32 Colo829_80pc_EMA.bam > Colo829_80pc_EMA.stats.txt
 
 ```
 for fq in ../ori_fq/* ; do
-	gunzip -c $fq | head -n684 | gzip -c > ori_fq/$(basename $fq)
+	gunzip -c $fq | head -n700 | gzip -c > ori_fq/$(basename $fq)
 done
 ```
 
@@ -253,7 +253,8 @@ done
 Create a file `interleave_fq.sh`:
 
 ```
-paste <(pigz -c -d $1 | paste - - - - | awk -F '\t' 'length($2) >= 40') <(pigz -c -d ${1/_R1_/_R2_} | paste - - - - | awk -F '\t' 'length($2) >= 40') | tr '\t' '\n'
+#paste <(pigz -c -d $1 | paste - - - - | awk -F '\t' 'length($2) >= 40') <(pigz -c -d ${1/_R1_/_R2_} | paste - - - - | awk -F '\t' 'length($2) >= 40') | tr '\t' '\n'
+paste <(pigz -c -d $1 | paste - - - -) <(pigz -c -d ${1/_R1_/_R2_} | paste - - - -) | tr '\t' '\n'
 ```
 
 ```
@@ -287,6 +288,11 @@ samtools stats -@ 32 ${SAMPLE}_EMA.bam > ${SAMPLE}_EMA.stats.txt
 date
 ```
 
+<!-- for fq in ../ori_fq/* ; do
+	gunzip -c $fq | head -n400000 | gzip -c > ori_fq/$(basename $fq)
+done
+parallel -j32 "bash interleave_fq.sh {} | ema count -w 4M-with-alts-february-2016.txt -o {/.}" ::: ori_fq/*_R1_*.gz
+ -->
 
 ### Extract BAMs to explore challenging regions
 
@@ -327,6 +333,23 @@ done
 `cd /g/data3/gx8/projects/Saveliev_10X/COLO829-10x/bcbio_10x/work` ad use this [yaml](bcbio_colo829_raijin_10x.yaml)
 
 Separately produce BWA alignments `cd /g/data3/gx8/projects/Saveliev_10X/COLO829-10x/bcbio_bwa` with [yaml](bcbio_colo829_raijin_bwa.yaml)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
