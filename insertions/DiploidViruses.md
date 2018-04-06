@@ -3,7 +3,6 @@
 * [Extracting unmapped reads](#extracting-unmapped-reads)
 * [Exploring taxonomic content](#exploring-taxonomic-content)
 * [De-novo assembling HPV18 region](#de-novo-assembling-hpv18-region)
-* [DNA Molecule Length Distribution](#dna-molecule-length-distribution)
 * [Looking for integration sites](#looking-for-integration-sites)
 * [chr8 integration site](#chr8-integration-site)
 

@@ -1,3 +1,3 @@
-For 10x insertions exploration, see [notebook](10x_novel_insertions.ipynb)
+[DiploidNeverResponder insertions explorations](DiploidViruses.md)
 
-For DiploidNeverResponder insertions explorations, see [DiploidViruses.md](DiploidViruses.md)
+[10x insertions exploration notebook](10x_novel_insertions.ipynb)
