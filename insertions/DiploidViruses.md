@@ -217,11 +217,11 @@ Another interesting obervation comes from blasting the contigs against all human
 
 ![blast](assemble/diploid/img/blast_HPV18.png)
 
-It would be interesting to repeate whole experiment with hg38.
+It would be interesting to repeat the whole experiment with hg38.
 
 ## chr8 integration site
 
-The read orientations spanning the breakpoints suggests a quite complex event rather than a simple insertion of the virus. Exploring the full 16kb GRCh37 region covering all of 3 breakpoints:
+The read orientations spanning the breakpoints suggest a quite complex event rather than a simple insertion of the virus. Exploring the full 16kb GRCh37 region covering all of 3 breakpoints:
 
 ```
 ~/bin/sambamba slice 8:128318910-128321289 diploid_tumor-ready.bam > diploid_tumor-chr8_HPV18.bam
@@ -238,6 +238,8 @@ We can see that 2 of the breakpoint positions show up very clearly, and it's als
 That suggests that the virus and created a loop by attaching to the leftmost and rightmost breakpoints, and this loop went around many times, heavily amplifying the chr8 16kb region as well as viral region NODE_2-NODE_3-NODE_4. While looping, it also likely occasionally attached to the inner left breakpoint as well. Indeed, things like this are typical for HPV viruses:
 
 ![igv](assemble/diploid/img/HPV_loop_from_paper.png)
+
+(Image from [Corden et all](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC395710/pdf/520275.pdf))
 
 In our case, the integration events might have led to the following sequence (letters are from the IGV screenshot above): 
 
