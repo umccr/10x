@@ -1,5 +1,12 @@
 # Oncoviruses in DiploidNeverResponder
 
+* [Extracting unmapped reads](#extracting-unmapped-reads)
+* [Exploring taxonomic content](#exploring-taxonomic-content)
+* [De-novo assembling HPV18 region](#de-novo-assembling-hpv18-region)
+* [DNA Molecule Length Distribution](#dna-molecule-length-distribution)
+* [Looking for integration sites](#looking-for-integration-sites)
+* [chr8 integration site](#chr8-integration-site)
+
 ## Extracting unmapped reads
 
 We want to eplore viruses that might be intergrated into the genome. In order to do that, we start with getting reads unmapped to the human genome, or reads with unmapped mate which can support integration breakpoints.
@@ -111,7 +118,7 @@ samtools idxstats viral_mapping/to_HPV18.bam | awk 'BEGIN {OFS="\t"} {print $1, 
 
 Getting same 19x coverage, which is a very strong evidence.
 
-### De-novo assembling HPV18 region
+## De-novo assembling HPV18 region
 
 Getting reads that map to HPV18 and all their mate that might point us to an integration site:
 
@@ -151,7 +158,7 @@ All 4 contigs touch each other and cover the assembly fully uniformly, which is 
 
 ![igv](assemble/diploid/img/igv_HPV18.png)
 
-### Looking for integration sites
+## Looking for integration sites
 
 To identify if the virus is integrated into human, we need to review the viral read whose mates map to the human genome. We would expect reads of forward orienation to pile up to the left of the breakpoint, and reads of the opposite orientation to pile up to the right of the breakpoint; a simmetrical picture would be expected in the human chromosome as well. In order to figure that out, we are creating a GRCh37-HPV18 spike reference, and remap reads against this artificial genome:
 
@@ -196,7 +203,7 @@ Also, it's interesting that blasting the contigs against human sequences, it rep
 
 It's worth exploring whole alignment to GRCh38.
 
-#### chr8 integration site
+## chr8 integration site
 
 The read orientations spanning the breakpoints suggests a quite complex event rather than a simple insertion of the virus. Exploring the full 16kb GRCh37 region covering all 3 breakpoints:
 
@@ -221,7 +228,7 @@ The integration site overlaps long non-coding RNA genes CASC21 (Cancer Susceptib
 
 ----
 
-### Playground
+## Playground
 
 #### chr3 integration site
 
