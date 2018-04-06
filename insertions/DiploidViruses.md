@@ -1,6 +1,6 @@
 # Oncoviruses in DiploidNeverResponder
 
-Some insertions in human samples cannot be reconstructed by human genome alignment because they have an external origin, for example [oncoviruses](https://en.wikipedia.org/wiki/Oncovirus) that got integrated into a human genome. We want to explore such novel insertions and see if we can reconstruct their sequences and locate integration sites.
+Some insertions in human samples cannot be reconstructed by human genome alignment because they have an external origin, for example [oncoviruses](https://en.wikipedia.org/wiki/Oncovirus) that got integrated into a human genome. Here, we explore such novel insertions in a [DiploidNeverResponder](https://trello.com/c/4gdQ4Tmi/65-diploid-never-responder) sample sequenced in UMCCR, and see if we can reconstruct their sequences and locate their integration sites. Authors: Vlad Saveliev and Arthur Hsu.
 
 ### Contents
 
@@ -8,7 +8,7 @@ Some insertions in human samples cannot be reconstructed by human genome alignme
 * [Exploring taxonomic content](#exploring-taxonomic-content)
   + [Mash](#mash)
   + [BWA-MEM](#bwa-mem)
-* [De-novo assembling HPV18 region](#de-novo-assembling-hpv18-region)
+* [De-novo assembling HPV18](#de-novo-assembling-hpv18-region)
 * [Looking for integration sites](#looking-for-integration-sites)
 * [chr8 integration site](#chr8-integration-site)
 
@@ -224,13 +224,13 @@ We can see that 2 of the breakpoint positions show up very clearly, and it's als
 - The read orientations tell us that the viral amplified region got attached to the rightmost chr8 breakpoint from the right side, and to the left breakpoints from the left side, which rejects the idea of a simple insertion;
 - chr8 region between the breakpoints is heavily amplified, at roughly the same coverage as the viral amplified regon.
 
-That suggests that the virus and created a loop by attaching to the leftmost and rightmost breakpoints, and this loop went around many times, heavily amplifying the chr8 16kb region as well as viral region NODE_2-NODE_3-NODE_4. While looping, it also likely occasionally attached to the inner left breakpoint as well. Indeed, things like this are typical for HPV viruses:
+That suggests that the virus and created a loop by attaching to the leftmost and rightmost breakpoints, and this loop went around multiple times, heavily amplifying the chr8 16kb region as well as the viral region NODE_2-NODE_3-NODE_4. While looping, it also likely occasionally got attached to the inner left breakpoint instead of the leftmost one. Indeed, things like this are typical for HPV viruses:
 
 ![igv](assemble/diploid/img/HPV_loop_from_paper.png)
 
 (Image from [Corden et all](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC395710/pdf/520275.pdf))
 
-In our case, the integration events might have led to the following sequence (letters are from the IGV screenshot above): 
+In our case, the integration events might have led to the following sequence (regions A, B, C, D are parts of the human reference 0 according to the IGV screenshot in the beginning of the section; NODE_1, NODE_2, NODE_3, NODE_4 are viral contigs according the earlier sections): 
 
 A - B - C - (NODE_4-NODE_3-NODE-2 - B - C)*10 - NODE_4-NODE_3 - C - D
 
