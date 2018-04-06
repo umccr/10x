@@ -174,11 +174,11 @@ OR EVEN (doesn't require index):
 minimap2 -ax sr GRCh37_HPV18/GRCh37_HPV18.fa to_HPV18.mapped_or_mate.R1.fq to_HPV18.mapped_or_mate.R2.fq | bamsort inputformat=sam index=1 indexfilename=to_GRCh37_HPV18_mm2.bam.bai O=to_GRCh37_HPV18_mm2.bam
 ```
 
-HPV18 region of the spiked reference in IGV, sorted by the chromosome of mate. Read direction is annotated with arrows:
+HPV18 region of the spiked reference in IGV, groupped by the chromosome of mate (based on [the color scheme](https://software.broadinstitute.org/software/igv/interpreting_insert_size) - the small green group is from chromosome 3, large purple group is from chromosome 8, and all gray read pairs are entirely mapped to HPV18). Read direction is annotated with arrows.
 
 ![igv](assemble/diploid/img/igv_spike_HPV18.png)
 
-There is no very large support for integration, however a bit of evidence from purple (chr8) and green (chr3): reads cluster in viral genome and their mates cluster in human. (for colors, see https://software.broadinstitute.org/software/igv/interpreting_insert_size)
+There is a quite evident support for human genome integration to chromosome 8 (with purple reads), and a smaller support for the chromosome 3 integration with the green reads. All those colored read piles are consitently one direction and their mates simmetrically cluster in GRCh37.
 
 The leftmost purple reads mates are mapping mapping to 8:128,303,800-128,304,900 
 
@@ -192,19 +192,19 @@ The rightmost purple pile mates is mapping nearby the leftmost pile - to 8:128,3
 
 ![igv](assemble/diploid/img/igv_spike_integration_site_chr8_right_2.png)
 
-It's possible that the deeply-covered part of the virus got inserted somehow into chromosome 8.
+This suggest that the deeply covered NODE_2-NODE_3-NODE_4 part of the virus got inserted into chromosome 8.
 
-Also, the green reads map to 3:186,691,636-186,699,490, suggesting possible another integration site. There might be also another strain of virus which is less abundant, but integrates to chromosome 3. Worth exploring other viral sequences to confirm - spiking GRCh37 with the whole GDC database and realigning all human-unmapped reads.
+Also, the green reads map to 3:186,691,636-186,699,490, suggesting possible another integration site. There might be also another less abundant strain of virus, worth exploring other viral sequences to confirm - spiking GRCh37 with the whole GDC database and realigning all human-unmapped reads.
 
-Also, it's interesting that blasting the contigs against human sequences, it reports 18% coverage by the human chr8 alternative assembly, as well as by GRCh38:
+Another interesting obervation comes from blasting the contigs against all human sequences: it reports 18% coverage in a chr8 alternative assembly, and same 18% in hg38:
 
 ![blast](assemble/diploid/img/blast_HPV18.png)
 
-It's worth exploring whole alignment to GRCh38.
+It would be interesting to repeate whole experiment with hg38.
 
 ## chr8 integration site
 
-The read orientations spanning the breakpoints suggests a quite complex event rather than a simple insertion of the virus. Exploring the full 16kb GRCh37 region covering all 3 breakpoints:
+The read orientations spanning the breakpoints suggests a quite complex event rather than a simple insertion of the virus. Exploring the full 16kb GRCh37 region covering all of 3 breakpoints:
 
 ```
 ~/bin/sambamba slice 8:128318910-128321289 diploid_tumor-ready.bam > diploid_tumor-chr8_HPV18.bam
@@ -212,18 +212,23 @@ The read orientations spanning the breakpoints suggests a quite complex event ra
 
 ![igv](assemble/diploid/img/igv_GRCh37_full_region.png)
 
-We can see that 2 of the breakpoint positions are very clear, and it's also evident that:
+We can see that 2 of the breakpoint positions show up very clearly, and it's also evident that:
 
-- The NODE2-3-4 region is amplified heavily instead of being deleted, meaning that the virus didn't replace the region with itself,
-- The breakpoints tell us that the viruses amplified region got attached to the rightmost chr8 breakpoint, then looped around and attached to one of the left chr8 breakpoints.
+- The NODE_2-NODE_3-NODE_4 region is amplified heavily instead of being deleted, meaning that the virus didn't replace the region with itself resulting in some more complex event;
+- The read orientations tell us that the viral amplified region got attached to the rightmost chr8 breakpoint from the right side, and to the left breakpoints from the left side, which rejects the idea of a simple insertion;
+- chr8 region between the breakpoints is heavily amplified, at roughly the same coverage as the viral amplified regon.
 
-It suggests that the virus created a loop that amplified the 16kb region multiple times, looping the leftmost-rightmost breakpoint chr8 region, likely occasionally attaching to the inner left breakpoint as well. Indeed, things like that happen with HPV viruses often:
+That suggests that the virus and created a loop by attaching to the leftmost and rightmost breakpoints, and this loop went around many times, heavily amplifying the chr8 16kb region as well as viral region NODE_2-NODE_3-NODE_4. While looping, it also likely occasionally attached to the inner left breakpoint as well. Indeed, things like this are typical for HPV viruses:
 
 ![igv](assemble/diploid/img/HPV_loop_from_paper.png)
 
-The integration site overlaps long non-coding RNA genes CASC21 (Cancer Susceptibility 21, CARLo-2) and CASC8 (Cancer Susceptibility 8, CARLo-1) in their introns. Both genes are associated with cancer.
+In our case, the integration events might have led to the following sequence (letters are from the IGV screenshot above): 
 
-8q24.21 is known as HPV integration site hotspot: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4695887/, https://www.ncbi.nlm.nih.gov/pubmed/1649348/: "We have determined the chromosomal localization of integrated HPV type 16 (HPV-16) or HPV-18 genomes in genital cancers... In three cancers, HPV sequences were localized in chromosome band 8q24.1, in which the c-myc gene is mapped... In three of the four cases, the proto-oncogene located near integrated viral sequences was found to be structurally altered and/or overexpressed. These data indicate that HPV genomes are preferentially integrated near myc genes in invasive genital cancers and support the hypothesis that integration plays a part in tumor progression via an activation of cellular oncogenes.", https://www.nature.com/articles/1207006: "RS–PCR of HPV18-positive tumors revealed a single large cluster at 8q24."
+A - B - C - (NODE_4-NODE_3-NODE-2 - B - C)*10 - NODE_4-NODE_3 - C - D
+
+The integration site overlaps long non-coding RNA genes CASC21 (Cancer Susceptibility 21, CARLo-2) and CASC8 (Cancer Susceptibility 8, CARLo-1) in their introns. Both genes are associated with cancer, and located in a region 8q24.21 nearby the oncogene MYC.
+
+8q24.21 is well known as HPV integration site hotspot: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4695887/, https://www.ncbi.nlm.nih.gov/pubmed/1649348/: "We have determined the chromosomal localization of integrated HPV type 16 (HPV-16) or HPV-18 genomes in genital cancers... In three cancers, HPV sequences were localized in chromosome band 8q24.1, in which the c-myc gene is mapped... In three of the four cases, the proto-oncogene located near integrated viral sequences was found to be structurally altered and/or overexpressed. These data indicate that HPV genomes are preferentially integrated near myc genes in invasive genital cancers and support the hypothesis that integration plays a part in tumor progression via an activation of cellular oncogenes.", also https://www.nature.com/articles/1207006: "RS–PCR of HPV18-positive tumors revealed a single large cluster at 8q24."
 
 ----
 
