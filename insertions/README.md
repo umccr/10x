@@ -285,7 +285,7 @@ Next we want to explore if we can more efficiently identify novel insertions usi
 	2. List reads that map in proximity with a breakpoint (in both directions), but have an unmapped mate
 	3. List BX of those reads
 	4. Find all unmapped reads (or reads with unmapped mate) with those barcodes
-	5. De novo assemble those reads (with 10x-aware Supernova or Athena, or just with SPAdes)
+	5. De novo assemble those reads (with 10x-aware [Supernova](https://support.10xgenomics.com/de-novo-assembly/software/pipelines/latest/using/running) or Athena, or just with SPAdes)
 
 3. Directly assembly all unmapped reads with Supernova and see what happens.
 
