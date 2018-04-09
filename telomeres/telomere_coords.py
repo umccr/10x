@@ -15,49 +15,19 @@ parse_threshold = 100000 # How much raw sequence to parse through?
 coordinates = 0
 bedfile = defaultdict(list)
 
-with gzip.open("data/hg38.fa.gz", "rt") as hg38_fa:
-    for record in SeqIO.parse(hg38_fa, "fasta"):
-        chrom_length = len(record.seq)
-        if "_" not in record.id: #avoid extra assemblies
-            seq = record.seq
-#            for char in seq[:parse_threshold]:
-            for char in seq:
-                coordinates = coordinates + 1
-                if(char == 'N'):
-                    continue
-                else:
-                    print("Forward: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(chrom=record.id, pos=coordinates, chr_length=chrom_length))
-                    print(seq[coordinates:coordinates+length])
-                    bedfile[record.id].append(coordinates)
-                    coordinates = 0
-                    break
 
-            # in reverse now
-            for char in reversed(seq):
-                coordinates = coordinates + 1
-                if(char == 'N'):
-                    continue
-                else:
-                    print("Reverse: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(chrom=record.id, pos=chrom_length-coordinates, chr_length=chrom_length))
-                    print(seq[chrom_length-coordinates-length:chrom_length-coordinates])
-                    bedfile[record.id].append(chrom_length-coordinates-length)
-                    coordinates = 0
-                    break
+def assess_repeats(seq, start, end):
+    pattern = __get_pattern__(seq)
+    hexamers = 0
+    if pattern in window(seq):
+        hexamers = hexamers + 1
+
+    return hexamers
 
 
-
-#from ipdb import set_trace
-#set_trace()
-print(bedfile)
-try:
-    for k, v in bedfile.items():
-        print("{}\t{}\t{}\t".format(k, v[0], v[0]+length))
-        print("{}\t{}\t{}\t".format(k, v[1], v[1]+length))
-except:
-    pass
-
-
-def __get_pattern__(self, seq):
+# Borrowed from telomerecat's logic:
+# https://github.com/jhrf/telomerecat/blob/884c7f830eb2639155113df2c6a7ea4f1154b5fc/telomerecat/telbam2length.py
+def __get_pattern__(seq):
     cta, tag = "CCCTAA", "TTAGGG"
     pattern = None
     if cta in seq or tag in seq:
@@ -66,7 +36,6 @@ def __get_pattern__(self, seq):
         else:
             pattern = tag
     return pattern
-
 
 def consume(iterator, n):
     "Advance the iterator n-steps ahead. If n is none, consume entirely."
@@ -86,3 +55,53 @@ def window(iterable, n=6):
     for i, it in enumerate(iters):
         consume(it, i)
     return zip(*iters)
+
+
+with gzip.open("data/hg38.fa.gz", "rt") as hg38_fa:
+    for record in SeqIO.parse(hg38_fa, "fasta"):
+        chrom_length = len(record.seq)
+        if "_" not in record.id: #avoid extra assemblies
+            seq = record.seq
+#            for char in seq[:parse_threshold]:
+            for char in seq:
+                coordinates = coordinates + 1
+                if(char == 'N'):
+                    continue
+                else:
+                    start = coordinates
+                    end = coordinates+length
+                    
+                    bedfile[record.id].append(start)
+                    hexa = assess_repeats(seq, start, end)
+                    
+                    print("Forward: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(chrom=record.id, pos=start, chr_length=chrom_length))
+                    print("Sequenc: {seq}".format(seq=seq[start:end]))
+                    print("HexCnt : {mers}".format(mers=hexa))
+
+                    coordinates = 0
+                    break
+
+            # in reverse now
+            for char in reversed(seq):
+                coordinates = coordinates + 1
+                if(char == 'N'):
+                    continue
+                else:
+                    start = chrom_length-coordinates-length
+                    end = chrom_length-coordinates
+
+                    bedfile[record.id].append(start)
+                    hexa = assess_repeats(seq, start, end)
+                    
+                    print("Reverse: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(chrom=record.id, pos=chrom_length-coordinates, chr_length=chrom_length))
+                    print("Sequenc: {seq}".format(seq=seq[start:end]))
+                    print("HexCnt : {mers}".format(mers=hexa))
+                    
+                    coordinates = 0
+                    break
+
+
+print(bedfile)
+for k, v in bedfile.items():
+    print("{}\t{}\t{}\t".format(k, v[0], v[0]+length))
+    print("{}\t{}\t{}\t".format(k, v[1], v[1]+length))
