@@ -238,6 +238,66 @@ The integration site overlaps long non-coding RNA genes CASC21 (Cancer Susceptib
 
 8q24.21 is well known as HPV integration site hotspot: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4695887/, https://www.ncbi.nlm.nih.gov/pubmed/1649348/: "We have determined the chromosomal localization of integrated HPV type 16 (HPV-16) or HPV-18 genomes in genital cancers... In three cancers, HPV sequences were localized in chromosome band 8q24.1, in which the c-myc gene is mapped... In three of the four cases, the proto-oncogene located near integrated viral sequences was found to be structurally altered and/or overexpressed. These data indicate that HPV genomes are preferentially integrated near myc genes in invasive genital cancers and support the hypothesis that integration plays a part in tumor progression via an activation of cellular oncogenes.", also https://www.nature.com/articles/1207006: "RS–PCR of HPV18-positive tumors revealed a single large cluster at 8q24."
 
+
+## 10x
+
+Raw FastQ data on Spartan:
+
+```
+Normal: /data/cephfs/punim0010/data/FASTQ/180312_A00130_0041_AHCLLMDMXX/Chromium_20180312/SI-GA-A11_*
+Tumor:  /data/cephfs/punim0010/data/FASTQ/180312_A00130_0041_AHCLLMDMXX/Chromium_20180312/SI-GA-A12_*
+```
+
+Copying tumor to Raijin:
+
+```
+cd /g/data3/gx8/projects/Saveliev_10X/NeverResponder/FASTQ
+rsync -tavz "spa:/data/cephfs/punim0010/data/FASTQ/180312_A00130_0041_AHCLLMDMXX/Chromium_20180312/SI-GA-A12_*" .
+```
+
+Running [EMA 10x aligner](https://github.com/arshajii/ema) on Spartan
+
+```
+sinteractive --time=80:00:00 --nodes=1 --cpus-per-task=32 -p vccc --mem=256G -J ema
+export PATH=/g/data3/gx8/extras/10x/miniconda/bin:$PATH
+```
+
+```
+echo 'paste <(pigz -c -d $1 | paste - - - -) <(pigz -c -d ${1/_R1_/_R2_} | paste - - - -) | tr "\\t" "\\n"' > interleave_fq.sh
+```
+
+```
+SAMPLE=
+
+date
+parallel -j32 "bash interleave_fq.sh {} | ema count -w 4M-with-alts-february-2016.txt -o {/.} 2>{/.}.log" ::: ori_fq/*_R1_*.gz
+
+date
+ls ori_fq/*R1*.gz | xargs -I '{}' bash interleave_fq.sh '{}' | ema preproc -w 4M-with-alts-february-2016.txt -n 500 -t 32 -o ema_work *.ema-ncnt 2>&1 | tee ema_preproc.log
+
+date
+parallel -j8 "ema align -R $'@RG\tID:${SAMPLE}_EMA\tSM:${SAMPLE}_EMA' -t 4 -d -r ref/GRCh37.fa -s {} | samtools sort -@ 4 -O bam -l 0 -m 4G -o {}.bam -" ::: ema_work/ema-bin-???
+
+date
+bwa mem -p -t 32 -M -R "@RG\tID:${SAMPLE}_EMA\tSM:${SAMPLE}_EMA" ref/GRCh37.fa ema_work/ema-bin-nobc |\
+  samtools sort -@ 4 -O bam -l 0 -m 4G -o ema_work/ema-bin-nobc.bam
+
+date
+sambamba markdup -t 32 -p -l 0 ema_work/ema-bin-nobc.bam ema_work/ema-bin-nobc-dupsmarked.bam && rm ema_work/ema-bin-nobc.bam
+
+date
+sambamba merge -t 32 -p ${SAMPLE}_EMA.bam ema_work/*.bam
+
+date
+samtools stats -@ 32 ${SAMPLE}_EMA.bam > ${SAMPLE}_EMA.stats.txt
+
+date
+```
+
+
+
+
+
 ----
 
 ## Playground
@@ -259,3 +319,29 @@ Not clear about this one.
 #### Expreriment with 10x data
 
 In [this document](README.md), we are experimenting with an external 10x dataset NA12878 and an internally sequences COLO829.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

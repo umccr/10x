@@ -22,14 +22,14 @@ cd /data/cephfs/punim0010/extras/vlad/synced/umccr/10x/ema
 
 Load conda environment (conda install -c bioconda seqtk parallel bwa picard -y):
 ```
-# spartan:  export PATH=/data/cephfs/punim0010/extras/10x/miniconda/bin:$PATH ; source activate 10x
+# spartan:  export PATH=/data/cephfs/punim0010/extras/10x/miniconda/bin:$PATH
 # raijin:   export PATH=/g/data3/gx8/extras/10x/miniconda/bin:$PATH
 ```
 
 Activate an interactive session
 
 ```
-sinteractive --time=80:00:00 --nodes=1 --ntasks=2 -p vccc --mem=30G -J ema
+sinteractive --time=80:00:00 --nodes=1 --cpus-per-task=32 -p vccc --mem=256G -J ema
 ```
 
 ### Prep subsampled data
@@ -248,13 +248,17 @@ done
 ```
 
 
-### Not merged version
+### Not merged version (LATEST)
 
 Create a file `interleave_fq.sh`:
 
 ```
 #paste <(pigz -c -d $1 | paste - - - - | awk -F '\t' 'length($2) >= 40') <(pigz -c -d ${1/_R1_/_R2_} | paste - - - - | awk -F '\t' 'length($2) >= 40') | tr '\t' '\n'
 paste <(pigz -c -d $1 | paste - - - -) <(pigz -c -d ${1/_R1_/_R2_} | paste - - - -) | tr '\t' '\n'
+```
+
+```
+echo 'paste <(pigz -c -d $1 | paste - - - -) <(pigz -c -d ${1/_R1_/_R2_} | paste - - - -) | tr "\\t" "\\n"' > interleave_fq.sh
 ```
 
 ```
