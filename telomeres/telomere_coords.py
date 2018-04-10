@@ -6,6 +6,7 @@ from collections import defaultdict, deque
 from itertools import islice, tee
 from Bio import SeqIO
 
+allowed_errs = 2 # How many errors in the telomeric pattern are allowed?
 length = 1000 # How much raw sequence to display?
 parse_threshold = 1000000 # How much raw sequence to parse through?
 
@@ -22,13 +23,19 @@ def assess_repeats(seq, start, end):
     seq_s = seq_s[start:end]
     
     hits = 0
+    partial_hits = 0
 
     for kmer in window(seq_s, len(pattern)):
-        kmer_s = ''.join(kmer)
+        kmer_s = ''.join(kmer) # fuse tuple back to string
         if pattern in kmer_s:
             hits = hits + 1
-    
-    return hits, pattern
+        else:
+            #if distance(pattern, seq) == allowed_errs:
+            #    partial_hits = partial_hits + 1
+            # XXX: Does distance really return something if there's no exact match?
+            partial_hits = distance(pattern, kmer_s)
+
+    return hits, partial_hits, pattern
 
 # Borrowed from telomerecat's logic:
 # https://github.com/jhrf/telomerecat/blob/884c7f830eb2639155113df2c6a7ea4f1154b5fc/telomerecat/telbam2length.py
@@ -41,6 +48,13 @@ def __get_pattern__(seq):
         else:
             pattern = tag
     return pattern
+
+def distance(a,b):
+    count = 0
+    for i in range (0,len(a)):
+        if a[i] != b[i]:
+            count += 1
+    return count
 
 def consume(iterator, n):
     "Advance the iterator n-steps ahead. If n is none, consume entirely."
@@ -77,12 +91,12 @@ with gzip.open("data/hg38.fa.gz", "rt") as hg38_fa:
                     end = coordinates+length
                     
                     bedfile[record.id].append(start)
-                    hits, pattern = assess_repeats(seq, start, end)
+                    hits, partial_hits, pattern = assess_repeats(seq, start, end)
                     
                     print("Forward: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(chrom=record.id, pos=start, chr_length=chrom_length))
                     print("Sequenc: {seq}".format(seq=seq[start:end]))
                     print("Telpatt: {patt}".format(patt=pattern))
-                    print("HexCnt : {mers}".format(mers=hits))
+                    print("HexCnt for {chrom}: {mers}, {phits}".format(chrom=record.id, mers=hits, phits=partial_hits))
 
                     coordinates = 0
                     break
@@ -97,12 +111,12 @@ with gzip.open("data/hg38.fa.gz", "rt") as hg38_fa:
                     end = chrom_length-coordinates
 
                     bedfile[record.id].append(start)
-                    hits, pattern = assess_repeats(seq, start, end)
+                    hits, partial_hits, pattern = assess_repeats(seq, start, end)
                     
                     print("Reverse: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(chrom=record.id, pos=chrom_length-coordinates, chr_length=chrom_length))
                     print("Sequenc: {seq}".format(seq=seq[start:end]))
                     print("Telpatt: {patt}".format(patt=pattern))
-                    print("HexCnt : {mers}".format(mers=hits))
+                    print("HexCnt for {chrom}: {mers}, {phits}".format(chrom=record.id, mers=hits, phits=partial_hits))
                     
                     coordinates = 0
                     break
