@@ -1,34 +1,39 @@
 #!/usr/bin/env python
 
-import gzip
 import sys
+import gzip
 from collections import defaultdict, deque
 from itertools import islice, tee
 from Bio import SeqIO
 
-length = 300 # How much raw sequence to display?
-parse_threshold = 100000 # How much raw sequence to parse through?
+length = 1000 # How much raw sequence to display?
+parse_threshold = 1000000 # How much raw sequence to parse through?
 
 # XXX: Do not use coordinates, but (BioPython) iterators instead (.next() and so on)
-# XXX: Use brentp's cruzdb to compare sequences side by side
-# XXX: Count/plot histogram to see TTAGGG or AATCCC pattern frequency over coordinate spans. Tweak length variable according to that metric.
+# XXX: Use brentp's cruzdb to compare sequences side by side?
+# XXX: K-mer analysis: Tweak length variable and resulting bedfile according to that metric.
 coordinates = 0
 bedfile = defaultdict(list)
 
 
 def assess_repeats(seq, start, end):
-    pattern = __get_pattern__(seq)
-    hexamers = 0
-    if pattern in window(seq):
-        hexamers = hexamers + 1
+    seq_s = str(seq).lower()
+    pattern = __get_pattern__(seq_s)
+    seq_s = seq_s[start:end]
+    
+    hits = 0
 
-    return hexamers
-
+    for kmer in window(seq_s, len(pattern)):
+        kmer_s = ''.join(kmer)
+        if pattern in kmer_s:
+            hits = hits + 1
+    
+    return hits, pattern
 
 # Borrowed from telomerecat's logic:
 # https://github.com/jhrf/telomerecat/blob/884c7f830eb2639155113df2c6a7ea4f1154b5fc/telomerecat/telbam2length.py
 def __get_pattern__(seq):
-    cta, tag = "CCCTAA", "TTAGGG"
+    cta, tag = "ccctaa", "ttaggg"
     pattern = None
     if cta in seq or tag in seq:
         if seq.count(cta) > seq.count(tag):
@@ -50,8 +55,7 @@ def consume(iterator, n):
 def window(iterable, n=6):
     "s -> (s0, ...,s(n-1)), (s1, ...,sn), (s2, ..., s(n+1)), ..."
     iters = tee(iterable, n)
-    # Could use enumerate(islice(iters, 1, None), 1) to avoid consume(it, 0), but that's
-    # slower for larger window sizes, while saving only small fixed "noop" cost
+
     for i, it in enumerate(iters):
         consume(it, i)
     return zip(*iters)
@@ -62,7 +66,8 @@ with gzip.open("data/hg38.fa.gz", "rt") as hg38_fa:
         chrom_length = len(record.seq)
         if "_" not in record.id: #avoid extra assemblies
             seq = record.seq
-#            for char in seq[:parse_threshold]:
+
+#XXX: Remove code duplication here
             for char in seq:
                 coordinates = coordinates + 1
                 if(char == 'N'):
@@ -72,11 +77,12 @@ with gzip.open("data/hg38.fa.gz", "rt") as hg38_fa:
                     end = coordinates+length
                     
                     bedfile[record.id].append(start)
-                    hexa = assess_repeats(seq, start, end)
+                    hits, pattern = assess_repeats(seq, start, end)
                     
                     print("Forward: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(chrom=record.id, pos=start, chr_length=chrom_length))
                     print("Sequenc: {seq}".format(seq=seq[start:end]))
-                    print("HexCnt : {mers}".format(mers=hexa))
+                    print("Telpatt: {patt}".format(patt=pattern))
+                    print("HexCnt : {mers}".format(mers=hits))
 
                     coordinates = 0
                     break
@@ -91,15 +97,15 @@ with gzip.open("data/hg38.fa.gz", "rt") as hg38_fa:
                     end = chrom_length-coordinates
 
                     bedfile[record.id].append(start)
-                    hexa = assess_repeats(seq, start, end)
+                    hits, pattern = assess_repeats(seq, start, end)
                     
                     print("Reverse: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(chrom=record.id, pos=chrom_length-coordinates, chr_length=chrom_length))
                     print("Sequenc: {seq}".format(seq=seq[start:end]))
-                    print("HexCnt : {mers}".format(mers=hexa))
+                    print("Telpatt: {patt}".format(patt=pattern))
+                    print("HexCnt : {mers}".format(mers=hits))
                     
                     coordinates = 0
                     break
-
 
 print(bedfile)
 for k, v in bedfile.items():
