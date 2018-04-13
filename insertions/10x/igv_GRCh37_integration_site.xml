@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Session genome="b37" hasGeneTrack="true" hasSequenceTrack="true" locus="8:128302800-128322000" path="/Users/vsaveliev/git/umccr/10x/insertions/10x/igv_GRCh37_integration_site.xml" version="8">
+    <Resources>
+        <Resource path="/Users/vsaveliev/git/umccr/10x/insertions/assemble/diploid/diploid_tumor-chr8_HPV18.bam"/>
+        <Resource path="/Users/vsaveliev/git/umccr/10x/insertions/10x/NeverResponder10x_EMA-chr8_HPV18.bam"/>
+    </Resources>
+    <Panel height="1243" name="Panel1523323634567" width="3823">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;3056.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/insertions/10x/NeverResponder10x_EMA-chr8_HPV18.bam_coverage" name="NeverResponder10x_EMA-chr8_HPV18.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="3419.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="60" id="/Users/vsaveliev/git/umccr/10x/insertions/10x/NeverResponder10x_EMA-chr8_HPV18.bam_junctions" name="NeverResponder10x_EMA-chr8_HPV18.bam Junctions" sortable="false" visible="false" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="60.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="SQUISHED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/insertions/10x/NeverResponder10x_EMA-chr8_HPV18.bam" name="NeverResponder10x_EMA-chr8_HPV18.bam" sortable="true" visible="true">
+            <RenderOptions colorByTag="BX" colorOption="TAG" linkedReads="false"/>
+        </Track>
+    </Panel>
+    <Panel height="1372" name="Panel1523323787564" width="3823">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;7021.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/insertions/assemble/diploid/diploid_tumor-chr8_HPV18.bam_coverage" name="diploid_tumor-chr8_HPV18.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="7021.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="60" id="/Users/vsaveliev/git/umccr/10x/insertions/assemble/diploid/diploid_tumor-chr8_HPV18.bam_junctions" name="diploid_tumor-chr8_HPV18.bam Junctions" sortable="false" visible="false" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="60.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="SQUISHED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/insertions/assemble/diploid/diploid_tumor-chr8_HPV18.bam" name="diploid_tumor-chr8_HPV18.bam" sortable="true" visible="true">
+            <RenderOptions/>
+        </Track>
+    </Panel>
+    <Panel height="170" name="FeaturePanel" width="3823">
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="Reference sequence" name="Reference sequence" sortable="false" visible="true"/>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" colorScale="ContinuousColorScale;0.0;368.0;255,255,255;0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="35" id="b37_genes" name="Gene" renderer="BASIC_FEATURE" sortable="false" visible="true" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="368.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+    </Panel>
+    <PanelLayout dividerFractions="0.003115264797507788,0.48598130841121495,0.9091381100726895"/>
+    <HiddenAttributes>
+        <Attribute name="DATA FILE"/>
+        <Attribute name="DATA TYPE"/>
+        <Attribute name="NAME"/>
+    </HiddenAttributes>
+</Session>

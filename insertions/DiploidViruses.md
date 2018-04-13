@@ -1,6 +1,6 @@
 # Oncoviruses in DiploidNeverResponder
 
-Some insertions in human samples cannot be reconstructed by human genome alignment because they have an external origin, for example [oncoviruses](https://en.wikipedia.org/wiki/Oncovirus) that got integrated into a human genome. Here, we explore such novel insertions in a [DiploidNeverResponder](https://trello.com/c/4gdQ4Tmi/65-diploid-never-responder) sample sequenced in UMCCR, and see if we can reconstruct their sequences and locate their integration sites. Authors: Vlad Saveliev and Arthur Hsu.
+Some insertions in human samples cannot be reconstructed by the read alignment to human genome reference, because they have an external origin. For example, [oncoviruses](https://en.wikipedia.org/wiki/Oncovirus) that often cause malignancies by integrating into a human genome. Here, we explore such novel insertions in a [DiploidNeverResponder](https://trello.com/c/4gdQ4Tmi/65-diploid-never-responder) sample sequenced in UMCCR, and see if we can reconstruct their sequences and locate their integration sites. Authors: Vlad Saveliev and Arthur Hsu.
 
 ### Contents
 
@@ -11,6 +11,9 @@ Some insertions in human samples cannot be reconstructed by human genome alignme
 * [De-novo assembling HPV18](#de-novo-assembling-hpv18-region)
 * [Looking for integration sites](#looking-for-integration-sites)
 * [chr8 integration site](#chr8-integration-site)
+  + [Host genes](#host-genes)
+  + [HPV oncogenes](#hpv-oncogenes)
+* [10x COLO829](#10x-colo829)
 
 ## Extracting unmapped reads
 
@@ -95,21 +98,21 @@ bwa mem -t 10 /g/data3/gx8/extras/vlad/bcbio/genomes/Hsapiens/GRCh37/viral/gdc-v
 [main] Real time: 38.855 sec; CPU: 333.034 sec
 [V] wrote 3666269 alignments
 
-samtools idxstats viral_mapping/diploid_tumor_viral.bam | awk 'BEGIN {OFS="\t"} {print $1, $2, $3, ($2 != 0) ? $3/$2 : 0 }' | sort -nr -k4,4 | head | cols
+samtools idxstats viral_mapping/diploid_tumor_viral.bam | awk 'BEGIN {OFS="\t"} {print $1, $2, $3, ($2 != 0) ? $3/$2*150 : 0 }' | sort -nr -k4,4 | head | cols
 
-name     len  mapped  coverage           normilize by dividing by 1173944366/1000000000 = 1.174 billion reads in genome
-HPV18    7857  151264  19.2521           16.3987223169
-HCV-2    9711   12828  1.32098
-HPV71    8037    2661  0.331094
-HCV-1    9646    2862  0.296703
-HPV82    7870     242  0.0307497
-HPV19    7685     212  0.0275862
-HPV21    7779      59  0.00758452
-HPV20    7757      37  0.00476989
-HPV25    7713      34  0.00440814
+name      len  mapped  coverage  normalize by dividing by 1173944366/1000000000 = 1.174 billion reads in genome
+HPV18    7857  151264  2888      2460
+HCV-2    9711   12828   198       169
+HPV71    8037    2661    49.6
+HCV-1    9646    2862    44.5
+HPV82    7870     242     4.6
+HPV19    7685     212     4.1
+HPV21    7779      59     1.1
+HPV20    7757      37     0.7
+HPV25    7713      34     0.7
 ```
 
-Aligning to HPV18 only to make sure none of the related virus didn't hijacked any reads:
+HPV18 has an extremely high coveage. Aligning to HPV18 only to make sure none of the related virus didn't hijacked any reads:
 
 ```
 samtools faidx /g/data3/gx8/extras/vlad/bcbio/genomes/Hsapiens/GRCh37/viral/gdc-viral.fa HPV18 > viral_mapping/HPV18.fa
@@ -117,11 +120,11 @@ bwa index viral_mapping/HPV18.fa
 
 bwa mem -t 10 viral_mapping/HPV18.fa diploid_tumor.R1.fq diploid_tumor.R2.fq | bamsort inputthreads=10 outputthreads=10 inputformat=sam index=1 indexfilename=viral_mapping/to_HPV18.bam.bai O=viral_mapping/to_HPV18.bam
 
-samtools idxstats viral_mapping/to_HPV18.bam | awk 'BEGIN {OFS="\t"} {print $1, $2, $3, ($2 != 0) ? $3/$2 : 0 }'
-# HPV18   7857    151271  19.253
+samtools idxstats viral_mapping/to_HPV18.bam | awk 'BEGIN {OFS="\t"} {print $1, $2, $3, ($2 != 0) ? $3/$2*150 : 0 }'
+# HPV18   7857    151271  2888
 ```
 
-Getting same 19x coverage, which is a very strong evidence.
+Getting same coverage.
 
 ## De-novo assembling HPV18 region
 
@@ -190,7 +193,7 @@ The leftmost purple reads mates are mapping mapping to 8:128,303,800-128,304,900
 
 ![igv](assemble/diploid/img/igv_spike_integration_site_chr8_leftmost.png)
 
-The second purple pile in the beginning of NODE_3 has its mates mapping 16kb apart - to 8:128,319,000-128,321,00:
+The second purple pile in the beginning of NODE_3 has its mates mapping 16kb apart - to 8:128,319,000-128,321,000:
 
 ![igv](assemble/diploid/img/igv_spike_integration_site_chr8_right_1.png)
 
@@ -213,7 +216,7 @@ It would be interesting to repeat the whole experiment with hg38.
 The read orientations spanning the breakpoints suggest a quite complex event rather than a simple insertion of the virus. Exploring the full 16kb GRCh37 region covering all of 3 breakpoints:
 
 ```
-~/bin/sambamba slice 8:128318910-128321289 diploid_tumor-ready.bam > diploid_tumor-chr8_HPV18.bam
+~/bin/sambamba slice diploid_tumor-ready.bam 8:128302800-128322000 > diploid_tumor-chr8_HPV18.bam
 ```
 
 ![igv](assemble/diploid/img/igv_GRCh37_full_region.png)
@@ -228,20 +231,55 @@ That suggests that the virus and created a loop by attaching to the leftmost and
 
 ![igv](assemble/diploid/img/HPV_loop_from_paper.png)
 
-(Image from [Corden et all](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC395710/pdf/520275.pdf))
+(Image from [Akagi et all](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3912410))
 
-In our case, the integration events might have led to the following sequence (regions A, B, C, D are parts of the human reference 0 according to the IGV screenshot in the beginning of the section; NODE_1, NODE_2, NODE_3, NODE_4 are viral contigs according the earlier sections): 
+In our case, the integration events might have led to the following sequence (regions A, B, C, D are parts of the human reference according to the IGV screenshot in the beginning of the section; NODE_1, NODE_2, NODE_3, NODE_4 are viral contigs according the earlier sections): 
 
-A - B - C - (NODE_4-NODE_3-NODE-2 - B - C)*10 - NODE_4-NODE_3 - C - D
+```
+A - B - C - (NODE_4-NODE_3-NODE-2 - B - C)*N - NODE_4-NODE_3 - C - D
+```
 
-The integration site overlaps long non-coding RNA genes CASC21 (Cancer Susceptibility 21, CARLo-2) and CASC8 (Cancer Susceptibility 8, CARLo-1) in their introns. Both genes are associated with cancer, and located in a region 8q24.21 nearby the oncogene MYC.
+Where N is around 10.
 
-8q24.21 is well known as HPV integration site hotspot: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4695887/, https://www.ncbi.nlm.nih.gov/pubmed/1649348/: "We have determined the chromosomal localization of integrated HPV type 16 (HPV-16) or HPV-18 genomes in genital cancers... In three cancers, HPV sequences were localized in chromosome band 8q24.1, in which the c-myc gene is mapped... In three of the four cases, the proto-oncogene located near integrated viral sequences was found to be structurally altered and/or overexpressed. These data indicate that HPV genomes are preferentially integrated near myc genes in invasive genital cancers and support the hypothesis that integration plays a part in tumor progression via an activation of cellular oncogenes.", also https://www.nature.com/articles/1207006: "RS–PCR of HPV18-positive tumors revealed a single large cluster at 8q24."
+### Host genes
 
+The integration site overlaps long non-coding RNA genes CASC21 (Cancer Susceptibility 21, CARLo-2) and CASC8 (Cancer Susceptibility 8, CARLo-1) in their introns. Both genes are associated with cancer, and located in a region 8q24.21 nearby the oncogene MYC, which is amplified in this sample.
 
-## 10x
+8q24.21 is [well known](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4695887) as HPV integration site hotspot: [](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4695887)
 
-Raw FastQ data on Spartan:
+["In genital cancers, HPV sequences were localized in chromosome band 8q24.1, in which the c-myc gene is mapped... In three of the four cases, the proto-oncogene located near integrated viral sequences was found to be structurally altered and/or overexpressed. These data indicate that HPV genomes are preferentially integrated near myc genes in invasive genital cancers and support the hypothesis that integration plays a part in tumor progression via an activation of cellular oncogenes."](https://www.ncbi.nlm.nih.gov/pubmed/1649348/)
+
+["RS–PCR of HPV18-positive tumors revealed a single large cluster at 8q24."](https://www.nature.com/articles/1207006)
+
+The patient is confirmed to have cervical cancer, which are [nearly always caused by HPV16 and HPV18](http://www.who.int/mediacentre/factsheets/fs380/en/). We as well observe MYC amplification in this sample. 
+
+### HPV oncogenes
+
+HPV contains two oncogenes E6 and E7:
+
+["The transforming ability of oncogenic HPV types has been attributed to two viral oncoproteins, E6 and E7, which inactivate p53 and members of the pRb family" and "HPV integrants in cervical cancers have been statistically associated with regional structural abnormalities, but the relationship of the virus to such variants, their detailed genomic structures, and their functional significance remain largely unknown."](](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3912410)). 
+
+["The E6/E7 proteins inactivate two tumor suppressor proteins, p53 (inactivated by E6) and pRb (inactivated by E7)."](https://en.wikipedia.org/wiki/Human_papillomavirus_infection)
+
+E2 regulates E6 and E7, however the viral integration usually disrupts it:
+
+["Viral early transcription subjects to viral E2 regulation and high E2 levels repress the transcription. HPV genomes integrate into host genome by disruption of E2 ORF, preventing E2 repression on E6 and E7. Thus, viral genome integration into host DNA genome increases E6 and E7 expression to promote cellular proliferation and the chance of malignancy. The degree to which E6 and E7 are expressed is correlated with the type of cervical lesion that can ultimately develop."](https://en.wikipedia.org/wiki/Human_papillomavirus_infection)
+
+["The viral genome is most often integrated in such a way as to disrupt the E2 gene and, thus, alleviate transcriptional repression of the early viral promoter. In turn, this causes dysregulation of the E6 and E7 oncogenes and promotes malignant progression"](https://www.researchgate.net/figure/HPV18-genome-The-circular-dsDNA-genome-of-HPV18-7-857-bp-is-shown-Viral-open-reading_fig1_236977461):
+
+![hpv_genes](assemble/diploid/img/HPV18-genome-The-circular-dsDNA-genome-of-HPV18-7-857-bp-is-shown-Viral-open-reading.png)
+
+By overlaying [HPV18 genes](https://www.ncbi.nlm.nih.gov/gene/1489088) on coverage, we can see that E6 and E7 are amplified heavily:
+
+![igv](assemble/diploid/img/HPV18_genes.png)
+
+However, the integration site doesn't disrupt E2, but it's covered in a much lower rate than the oncogenes. It would be interesting to perform and RNAseq on this sample and quantify the expression of E6, E7, E2, MYC, MYC, TP53, and RB1; additionally, MYC significantly upregulates genes with already high expression, so it would be interesting to look for overexpressed genes.
+
+More on HPV integration: [1](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC395710/pdf/520275.pdf), [2](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3912410/).
+
+## Exprerimenting with 10x
+
+We also sequenced the same sample with 10x barcoded data. Raw FastQ data on Spartan:
 
 ```
 Normal: /data/cephfs/punim0010/data/FASTQ/180312_A00130_0041_AHCLLMDMXX/Chromium_20180312/SI-GA-A11_*
@@ -259,42 +297,64 @@ Running [EMA 10x aligner](https://github.com/arshajii/ema) on Spartan
 
 ```
 sinteractive --time=80:00:00 --nodes=1 --cpus-per-task=32 -p vccc --mem=256G -J ema
+```
+
+```
 export PATH=/g/data3/gx8/extras/10x/miniconda/bin:$PATH
-```
+module load libzip/1.1.2-GCC-6.2.0
 
-```
+SAMPLE=NeverResponder10x
+
 echo 'paste <(pigz -c -d $1 | paste - - - -) <(pigz -c -d ${1/_R1_/_R2_} | paste - - - -) | tr "\\t" "\\n"' > interleave_fq.sh
+
+mkdir ref
+cd ref
+ln -s /data/cephfs/punim0010/extras/vlad/bcbio/genomes/Hsapiens/GRCh37/seq/* .
+ln -s /data/cephfs/punim0010/extras/vlad/bcbio/genomes/Hsapiens/GRCh37/bwa/* .
+cd ..
+
+time parallel -j32 "bash interleave_fq.sh {} | ema count -w 4M-with-alts-february-2016.txt -o {/.} 2>{/.}.log" ::: /data/cephfs/punim0010/data/FASTQ/180312_A00130_0041_AHCLLMDMXX/Chromium_20180312/SI-GA-A12_*/*_R1_*.gz
+# Mon 9 14:57:48 - Mon 9 15:09:04 = 11m
+
+time ls /data/cephfs/punim0010/data/FASTQ/180312_A00130_0041_AHCLLMDMXX/Chromium_20180312/SI-GA-A12_*/*_R1_*.gz | xargs -I '{}' bash interleave_fq.sh '{}' | ema preproc -w 4M-with-alts-february-2016.txt -n 500 -t 32 -o ema_work *.ema-ncnt 2>&1 | tee ema_preproc.log
+# Mon 9 15:19:50 - Mon 9 16:03:05 = 53m
+
+time parallel -j8 "ema align -R $'@RG\tID:${SAMPLE}_EMA\tSM:${SAMPLE}_EMA' -t 4 -d -r ref/GRCh37.fa -s {} | samtools sort -@ 4 -O bam -l 0 -m 4G -o {}.bam -" ::: ema_work/ema-bin-???
+# Mon 9 16:13:39 - Tue 10 4:54:22 = 12h40m
+
+bwa mem -p -t 32 -M -R "@RG\tID:${SAMPLE}_EMA\tSM:${SAMPLE}_EMA" ref/GRCh37.fa ema_work/ema-nobc |\
+  samtools sort -@ 4 -O bam -l 0 -m 4G -o ema_work/ema-nobc.bam
+# Tue 10 4:54:22 - Tue 10 5:42:04 = 48m
+
+time sambamba markdup -t 32 -p -l 0 ema_work/ema-nobc.bam ema_work/ema-nobc-dupsmarked.bam && rm ema_work/ema-nobc.bam
+# Tue 10 5:42:04 - Tue 10 5:45:42 = 4m
+
+time sambamba merge -t 32 -p ${SAMPLE}_EMA.bam ema_work/*.bam
+# Tue 10 5:45:43 - Tue 10 6:47:31 = 1h2m
+
+time samtools stats -@ 32 ${SAMPLE}_EMA.bam > ${SAMPLE}_EMA.stats.txt
+# Tue 10 6:47:31 - Tue 10 7:41:39 = 4m
 ```
 
+(It took around 15h50m to process the tumor BAM. Also for the normal match, it took 16h31m).
+
+Extracting the HPV18 integration site
+
 ```
-SAMPLE=
-
-date
-parallel -j32 "bash interleave_fq.sh {} | ema count -w 4M-with-alts-february-2016.txt -o {/.} 2>{/.}.log" ::: ori_fq/*_R1_*.gz
-
-date
-ls ori_fq/*R1*.gz | xargs -I '{}' bash interleave_fq.sh '{}' | ema preproc -w 4M-with-alts-february-2016.txt -n 500 -t 32 -o ema_work *.ema-ncnt 2>&1 | tee ema_preproc.log
-
-date
-parallel -j8 "ema align -R $'@RG\tID:${SAMPLE}_EMA\tSM:${SAMPLE}_EMA' -t 4 -d -r ref/GRCh37.fa -s {} | samtools sort -@ 4 -O bam -l 0 -m 4G -o {}.bam -" ::: ema_work/ema-bin-???
-
-date
-bwa mem -p -t 32 -M -R "@RG\tID:${SAMPLE}_EMA\tSM:${SAMPLE}_EMA" ref/GRCh37.fa ema_work/ema-bin-nobc |\
-  samtools sort -@ 4 -O bam -l 0 -m 4G -o ema_work/ema-bin-nobc.bam
-
-date
-sambamba markdup -t 32 -p -l 0 ema_work/ema-bin-nobc.bam ema_work/ema-bin-nobc-dupsmarked.bam && rm ema_work/ema-bin-nobc.bam
-
-date
-sambamba merge -t 32 -p ${SAMPLE}_EMA.bam ema_work/*.bam
-
-date
-samtools stats -@ 32 ${SAMPLE}_EMA.bam > ${SAMPLE}_EMA.stats.txt
-
-date
+~/bin/sambamba slice NeverResponder10x_EMA.bam 8:128302800-128322000 > NeverResponder10x_EMA-chr8_HPV18.bam
 ```
 
+![igv](10x/igv_vs_old.png)
 
+This data looks much more noisy. Remapping same data using BWA to see if has to do with EMA.
+
+
+
+## 10x COLO829
+
+In [this document](README.md), we are trying a different BX tag based approach to explore unmapped reads in 10x data.
+
+Here, we try the same approach we used for the NeverResponder, but for COLO829.
 
 
 
@@ -319,20 +379,6 @@ Not clear about this one.
 #### Expreriment with 10x data
 
 In [this document](README.md), we are experimenting with an external 10x dataset NA12878 and an internally sequences COLO829.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

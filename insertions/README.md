@@ -141,7 +141,7 @@ GTTGCAACAGATCTGT-1  5943              19.60% 15.01%               273  329  60
 
 For each tag, we extract mapped reads with unmapped mates:
 
-```python
+```
 !cd /data/cephfs/punim0010/projects/Saveliev_10X/COLO829-10x/insertions/unmapped_or_mate_is_unmapped/split_by_bx/
 
 for tag in df.index:
@@ -225,11 +225,14 @@ For comparison, this is how a regular region looks:
 
 ## Trying de novo assembly of unmapped reads with Supernova
 
-Extract reads:
+Extracting reads. Making sure to name-sort the BAM file before converting it to FASTQ.
 
 ```
-bedtools bamtofastq -i COLO829-10x.bam -fq COLO829-10x_S1_L001_R1_001.fastq -fq2 COLO829-10x_S1_L001_R2_001.fastq 2>COLO829-10x.unpaired
-bedtools bamtofastq -i NA12878_WGS.bam -fq NA12878_WGS_S1_L001_R1_001.fastq -fq2 NA12878_WGS_S1_L001_R2_001.fastq 2>NA12878_WGS.unpaired
+samtools sort -n COLO829-10x.bam -O bam -o COLO829-10x.namesorted.bam
+samtools sort -n NA12878_WGS.bam -O bam -o NA12878_WGS.namesorted.bam
+
+bedtools bamtofastq -i COLO829-10x.namesorted.bam -fq COLO829-10x_S1_L001_R1_001.fastq -fq2 COLO829-10x_S1_L001_R2_001.fastq 2>COLO829-10x.unpaired
+bedtools bamtofastq -i NA12878_WGS.namesorted.bam -fq NA12878_WGS_S1_L001_R1_001.fastq -fq2 NA12878_WGS_S1_L001_R2_001.fastq 2>NA12878_WGS.unpaired
 ```
 
 Try assemble with supernova:
@@ -257,36 +260,26 @@ Searching viral sequences using 3 different approaches.
 
 ```
 mash sketch /g/data3/gx8/extras/vlad/bcbio/genomes/Hsapiens/GRCh37/viral/gdc-viral.fa -i -o mash/gdc-viral
-mash screen gdc-viral.msh ../NA12878_WGS.merged.fq > screen_gdc.tab
+mash screen gdc-viral.msh ../NA12878_WGS_S1_L001_R1_001.fastq ../NA12878_WGS_S1_L001_R2_001.fastq > screen_gdc.tab
 sort -gr screen_gdc.tab | head
-0.833811        22/1000 2       2.09944e-33     HPV20
-0.828011        19/1000 4       7.40488e-28     HPV6
-0.821262        16/1000 3       1.62953e-22     HPV83
-0.816057        14/1000 6       4.38911e-19     HPV114
-0.816057        14/1000 4       4.38911e-19     HPV19
-0.816057        14/1000 3       4.38911e-19     HPV77
-0.816057        14/1000 1       4.38911e-19     HPV87
-0.813182        13/1000 1       2.05593e-17     HPV29
-0.810088        12/1000 49      8.93544e-16     HPV12
-0.810088        12/1000 2       8.93544e-16     HPV71
 ```
 
 Also against RefSeq:
 
 ```
-mash screen refseq.genomes.k21s1000.msh ../NA12878_WGS.merged.fq > screen_refseq.tab
+mash screen refseq.genomes.k21s1000.msh ../NA12878_WGS_S1_L001_R1_001.fastq ../NA12878_WGS_S1_L001_R2_001.fastq > screen_refseq.tab
 ```
 
-- Kraken against minikraken (http://ccb.jhu.edu/software/kraken/MANUAL.html)
+- Kraken against the minikraken database (http://ccb.jhu.edu/software/kraken/MANUAL.html)
 
 ```
-kraken --preload --db /g/data3/gx8/extras/kraken/minikraken_20171019_8GB --fastq-input fastq/NA12878_WGS.R1.fq --threads 9 --out kraken/kraken_out --min-hits 2 --quick
+kraken --preload --db /g/data3/gx8/extras/kraken/minikraken_20171019_8GB --fastq-input NA12878_WGS_S1_L001_R1_001.fastq --threads 9 --out kraken/kraken_out --min-hits 2 --quick
 ```
 
 - Align against the viral database:
 
 ```
-bwa mem -t 9 /g/data3/gx8/extras/vlad/bcbio/genomes/Hsapiens/GRCh37/viral/gdc-viral.fa NA12878_WGS.R1.fq NA12878_WGS.R2.fq | bamsort inputthreads=9 outputthreads=9 inputformat=sam index=1 indexfilename=viral_mapping/NA12878_viral.bam.bai O=viral_mapping/NA12878_viral.bam
+bwa mem -t 9 /g/data3/gx8/extras/vlad/bcbio/genomes/Hsapiens/GRCh37/viral/gdc-viral.fa ../NA12878_WGS_S1_L001_R1_001.fastq ../NA12878_WGS_S1_L001_R2_001.fastq | bamsort inputthreads=9 outputthreads=9 inputformat=sam index=1 indexfilename=viral_mapping/NA12878_viral.bam.bai O=viral_mapping/NA12878_viral.bam
 # Real time: 180.500 sec; CPU: 1553.289 sec
 
 samtools idxstats viral_mapping/NA12878_viral.bam | py -x "'\t'.join([x.split()[0], x.split()[1], x.split()[2], str(int(x.split()[2]) / int(x.split()[1]))]) if int(x.split()[1]) > 0 else None" | sort -nr -k4,4 | head | cols
