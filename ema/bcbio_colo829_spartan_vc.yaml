@@ -1,5 +1,3 @@
-# LongRanger
-
 details:
   - analysis: variant2
     algorithm:
@@ -12,14 +10,16 @@ details:
         tools_on: [gatk4, noalt_calling]
         tools_off: [gemini, upload_alignment]
         # Variant calling, 2-out-of-3. All callers handle InDels
-        variantcaller: [vardict, strelka2, mutect2]
+        variantcaller:
+            germline: [vardict, strelka2, gatk-haplotype]
+            somatic: [vardict, strelka2, mutect2]
         ensemble:
             numpass: 2
-    description: 10X-COLO829  # RG:10X-COLO829
-    files: /data/cephfs/punim0010/projects/Saveliev_10X/COLO829-10x/bams/Colo829_10x_80pc_LongRanger.bam
-    genome_build: hg19
+    description: Colo829_10x_80pc_LR  # RG:Colo829_10x_80pc_LR
+    files: /data/cephfs/punim0010/projects/Saveliev_10X/COLO829-10x/bams/Colo829_10x_80pc_LR.bam
+    genome_build: GRCh37
     metadata:
-        batch: Colo829_10x_80pc_LongRanger
+        batch: Colo829_10x_80pc_LR_batch
         phenotype: tumor
 
   - analysis: variant2
@@ -33,23 +33,18 @@ details:
         tools_on: [gatk4, noalt_calling]
         tools_off: [gemini, upload_alignment]
         # Variant calling, 2-out-of-3. All callers handle InDels
-        variantcaller: [vardict, strelka2, mutect2]
+        variantcaller:
+            germline: [vardict, strelka2, gatk-haplotype]
+            somatic: [vardict, strelka2, mutect2]
         ensemble:
             numpass: 2
-    description: 10X-COLO829Bl  # RG:10X-COLO829Bl
-    files: /data/cephfs/punim0010/projects/Saveliev_10X/COLO829-10x/bams/Colo829Bl_10x_80pc_LongRanger.bam
-    genome_build: hg19
+    description: Colo829Bl_10x_LR # RG:Colo829Bl_10x_LR
+    files: /data/cephfs/punim0010/projects/Saveliev_10X/COLO829-10x/bams/Colo829Bl_10x_80pc_LR.bam
+    genome_build: GRCh37
     metadata:
-        batch: Colo829_10x_80pc_LongRanger
+        batch: Colo829_10x_80pc_LR_batch
         phenotype: normal
 
-upload:
-  dir: ../final
-
-
-# EMA
-
-details:
   - analysis: variant2
     algorithm:
         aligner: none
@@ -61,14 +56,16 @@ details:
         tools_on: [gatk4, noalt_calling]
         tools_off: [gemini, upload_alignment]
         # Variant calling, 2-out-of-3. All callers handle InDels
-        variantcaller: [vardict, strelka2, mutect2]
+        variantcaller:
+            germline: [vardict, strelka2, gatk-haplotype]
+            somatic: [vardict, strelka2, mutect2]
         ensemble:
             numpass: 2
     description: Colo829_80pc_EMA
     files: /data/cephfs/punim0010/projects/Saveliev_10X/COLO829-10x/bams/Colo829_10x_80pc_EMA.bam
     genome_build: GRCh37
     metadata:
-        batch: Colo829_10x_80pc_EMA
+        batch: Colo829_10x_80pc_EMA_batch
         phenotype: tumor
 
   - analysis: variant2
@@ -82,14 +79,16 @@ details:
         tools_on: [gatk4, noalt_calling]
         tools_off: [gemini, upload_alignment]
         # Variant calling, 2-out-of-3. All callers handle InDels
-        variantcaller: [vardict, strelka2, mutect2]
+        variantcaller:
+            germline: [vardict, strelka2, gatk-haplotype]
+            somatic: [vardict, strelka2, mutect2]
         ensemble:
             numpass: 2
     description: Colo829Bl_10x_80pc_EMA
     files: /data/cephfs/punim0010/projects/Saveliev_10X/COLO829-10x/bams/Colo829Bl_10x_80pc_EMA.bam
     genome_build: GRCh37
     metadata:
-        batch: Colo829_10x_80pc_EMA
+        batch: Colo829_10x_80pc_EMA_batch
         phenotype: normal
 
 upload:

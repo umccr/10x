@@ -277,11 +277,11 @@ date
 parallel -j8 "ema align -R $'@RG\tID:${SAMPLE}_EMA\tSM:${SAMPLE}_EMA' -t 4 -d -r ref/GRCh37.fa -s {} | samtools sort -@ 4 -O bam -l 0 -m 4G -o {}.bam -" ::: ema_work/ema-bin-???
 
 date
-bwa mem -p -t 32 -M -R "@RG\tID:${SAMPLE}_EMA\tSM:${SAMPLE}_EMA" ref/GRCh37.fa ema_work/ema-bin-nobc |\
-  samtools sort -@ 4 -O bam -l 0 -m 4G -o ema_work/ema-bin-nobc.bam
+bwa mem -p -t 32 -M -R "@RG\tID:${SAMPLE}_EMA\tSM:${SAMPLE}_EMA" ref/GRCh37.fa ema_work/ema-nobc |\
+  samtools sort -@ 4 -O bam -l 0 -m 4G -o ema_work/ema-nobc.bam
 
 date
-sambamba markdup -t 32 -p -l 0 ema_work/ema-bin-nobc.bam ema_work/ema-bin-nobc-dupsmarked.bam && rm ema_work/ema-bin-nobc.bam
+sambamba markdup -t 32 -p -l 0 ema_work/ema-nobc.bam ema_work/ema-bin-nobc-dupsmarked.bam && rm ema_work/ema-nobc.bam
 
 date
 sambamba merge -t 32 -p ${SAMPLE}_EMA.bam ema_work/*.bam

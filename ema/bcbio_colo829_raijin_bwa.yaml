@@ -7,23 +7,48 @@ details:
         mark_duplicates: true
         remove_lcr: false
         maxcov_downsample: false
-        coverage: /g/data/gx8/extras/2018-02-16_PMCC_Panel_Regions.bed
-        tools_on: [gatk4, qualimap_full, noalt_calling]
-        tools_off: [gemini, upload_alignment]
-        # Variant calling, 2-out-of-3. All callers handle InDels
-        variantcaller: [vardict, strelka2, gatk-haplotype]
+        tools_on: [gatk4, noalt_calling]
+        tools_off: [gemini]
+        variantcaller:
+            germline: [vardict, strelka2, gatk-haplotype]
+            somatic: [vardict, strelka2, mutect2]
         ensemble:
             numpass: 2
-    description: Colo829_80pc_BWA
-    files: /g/data3/gx8/projects/Saveliev_10X/COLO829-10x/bams/Colo829_80pc_LongRanger.bam
+    description: Colo829_10x_80pc_BWA
+    files: /g/data3/gx8/projects/Saveliev_10X/COLO829-10x/ema/Colo829_80pc_EMA.bam
     genome_build: GRCh37
-    # metadata:
-    #     batch: Colo829_80pc_BWA_batch
-    #     phenotype: tumor
+    metadata:
+        batch: Colo829_10x_80pc_BWA_batch
+        phenotype: tumor
+
+  - analysis: variant2
+    algorithm:
+        aligner: bwa
+        recalibrate: false
+        realign: false
+        mark_duplicates: true
+        remove_lcr: false
+        maxcov_downsample: false
+        tools_on: [gatk4, noalt_calling]
+        tools_off: [gemini]
+        variantcaller:
+            germline: [vardict, strelka2, gatk-haplotype]
+            somatic: [vardict, strelka2, mutect2]
+        ensemble:
+            numpass: 2
+    description: Colo829Bl_10x_80pc_BWA
+    files: /g/data3/gx8/projects/Saveliev_10X/COLO829-10x/ema_normal/Colo829Bl_10x_80pc_EMA.bam
+    genome_build: GRCh37
+    metadata:
+        batch: Colo829_10x_80pc_BWA_batch
+        phenotype: normal
 
 upload:
   dir: ../final
 
+
+
+quast.py
 
 
 seq        len   reads
@@ -87,6 +112,153 @@ A00130:39:H5GWHDMXX:1:1235:11026:33739  137     chr4    49275711        24      
 
 
 
+
+
+Iterate over reads
+
+00130:39:H5GWHDMXX:1:2131:22046:27242  99      HPV71   94      51      23M104S =       96      23      
+ACAAAGCAATGCTTGGTTCAGCAATGCTCCATCGAGCAATGCTTGCGATAGCAATGCTCAGTGTAGCAATGCTAGCTTGAGCAATGCTCCACAAAGCACTGCTTGGTTCAGCAATGCTCCATCGAGC 
+FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF,FFF:FFFFFFFFFFFFFF,FFFFFFFFFFFFFF,FFFFFFF,FFFFFFFFFFFFFFF:,FFF 
+NM:i:1  MD:Z:1T21       MC:Z:94S21M36S  AS:i:21 XS:i:0
+
+A00130:39:H5GWHDMXX:1:2131:22046:27242  125     *       0       0       32S19M76S       chr8    117107344       0       
+GCTCGATGGAGCATTGCTGAACCAAGCAGTGCTTTGTGGAGCATTGCTCAAGCTAGCATTGCTACACTGAGCATTGCTATCGCAAGCATTGCTCGATGGAGCATTGCTGAACCAAGCATTGCTTTGT       
+FFF,:FFFFFFFFFFFFFFF,FFFFFFF,FFFFFFFFFFFFFF,FFFFFFFFFFFFFF:FFF,FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF 
+RX:Z:AACCCTCAGCATTGCT   QX:Z:FFFFFFFFFFFFFFFF   TR:Z:CCTCGTT    TQ:Z:FF:FFFF    BC:Z:CAGTACTGQT:Z:F:FFFFFF    XS:f:-138.5     XC:Z:   AC:Z:   AS:f:-138.5     XM:A:0  AM:A:0  XT:i:0  BX:Z:AACCCTCAGCATTGCT-1 RG:Z:10X-COLO829:LibraryNotSpecified:1:unknown_fc:0
+
+A00130:39:H5GWHDMXX:1:2131:22046:27242  189     *       0       0       20M131S *       0       0       
+CCACCAAGCACTGCTTGGTTCAGCAAGGCTCCATCGAGCACTGCTGGCGAGAGCAATGCTCAGTGTAGCAATGCGAGCTTGAGCAATGCTCCACAAAGCAATGCTTGGTTCAGCAATGCTCCATCGAGCAATGCTATCGCAAGCATTGCTC       
+F:::,:FFF,,FF:FFFF,F:,F:F,,F::FF:,FFF::F,FFFF,FFFF,F:FFFF:FFF:,,:FFFF:,::F,:F:F,::FFF,FFFFFF:FFF::FFF:FFFFFFF:F:FFFF,FFFFFFFFF,FFFFFFFF:FFFF:FFFF:,FFFF 
+RX:Z:AACCCTCAGCATTGCT   QX:Z:FFFFFFFFFFFFFFFF   BC:Z:CAGTACTGQT:Z:F:FFFFFF    XS:f:-140       XC:Z:   AC:Z:   AS:f:-138.5     XM:A:0  AM:A:0  XT:i:0  SA:Z:chrX,89395382,+,54H19M78H,19,0;    BX:Z:AACCCTCAGCATTGCT-1 RG:Z:10X-COLO829:LibraryNotSpecified:1:unknown_fc:0
+
+
+
+
+
+
+
+
+
+
+
+
+Rscript -e "rmarkdown::render('/data/cephfs/punim0010/extras/umccrise/umccrise/sig.Rmd', output_file='/data/cephfs/punim0010/data/Results/Tothill-Research/final/umccrised/PRJ170036_E122-T01-D/PRJ170036_E122-T01-D-rmd_report.html', params=list(af_freqs='work/PRJ170036_E122-T01-D/rmd/afs/af_tumor.txt', af_freqs_az300='work/PRJ170036_E122-T01-D/rmd/afs/af_tumor_az300.txt', vcf_fname='work/PRJ170036_E122-T01-D/rmd/ensemble-hg19.vcf', sv_fname='PRJ170036_E122-T01-D/structural/PRJ170036_E122-T01-D-sv-prioritize-manta-pass.tsv', tumor_name='PRJ170036_E122-T01-D', sig_probs='/data/cephfs/punim0010/extras/umccrise/umccrise/rmd_files/signatures_probabilities.txt', suppressors='/data/cephfs/punim0010/extras/umccrise/umccrise/rmd_files/suppressors.txt', workdir='/data/cephfs/punim0010/data/Results/Tothill-Research/final/umccrised'))" && if [ -e /data/cephfs/punim0010/data/Results/Tothill-Research/final/umccrised/PRJ170036_E122-T01-D/PRJ170036_E122-T01-D-rmd_report.html ] ; then exit 1; fi
+
+snakemake igv --snakefile /data/cephfs/punim0010/extras/umccrise/umccrise/Snakefile --printshellcmds --directory /data/cephfs/punim0010/extras/umccrise/umccrise_test_data/results/bcbio_test_project -j 2 --config run_dir=/data/cephfs/punim0010/extras/umccrise/umccrise_test_data/data/bcbio_test_project | tee /data/cephfs/punim0010/extras/umccrise/umccrise_test_data/results/bcbio_test_project/umccrised.log
+
+
+
+Read name = A00130:36:H32JNDSXX:2:2422:21097:19742
+Read length = 151bp
+----------------------
+Mapping = Primary @ MAPQ 60
+Reference span = NODE_1_length_4594_cov_1709.398716:1-151 (+) = 151bp
+Cigar = 151M
+Clipping = None
+----------------------
+Mate is mapped = yes
+Mate start = NODE_1_length_4594_cov_1709.398716:608 (-)
+Insert size = 759
+First in pair
+Pair orientation = F1R2
+----------------------
+MC = 151M
+NM = 0
+AS = 151
+XS = 0
+Hidden tags: MD<hr>Location = NODE_1_length_4594_cov_1709.398716:62
+Base = T @ QV 37
+
+Alignment start position = NODE_1_length_4594_cov_1709.398716:1
+TTGGGGAGGGATGTGGAAAGCATAGACAGAAGGCACTGCAGAAGAGGAGAGTAAATGACTTTAGGTCATTGAACTGGTTTTTGATAGAAATCAAGTTAAGAAAAATAGAAGTCAATAGTACTAAGTTTGAACTTTATCTTTCTAAAAACTG
+
+
+Read name = A00130:36:H32JNDSXX:2:1446:9426:16971
+Read length = 151bp
+----------------------
+Mapping = Primary @ MAPQ 60
+Reference span = NODE_1_length_4594_cov_1709.398716:78-228 (+) = 151bp
+Cigar = 151M
+Clipping = None
+----------------------
+Mate is mapped = yes
+Mate start = NODE_1_length_4594_cov_1709.398716:651 (-)
+Insert size = 724
+First in pair
+Pair orientation = F1R2
+----------------------
+MC = 150M
+NM = 0
+AS = 151
+XS = 0
+Hidden tags: MDLocation = NODE_1_length_4594_cov_1709.398716:159
+Base = G @ QV 37
+
+
+
+There were 3 reruns for the project - so PCGR should be processing each sample 3 times. With UIDs 0cc2e6, 52a8c9, and eab81b :slightly_smiling_face: 
+
+
+
+
+Rscript -e "rmarkdown::render('/data/cephfs/punim0010/extras/umccrise/umccrise/sig.Rmd', output_file='$1.html', params=list(af_freqs='work/PRJ170034_E125-T01-D/rmd/afs/af_tumor.txt', af_freqs_az300='work/PRJ170034_E125-T01-D/rmd/afs/af_tumor_az300.txt', vcf_fname='work/PRJ170034_E125-T01-D/rmd/ensemble-hg19.vcf', sv_fname='PRJ170034_E125-T01-D/structural/PRJ170034_E125-T01-D-sv-prioritize-manta-pass.tsv', tumor_name='PRJ170034_E125-T01-D', sig_probs='/data/cephfs/punim0010/extras/umccrise/umccrise/rmd_files/signatures_probabilities.txt', suppressors='/data/cephfs/punim0010/extras/umccrise/umccrise/rmd_files/suppressors.txt', workdir='/data/cephfs/punim0010/data/Results/Tothill-Research/final/umccrised'))"
+
+parallel  ::: 1 2 3
+
+
+seq 1 16 | parallel -j 16 "source tmp.sh {}"
+
+seq 1 16 | parallel -j 16 "source tmp.sh {}"
+seq 1 16 | parallel -j 16 "echp
+
+
+
+
+
+
+snakemake  --snakefile /data/cephfs/punim0010/extras/umccrise/umccrise/Snakefile --printshellcmds --directory /data/cephfs/punim0010/extras/umccrise/umccrise_test_data/results/bcbio_test_project -j 1 --config run_dir=/data/cephfs/punim0010/extras/umccrise/umccrise_test_data/data/bcbio_test_project unique_id="XXXXXX" pcgr_download=yes
+
+
+
+
+
+
+aws s3 ls s3://pcgr/cup_tissue-XXXXXX-normal.tar.gz && echo "Tarball already uploaded, or cannot access the bucket"; touch cup_tissue/pcgr/input/upload-normal.done || echo export HTTPS_PROXY=http://wwwproxy.unimelb.edu.au:8000; aws s3 cp cup_tissue/pcgr/input/cup_tissue-XXXXXX-normal.tar.gz s3://pcgr && touch cup_tissue/pcgr/input/upload-normal.done
+
+
+snakemake  --snakefile /data/cephfs/punim0010/extras/umccrise/umccrise/Snakefile --printshellcmds --directory /data/cephfs/punim0010/extras/umccrise/umccrise_test_data/results/bcbio_test_project -j 2 --config run_dir=/data/cephfs/punim0010/extras/umccrise/umccrise_test_data/data/bcbio_test_project
+
+
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170029_E120-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170031_E121-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170033_E123-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170035_E125-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170038_E122-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170040_E019-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170158_E143-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170160_E133-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170162_E141-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170164_E130-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170166_E140-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170168_E164-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170170_E146-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170172_E144-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170174_E156-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170176_E158-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170178_E162-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170180_E134-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170182_E142-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170184_E165-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170186_E163-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170188_E168-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170191_E159-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ170193_E124-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ180003_E169-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ180005_E129-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ180007_E170-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ180010_E153-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ180012_E131-B01-D-ensemble-annotated.vcf.gz
+/data/cephfs/punim0010/data/Results/Tothill-Research/final/2018-04-01_a5-merged/PRJ180014_E155-B01-D-ensemble-annotated.vcf.gz
 
 
 
