@@ -8,18 +8,21 @@ from Bio import SeqIO
 
 allowed_errs = 1 # How many errors in the telomeric pattern are allowed?
 length = 1000 # How much raw sequence to display?
+oliver_offset = 500 # "Can you calculate the number of hexamers around your established transition coordinates for, say, 500bp in each direction?"
 parse_threshold = 1000000 # How much raw sequence to parse through?
 
 # XXX: Do not use coordinates, but (BioPython) iterators instead (.next() and so on)
 # XXX: Use brentp's cruzdb to compare sequences side by side?
 # XXX: K-mer analysis: Tweak length variable and resulting bedfile according to that metric.
+# XXX: chrM    -499    501 # after applying Oliver offsets... treat as offlier?
 coordinates = 0
 bedfile = defaultdict(list)
 
 
 def assess_repeats(seq, start, end):
     seq_s = str(seq).lower()
-    #pattern = __get_pattern__(seq_s) #XXX: only takes one pattern, check telomerecat source more
+    # pattern = __get_pattern__(seq_s) #XXX: only takes one pattern, check telomerecat source more
+    # Search for both patterns instead
     pattern1 = 'ccctaa'
     pattern2 = 'ttaggg'
     seq_s = seq_s[start:end]
@@ -33,12 +36,18 @@ def assess_repeats(seq, start, end):
             hits = hits + 1
         elif pattern2 in kmer_s:
             hits = hits + 1
+        elif str(reversed(pattern2)) in kmer_s:
+            hits = hits + 1
+        elif str(reversed(pattern1)) in kmer_s:
+            hits = hits + 1
         else:
             if distance(pattern1, seq) == allowed_errs:
                 partial_hits = partial_hits + 1
             if distance(pattern2, seq) == allowed_errs:
                 partial_hits = partial_hits + 1
-            #partial_hits = distance(pattern, kmer_s)
+
+            # XXX: Overriding the above logic with just the distance
+            partial_hits = distance(pattern1, kmer_s)
 
     return hits, partial_hits
 
@@ -92,7 +101,7 @@ with gzip.open("data/hg38.fa.gz", "rt") as hg38_fa:
                 if(char == 'N'):
                     continue
                 else:
-                    start = coordinates
+                    start = coordinates-oliver_offset
                     end = coordinates+length
                     
                     bedfile[record.id].append(start)
@@ -111,7 +120,7 @@ with gzip.open("data/hg38.fa.gz", "rt") as hg38_fa:
                 if(char == 'N'):
                     continue
                 else:
-                    start = chrom_length-coordinates-length
+                    start = chrom_length-coordinates-length-oliver_offset
                     end = chrom_length-coordinates
 
                     bedfile[record.id].append(start)
@@ -126,5 +135,5 @@ with gzip.open("data/hg38.fa.gz", "rt") as hg38_fa:
 
 print(bedfile)
 for k, v in bedfile.items():
-    print("{}\t{}\t{}\t".format(k, v[0], v[0]+length))
-    print("{}\t{}\t{}\t".format(k, v[1], v[1]+length))
+    print("{}\t{}\t{}\t".format(k, v[0], v[0]+length)) # Forward
+    print("{}\t{}\t{}\t".format(k, v[1], v[1]+length)) # Reverse
