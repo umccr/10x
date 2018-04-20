@@ -15,9 +15,9 @@ parse_threshold = 1000000 # How much raw sequence to parse through?
 # XXX: Use brentp's cruzdb to compare sequences side by side?
 # XXX: K-mer analysis: Tweak length variable and resulting bedfile according to that metric.
 # XXX: chrM    -499    501 # after applying Oliver offsets... treat as offlier?
+# XXX: Apply Vlad advise, do enumerate instead of iter sliding window.
 coordinates = 0
 bedfile = defaultdict(list)
-
 
 def assess_repeats(seq, start, end):
     seq_s = str(seq).lower()
@@ -39,13 +39,17 @@ def assess_repeats(seq, start, end):
             hits = hits + 1
         elif pattern2 in kmer_s:
             hits = hits + 1
+        elif str(pattern3) in kmer_s:
+            hits = hits + 1
+        elif str(pattern4) in kmer_s:
+            hits = hits + 1
         elif str(reversed(pattern2)) in kmer_s:
             hits = hits + 1
         elif str(reversed(pattern1)) in kmer_s:
             hits = hits + 1
-        elif str(pattern3) in kmer_s:
+        elif str(reversed(pattern3)) in kmer_s:
             hits = hits + 1
-        elif str(pattern4) in kmer_s:
+        elif str(reversed(pattern4)) in kmer_s:
             hits = hits + 1
         else:
             if distance(pattern1, seq) == allowed_errs:
@@ -119,10 +123,12 @@ with gzip.open("data/hg38.fa.gz", "rt") as hg38_fa:
                     print("HexCnt for {chrom}: {mers}, {phits}".format(chrom=record.id, mers=hits, phits=partial_hits))
 
                     coordinates = 0
+                    hits = 0
                     break
 
             # in reverse now
             for char in reversed(seq):
+
                 coordinates = coordinates + 1
                 if(char == 'N'):
                     continue
@@ -138,6 +144,7 @@ with gzip.open("data/hg38.fa.gz", "rt") as hg38_fa:
                     print("HexCnt for {chrom}: {mers}, {phits}".format(chrom=record.id, mers=hits, phits=partial_hits))
                     
                     coordinates = 0
+                    hits = 0
                     break
 
 print(bedfile)
