@@ -24,7 +24,10 @@ def assess_repeats(seq, start, end):
     # pattern = __get_pattern__(seq_s) #XXX: only takes one pattern, check telomerecat source more
     # Search for both patterns instead
     pattern1 = 'ccctaa'
+    pattern3 = 'gggatt'
+    
     pattern2 = 'ttaggg'
+    pattern4 = 'aatccc'
     seq_s = seq_s[start:end]
     
     hits = 0
@@ -39,6 +42,10 @@ def assess_repeats(seq, start, end):
         elif str(reversed(pattern2)) in kmer_s:
             hits = hits + 1
         elif str(reversed(pattern1)) in kmer_s:
+            hits = hits + 1
+        elif str(pattern3) in kmer_s:
+            hits = hits + 1
+        elif str(pattern4) in kmer_s:
             hits = hits + 1
         else:
             if distance(pattern1, seq) == allowed_errs:
