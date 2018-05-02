@@ -104,48 +104,49 @@ with gzip.open("data/hg38.fa.gz", "rt") as hg38_fa:
     for record in SeqIO.parse(hg38_fa, "fasta"):
         chrom_length = len(record.seq)
         if "_" not in record.id: #avoid extra assemblies
-            seq = record.seq
+            if "chrM" not in record.id: #skip Mitochondrial DNA
+                seq = record.seq
 
-#XXX: Remove code duplication here
-            for char in seq:
-                coordinates = coordinates + 1
-                if(char == 'N'):
-                    continue
-                else:
-                    start = coordinates-oliver_offset
-                    end = coordinates+length
-                    
-                    bedfile[record.id].append(start)
-                    hits, partial_hits = assess_repeats(seq, start, end)
-                    
-                    print("Forward: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(chrom=record.id, pos=start, chr_length=chrom_length))
-                    print("Sequenc: {seq}".format(seq=seq[start:end]))
-                    print("HexCnt for {chrom}: {mers}, {phits}".format(chrom=record.id, mers=hits, phits=partial_hits))
+    #XXX: Remove code duplication here
+                for char in seq:
+                    coordinates = coordinates + 1
+                    if(char == 'N'):
+                        continue
+                    else:
+                        start = coordinates-oliver_offset
+                        end = coordinates+length
+                        
+                        bedfile[record.id].append(start)
+                        hits, partial_hits = assess_repeats(seq, start, end)
+                        
+                        print("Forward: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(chrom=record.id, pos=start, chr_length=chrom_length))
+                        print("Sequenc: {seq}".format(seq=seq[start:end]))
+                        print("HexCnt for {chrom}: {mers}, {phits}".format(chrom=record.id, mers=hits, phits=partial_hits))
 
-                    coordinates = 0
-                    hits = 0
-                    break
+                        coordinates = 0
+                        hits = 0
+                        break
 
-            # in reverse now
-            for char in reversed(seq):
+                # in reverse now
+                for char in reversed(seq):
 
-                coordinates = coordinates + 1
-                if(char == 'N'):
-                    continue
-                else:
-                    start = chrom_length-coordinates-length-oliver_offset
-                    end = chrom_length-coordinates
+                    coordinates = coordinates + 1
+                    if(char == 'N'):
+                        continue
+                    else:
+                        start = chrom_length-coordinates-length-oliver_offset
+                        end = chrom_length-coordinates
 
-                    bedfile[record.id].append(start)
-                    hits, partial_hits = assess_repeats(seq, start, end)
-                    
-                    print("Reverse: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(chrom=record.id, pos=chrom_length-coordinates, chr_length=chrom_length))
-                    print("Sequenc: {seq}".format(seq=seq[start:end]))
-                    print("HexCnt for {chrom}: {mers}, {phits}".format(chrom=record.id, mers=hits, phits=partial_hits))
-                    
-                    coordinates = 0
-                    hits = 0
-                    break
+                        bedfile[record.id].append(start)
+                        hits, partial_hits = assess_repeats(seq, start, end)
+                        
+                        print("Reverse: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(chrom=record.id, pos=chrom_length-coordinates, chr_length=chrom_length))
+                        print("Sequenc: {seq}".format(seq=seq[start:end]))
+                        print("HexCnt for {chrom}: {mers}, {phits}".format(chrom=record.id, mers=hits, phits=partial_hits))
+                        
+                        coordinates = 0
+                        hits = 0
+                        break
 
 print(bedfile)
 for k, v in bedfile.items():
