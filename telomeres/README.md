@@ -58,6 +58,39 @@ At least as Roman imagines it goes at this point... XXX's represent gaps/doubts.
 
 `bedtools intersect -a data/telomere_regions_GRCh37.bed -b data/EGAZ00001226275_COLO_829_TGEN_IlluminaPipe.bam -c > telomer_counts.txt`
 
+### COLO829BL (regular Illumina run)
+#### Multimapped reads
+
+```
+$ samtools view final/hg38/COLO829BL-hg38-ready.bam -L bed/hg38_noalt.bed -b > final/hg38/COLO829BL-hg38-ready-without_randoms.bam
+$ samtools view -H final/hg38/COLO829BL-hg38-ready-without_randoms.bam | grep -v GL | grep -v KI > COLO829BL-hg38-ready-without_randoms-torehead.sam
+$ samtools reheader COLO829BL-hg38-ready-without_randoms-torehead.sam COLO829BL-hg38-ready-without_randoms.bam > COLO829BL-hg38-ready-without_randoms-reheaded.bam
+$ samtools view COLO829BL-hg38-ready-without_randoms-reheaded.bam | cut -f 3 | sort | uniq -c | sort -rn
+18779 chr5
+6604 chr1
+3104 chrX
+2852 chr20
+2654 chr12
+2623 chr10
+2049 chr4
+2008 chr21
+1932 chr3
+1917 chr15
+1699 chr18
+1680 chr16
+1599 chr22
+1505 chr6
+1303 chr7
+1268 chr13
+1206 chr9
+ 975 chr2
+ 926 chr17
+ 892 chr11
+ 827 chr19
+ 786 chr14
+  77 chr8
+```
+
 ## Use kmers if the above looks good
 
 I wrote a brute script that assesses the exact hexamer count for each chromosome in GRCh38 (2013) reference assembly, example outputs can be found on `latest_output.txt` on this repo.
