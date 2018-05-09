@@ -100,7 +100,8 @@ def window(iterable, n=6):
     return zip(*iters)
 
 
-with gzip.open("data/hg38.fa.gz", "rt") as hg38_fa:
+#with gzip.open("data/hg38.fa.gz", "rt") as hg38_fa:
+with gzip.open("data/GRCh37.fa.gz", "rt") as hg38_fa:
     for record in SeqIO.parse(hg38_fa, "fasta"):
         chrom_length = len(record.seq)
         if "_" not in record.id: #avoid extra assemblies

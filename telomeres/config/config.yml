@@ -1,0 +1,19 @@
+# Snakemake configuration file
+out_dir: data/processed
+cluster_config:
+  spartan:
+        "time": "12:00:00",
+        "n": 1,
+        "partition": "vccc",
+        "mem": 15000,
+        "out": "logs/{rule}_%j.out",
+        "err": "logs/{rule}_%j.err",
+        "name": "{rule}.{wildcards}"
+
+samples:
+  COLO829: 
+    tumor: data/raw/COLO829T-ready.bam
+    normal: data/raw/COLO829BL-ready.bam
+  10X_EMA:
+    tumor: data/raw/Colo829T_10x_EMA
+    normal: data/raw/Colo829Bl_10x_EMA

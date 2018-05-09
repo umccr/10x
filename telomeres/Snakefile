@@ -1,0 +1,34 @@
+from pathlib import Path
+
+##############################
+# Globals
+##############################
+
+PROJECT_DIR = Path(".").absolute()
+PROJECT_NAME = "telomeres"
+
+workdir: PROJECT_DIR
+
+configfile: Path("config/config.yml")
+    
+##############################
+# Project rules
+##############################
+RESULT_FILES = ["results/report.md"]
+
+rule all:
+    """Default rule to generate final report/results"""
+    input: RESULT_FILES
+    output: "foo.bar"
+    shell:
+        "echo Modify all rule to generate relevant target and list relevant result files"
+
+##############################
+# Includes
+##############################
+include: "src/snakemake/hg38_telomere_coords.smk"
+include: "src/snakemake/bamprep.smk"
+#include: "src/snakemake/multimapping.smk"
+#include: "src/snakemake/stats.smk"
+#include: "src/snakemake/telomerecat.smk"
+#include: "src/snakemake/igv.smk"
