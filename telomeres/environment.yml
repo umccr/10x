@@ -1,2 +1,3 @@
 # Conda environment file; add project dependencies here
 - biopython
+- click

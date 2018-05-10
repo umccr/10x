@@ -1,14 +1,15 @@
 # Snakemake configuration file
+latency_wait: 0
 out_dir: data/processed
-cluster_config:
-  spartan:
-        "time": "12:00:00",
-        "n": 1,
-        "partition": "vccc",
-        "mem": 15000,
-        "out": "logs/{rule}_%j.out",
-        "err": "logs/{rule}_%j.err",
-        "name": "{rule}.{wildcards}"
+# cluster_config:
+#   spartan:
+#     "time": "12:00:00",
+#     "n": 1,
+#     "partition": "vccc",
+#     "mem": 15000,
+#     "out": "logs/{rule}_%j.out",
+#     "err": "logs/{rule}_%j.err",
+#     "name": "{rule}.{wildcards}"
 
 samples:
   COLO829: 

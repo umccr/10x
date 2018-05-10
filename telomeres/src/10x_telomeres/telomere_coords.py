@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import click
 import gzip
 from collections import defaultdict, deque
 from itertools import islice, tee
@@ -16,7 +17,6 @@ parse_threshold = 1000000 # How much raw sequence to parse through?
 # XXX: K-mer analysis: Tweak length variable and resulting bedfile according to that metric.
 # XXX: chrM    -499    501 # after applying Oliver offsets... treat as offlier?
 # XXX: Apply Vlad advise, do enumerate instead of iter sliding window.
-coordinates = 0
 bedfile = defaultdict(list)
 
 def assess_repeats(seq, start, end):
@@ -99,57 +99,64 @@ def window(iterable, n=6):
         consume(it, i)
     return zip(*iters)
 
+@click.command()
+@click.argument('genome_build', type=click.Path(exists=True))
+@click.argument('bedfile', type=click.Path(exists=True))
+def main(genome_build="data/external/hg38.fa.gz"):
+    coordinates = 0
 
-#with gzip.open("data/hg38.fa.gz", "rt") as hg38_fa:
-with gzip.open("data/GRCh37.fa.gz", "rt") as hg38_fa:
-    for record in SeqIO.parse(hg38_fa, "fasta"):
-        chrom_length = len(record.seq)
-        if "_" not in record.id: #avoid extra assemblies
-            if "chrM" not in record.id: #skip Mitochondrial DNA
-                seq = record.seq
+    with gzip.open(genome_build, "rt") as hg38_fa:
+        for record in SeqIO.parse(hg38_fa, "fasta"):
+            chrom_length = len(record.seq)
+            if "_" not in record.id: #avoid extra assemblies
+                if "chrM" not in record.id: #skip Mitochondrial DNA
+                    seq = record.seq
 
-    #XXX: Remove code duplication here
-                for char in seq:
-                    coordinates = coordinates + 1
-                    if(char == 'N'):
-                        continue
-                    else:
-                        start = coordinates-oliver_offset
-                        end = coordinates+length
-                        
-                        bedfile[record.id].append(start)
-                        hits, partial_hits = assess_repeats(seq, start, end)
-                        
-                        print("Forward: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(chrom=record.id, pos=start, chr_length=chrom_length))
-                        print("Sequenc: {seq}".format(seq=seq[start:end]))
-                        print("HexCnt for {chrom}: {mers}, {phits}".format(chrom=record.id, mers=hits, phits=partial_hits))
+        #XXX: Remove code duplication here
+                    for char in seq:
+                        coordinates = coordinates + 1
+                        if(char == 'N'):
+                            continue
+                        else:
+                            start = coordinates-oliver_offset
+                            end = coordinates+length
+                            
+                            bedfile[record.id].append(start)
+                            hits, partial_hits = assess_repeats(seq, start, end)
+                            
+                            print("Forward: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(chrom=record.id, pos=start, chr_length=chrom_length))
+                            print("Sequenc: {seq}".format(seq=seq[start:end]))
+                            print("HexCnt for {chrom}: {mers}, {phits}".format(chrom=record.id, mers=hits, phits=partial_hits))
 
-                        coordinates = 0
-                        hits = 0
-                        break
+                            coordinates = 0
+                            hits = 0
+                            break
 
-                # in reverse now
-                for char in reversed(seq):
+                    # in reverse now
+                    for char in reversed(seq):
 
-                    coordinates = coordinates + 1
-                    if(char == 'N'):
-                        continue
-                    else:
-                        start = chrom_length-coordinates-length-oliver_offset
-                        end = chrom_length-coordinates
+                        coordinates = coordinates + 1
+                        if(char == 'N'):
+                            continue
+                        else:
+                            start = chrom_length-coordinates-length-oliver_offset
+                            end = chrom_length-coordinates
 
-                        bedfile[record.id].append(start)
-                        hits, partial_hits = assess_repeats(seq, start, end)
-                        
-                        print("Reverse: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(chrom=record.id, pos=chrom_length-coordinates, chr_length=chrom_length))
-                        print("Sequenc: {seq}".format(seq=seq[start:end]))
-                        print("HexCnt for {chrom}: {mers}, {phits}".format(chrom=record.id, mers=hits, phits=partial_hits))
-                        
-                        coordinates = 0
-                        hits = 0
-                        break
+                            bedfile[record.id].append(start)
+                            hits, partial_hits = assess_repeats(seq, start, end)
+                            
+                            print("Reverse: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(chrom=record.id, pos=chrom_length-coordinates, chr_length=chrom_length))
+                            print("Sequenc: {seq}".format(seq=seq[start:end]))
+                            print("HexCnt for {chrom}: {mers}, {phits}".format(chrom=record.id, mers=hits, phits=partial_hits))
+                            
+                            coordinates = 0
+                            hits = 0
+                            break
 
-print(bedfile)
 for k, v in bedfile.items():
     print("{}\t{}\t{}\t".format(k, v[0], v[0]+length)) # Forward
     print("{}\t{}\t{}\t".format(k, v[1], v[1]+length)) # Reverse
+
+if __name__ == "__main__":
+    """ This is executed when run from the command line """
+    main()

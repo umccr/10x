@@ -1,4 +1,6 @@
-# XXX: Tweak telomere_coords.py accordingly to output a well formed bedfile
+rule telomere_coords:
+    output: "GRC38h_telomeric_regions.bed"
+    shell:
+        "src/10x_telomeres/telomere_coords.py data/external/hg38.fa.gz"
 
-#bedfile:
-#    tail -48 latest_output.txt > GRC38h_real_coords.bed
+# XXX: Tweak telomere_coords.py accordingly to output a well formed bedfile
