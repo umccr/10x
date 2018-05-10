@@ -3,9 +3,15 @@
 import sys
 import click
 import gzip
+from pathlib import Path
 from collections import defaultdict, deque
 from itertools import islice, tee
 from Bio import SeqIO
+import logging
+
+# Logging boilerplate
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
 
 allowed_errs = 1 # How many errors in the telomeric pattern are allowed?
 length = 1000 # How much raw sequence to display?
@@ -17,7 +23,6 @@ parse_threshold = 1000000 # How much raw sequence to parse through?
 # XXX: K-mer analysis: Tweak length variable and resulting bedfile according to that metric.
 # XXX: chrM    -499    501 # after applying Oliver offsets... treat as offlier?
 # XXX: Apply Vlad advise, do enumerate instead of iter sliding window.
-bedfile = defaultdict(list)
 
 def assess_repeats(seq, start, end):
     seq_s = str(seq).lower()
@@ -101,9 +106,9 @@ def window(iterable, n=6):
 
 @click.command()
 @click.argument('genome_build', type=click.Path(exists=True))
-@click.argument('bedfile', type=click.Path(exists=True))
-def main(genome_build="data/external/hg38.fa.gz"):
+def main(genome_build='data/external/hg38.fa.gz'):
     coordinates = 0
+    bedfile = defaultdict(list)
 
     with gzip.open(genome_build, "rt") as hg38_fa:
         for record in SeqIO.parse(hg38_fa, "fasta"):
@@ -124,9 +129,9 @@ def main(genome_build="data/external/hg38.fa.gz"):
                             bedfile[record.id].append(start)
                             hits, partial_hits = assess_repeats(seq, start, end)
                             
-                            print("Forward: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(chrom=record.id, pos=start, chr_length=chrom_length))
-                            print("Sequenc: {seq}".format(seq=seq[start:end]))
-                            print("HexCnt for {chrom}: {mers}, {phits}".format(chrom=record.id, mers=hits, phits=partial_hits))
+                            log.info("Forward: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(chrom=record.id, pos=start, chr_length=chrom_length))
+                            log.info("Sequenc: {seq}".format(seq=seq[start:end]))
+                            log.info("HexCnt for {chrom}: {mers}, {phits}".format(chrom=record.id, mers=hits, phits=partial_hits))
 
                             coordinates = 0
                             hits = 0
@@ -145,17 +150,18 @@ def main(genome_build="data/external/hg38.fa.gz"):
                             bedfile[record.id].append(start)
                             hits, partial_hits = assess_repeats(seq, start, end)
                             
-                            print("Reverse: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(chrom=record.id, pos=chrom_length-coordinates, chr_length=chrom_length))
-                            print("Sequenc: {seq}".format(seq=seq[start:end]))
-                            print("HexCnt for {chrom}: {mers}, {phits}".format(chrom=record.id, mers=hits, phits=partial_hits))
+                            log.info("Reverse: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(chrom=record.id, pos=chrom_length-coordinates, chr_length=chrom_length))
+                            log.info("Sequenc: {seq}".format(seq=seq[start:end]))
+                            log.info("HexCnt for {chrom}: {mers}, {phits}".format(chrom=record.id, mers=hits, phits=partial_hits))
                             
                             coordinates = 0
                             hits = 0
                             break
 
-for k, v in bedfile.items():
-    print("{}\t{}\t{}\t".format(k, v[0], v[0]+length)) # Forward
-    print("{}\t{}\t{}\t".format(k, v[1], v[1]+length)) # Reverse
+        with open(Path('data/processed/telomere_coords.bed'), "w+") as tel:
+            for k, v in bedfile.items():
+                tel.write("{}\t{}\t{}\n".format(k, v[0], v[0]+length)) # Forward
+                tel.write("{}\t{}\t{}\n".format(k, v[1], v[1]+length)) # Reverse
 
 if __name__ == "__main__":
     """ This is executed when run from the command line """
