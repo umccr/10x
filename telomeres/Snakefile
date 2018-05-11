@@ -14,19 +14,17 @@ configfile: Path("config/config.yml")
 ##############################
 # Project rules
 ##############################
-RESULT_FILES = []
+RESULT_FILES = ["data/processed/telomere_coords.bed"]
 
 rule all:
     """Default rule to generate final report/results"""
     input: RESULT_FILES
-    output: "summary.txt"
-    shell:
-        "ls results"
 
 ##############################
 # Includes
 ##############################
-#include: "src/snakemake/hg38_telomere_coords.smk"
+
+include: "src/snakemake/hg38_telomere_coords.smk"
 #include: "src/snakemake/bamprep.smk"
 #include: "src/snakemake/multimapping.smk"
 #include: "src/snakemake/stats.smk"

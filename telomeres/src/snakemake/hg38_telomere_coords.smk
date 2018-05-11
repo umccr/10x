@@ -1,6 +1,6 @@
 rule telomere_coords:
-    output: "GRC38h_telomeric_regions.bed"
+    output: "data/processed/telomere_coords.bed"
+    params:
+        genome_path = "data/external/hg38.fa.gz"
     shell:
-        "src/10x_telomeres/telomere_coords.py data/external/hg38.fa.gz"
-
-# XXX: Tweak telomere_coords.py accordingly to output a well formed bedfile
+        "src/10x_telomeres/telomere_coords.py {params.genome_path}"
