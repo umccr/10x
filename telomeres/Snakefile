@@ -10,15 +10,6 @@ PROJECT_NAME = "telomeres"
 workdir: PROJECT_DIR
 
 configfile: Path("config/config.yml")
-    
-##############################
-# Project rules
-##############################
-RESULT_FILES = ["data/processed/telomere_coords.bed"]
-
-rule all:
-    """Default rule to generate final report/results"""
-    input: RESULT_FILES
 
 ##############################
 # Includes
@@ -30,3 +21,13 @@ include: "src/snakemake/hg38_telomere_coords.smk"
 #include: "src/snakemake/stats.smk"
 #include: "src/snakemake/telomerecat.smk"
 #include: "src/snakemake/igv.smk"
+    
+##############################
+# Project rules
+##############################
+RESULT_FILES = ["data/processed/telomere_coords.bed"]
+
+rule all:
+    """Default rule to generate final report/results"""
+    input: RESULT_FILES
+
