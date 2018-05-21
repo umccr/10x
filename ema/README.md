@@ -250,46 +250,63 @@ done
 
 ### Not merged version (LATEST)
 
-Create a file `interleave_fq.sh`:
-
-```
-#paste <(pigz -c -d $1 | paste - - - - | awk -F '\t' 'length($2) >= 40') <(pigz -c -d ${1/_R1_/_R2_} | paste - - - - | awk -F '\t' 'length($2) >= 40') | tr '\t' '\n'
-paste <(pigz -c -d $1 | paste - - - -) <(pigz -c -d ${1/_R1_/_R2_} | paste - - - -) | tr '\t' '\n'
-```
-
-```
-echo 'paste <(pigz -c -d $1 | paste - - - -) <(pigz -c -d ${1/_R1_/_R2_} | paste - - - -) | tr "\\t" "\\n"' > interleave_fq.sh
-```
+Create `run.sh`:
 
 ```
 module load gcc/6.2.0
 export PATH=/g/data3/gx8/extras/10x/miniconda/bin:/home/563/vs2870/bin:$PATH
 
-SAMPLE=Colo829Bl_10x_80pc
+FASTQ_DIR_1=$1
+FASTQ_DIR_2=$2
+FASTQ_DIR_3=$3
+FASTQ_DIR_4=$4
+SAMPLE=$5
+if [ -z $6 ]; then GENOME=GRCh37; else GENOME=$6; fi
+
+echo $SAMPLE
+echo $GENOME
+
+BARCODES=/g/data3/gx8/extras/10x/longranger-2.1.6/longranger-cs/2.1.6/tenkit/lib/python/tenkit/barcodes/4M-with-alts-february-2016.txt
+REF=/g/data3/gx8/projects/Saveliev_10X/COLO829-10x/EMA_REF
+THREADS=30
+BWA_RUNS=8
+BWA_THREADS=4
+
+echo 'paste <(pigz -c -d $1 | paste - - - -) <(pigz -c -d ${1/_R1_/_R2_} | paste - - - -) | tr "\\t" "\\n"' > interleave_fq.sh
 
 date
-parallel -j32 "bash interleave_fq.sh {} | ema count -w 4M-with-alts-february-2016.txt -o {/.} 2>{/.}.log" ::: ori_fq/*_R1_*.gz
+parallel -j${THREADS} "bash interleave_fq.sh {} | ema count -w $BARCODES -o {/.} 2>{/.}.log" ::: $FASTQ_DIR_1/*_R1_*.gz $FASTQ_DIR_2/*_R1_*.gz $FASTQ_DIR_3/*_R1_*.gz $FASTQ_DIR_4/*_R1_*.gz
 
 date
-ls ori_fq/*R1*.gz | xargs -I '{}' bash interleave_fq.sh '{}' | ema preproc -w 4M-with-alts-february-2016.txt -n 500 -t 32 -o ema_work *.ema-ncnt 2>&1 | tee ema_preproc.log
+ls $FASTQ_DIR_1/*_R1_*.gz $FASTQ_DIR_2/*_R1_*.gz $FASTQ_DIR_3/*_R1_*.gz $FASTQ_DIR_4/*_R1_*.gz | xargs -I '{}' bash interleave_fq.sh '{}' | ema preproc -w $BARCODES -n 500 -t ${THREADS} -o ema_work *.ema-ncnt 2>&1 | tee ema_preproc.log
 
 date
-parallel -j8 "ema align -R $'@RG\tID:${SAMPLE}_EMA\tSM:${SAMPLE}_EMA' -t 4 -d -r ref/GRCh37.fa -s {} | samtools sort -@ 4 -O bam -l 0 -m 4G -o {}.bam -" ::: ema_work/ema-bin-???
+parallel -j${BWA_RUNS} "ema align -R $'@RG\tID:${SAMPLE}_EMA\tSM:${SAMPLE}_EMA' -t ${BWA_THREADS} -d -r $REF/$GENOME.fa -s {} | samtools sort -@ ${BWA_THREADS} -O bam -l 0 -m 4G -o {}.bam -" ::: ema_work/ema-bin-???
 
 date
-bwa mem -p -t 32 -M -R "@RG\tID:${SAMPLE}_EMA\tSM:${SAMPLE}_EMA" ref/GRCh37.fa ema_work/ema-nobc |\
-  samtools sort -@ 4 -O bam -l 0 -m 4G -o ema_work/ema-nobc.bam
+bwa mem -p -t ${THREADS} -M -R "@RG\tID:${SAMPLE}_EMA\tSM:${SAMPLE}_EMA" $REF/$GENOME.fa ema_work/ema-nobc |\
+  samtools sort -@ ${THREADS} -O bam -l 0 -m 4G -o ema_work/ema-nobc.bam
 
 date
-sambamba markdup -t 32 -p -l 0 ema_work/ema-nobc.bam ema_work/ema-bin-nobc-dupsmarked.bam && rm ema_work/ema-nobc.bam
+sambamba markdup -t ${THREADS} -p -l 0 ema_work/ema-nobc.bam ema_work/ema-bin-nobc-dupsmarked.bam && rm ema_work/ema-nobc.bam
 
 date
-sambamba merge -t 32 -p ${SAMPLE}_EMA.bam ema_work/*.bam
+sambamba merge -t ${THREADS} -p ${SAMPLE}_EMA.bam ema_work/*.bam
 
 date
-samtools stats -@ 32 ${SAMPLE}_EMA.bam > ${SAMPLE}_EMA.stats.txt
+samtools stats -@ ${THREADS} ${SAMPLE}_EMA.bam > ${SAMPLE}_EMA.stats.txt
 
 date
+```
+
+Running:
+
+```
+cd /g/data3/gx8/projects/Saveliev_10X/COLO829-10x/ema_hg38
+source run.sh /g/data3/gx8/data/Transfer/180307_A00130_0039_AH5GWHDMXX/Chromium_WGS_20180306/SI-GA-A4_? Colo829_80pc_EMA hg38 2>&1 | tee ema.log
+
+cd /g/data3/gx8/projects/Saveliev_10X/COLO829-10x/ema_normal_hg38
+source run.sh /g/data3/gx8/data/Transfer/180307_A00130_0040_BHCLKNDMXX/Chromium_WGS_20180306/SI-GA-A8_? Colo829Bl_10x_EMA hg38 2>&1 | tee ema.log
 ```
 
 <!-- for fq in ../ori_fq/* ; do
