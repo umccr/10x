@@ -31,3 +31,4 @@ rule all:
     """Default rule to generate final report/results"""
     input: RESULT_FILES
 
+    
