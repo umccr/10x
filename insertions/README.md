@@ -21,7 +21,7 @@ First, we experimented with a regular non-10x dataset which is was known for a h
 
 ## Strategies
 
-We considered several strategies how to utilies the 10x barcodes in order to more efficiently identify novel insertions.
+We considered several strategies how to utilie the 10x barcodes in order to more efficiently identify novel insertions.
 
 1. By Oliver
 	1. Extract read group (GEM) tags from unmapped reads
@@ -49,35 +49,33 @@ We are going to start exploring with the first strategy.
 
 ## Datasets
 
-We are working with 2 10x samples: [NA12878_WGS downloaded from the 10x website](https://support.10xgenomics.com/genome-exome/datasets/2.2.1/NA12878_WGS_v2), and COLO829-10x sequenced in UMCCR. Both datasets were pre-processed with LongRanger to get `NA12878_WGS_v2_phased_possorted_bam.bam` and `COLO829-10x_phased_possorted_bam.bam` barcode-aware GRCh37 BAM files.
+We are working with 2 10x samples: [NA12878_WGS downloaded from the 10x website](https://support.10xgenomics.com/genome-exome/datasets/2.2.1/NA12878_WGS_v2), and cancer COLO829-10x sequenced in UMCCR. Both datasets were pre-processed with LongRanger to get `NA12878_WGS_v2_phased_possorted_bam.bam` and `COLO829-10x_phased_possorted_bam.bam` barcode-aware GRCh37 BAM files.
 
 We are using the following conda environment for the following processing: bioconda's `sambamba samtools pigz parallel bxtools blast snakemake spades bioawk` + `supernova` and `ema` (installed in extras). We work in the following folder on Raijin:
 
 ```
-cd /data/cephfs/punim0010/projects/Saveliev_10X/COLO829-10x/insertions
-cd /data/cephfs/punim0010/projects/Saveliev_10X/NA12878_WGS/insertions
+cd /g/data3/gx8/projects/Saveliev_10X/COLO829-10x/insertions
+cd /g/data3/gx8/projects/Saveliev_10X/NA12878-10x/insertions
 ```
 
-## Unmapped read extraction
+
+## Extracting unmapped read
 
 Reads from novel insertions are expected to end up as "unmapped" in a human genome BAM file file, so we start the analysis by getting reads unmapped to the human genome, as well as the reads unmapped mates which can support integration breakpoints.
 
 ```
 mkdir unmapped_or_mate_is_unmapped
-
-NA12878:
-sambamba view -f bam -F "unmapped or mate_is_unmapped" -t 20 /data/cephfs/punim0010/projects/Saveliev_10X/NA12878-10x/NA12878_WGS_v2_phased_possorted_bam.bam | sambamba sort -n -t 20 -m 100G /dev/stdin --show-progress > unmapped_or_mate_is_unmapped/NA12878_WGS.bam
-
-COLO829:
-sambamba view -f bam -F "unmapped or mate_is_unmapped" -t 20 COLO829-10x_phased_possorted_bam.bam | sambamba sort -n -t {threads} -m 100G /dev/stdin --show-progress > unmapped_or_mate_is_unmapped/COLO829-10x.bam
+sambamba view -f bam -F "unmapped or mate_is_unmapped" -t 20 COLO829-10x_phased_possorted_bam.bam | sambamba sort -n -t {threads} -m 100G /dev/stdin --show-progress > unmapped_or_mate_is_unmapped/COLO829-10x.namesorted.bam
 ```
+
+
+## Exploring unmapped GEMs
 
 Split by BX tag:
 
 ```
 cd unmapped_or_mate_is_unmapped
 mkdir bx_split
-bxtools split NA12878_WGS.bam -a bx_split/NA12878_WGS -m 1000 > bx_split/NA12878_WGS_bx_counts.txt
 bxtools split COLO829-10x.bam -a bx_split/COLO829-10x -m 1000 > bx_split/COLO829-10x_bx_counts.txt
 ```
 
@@ -94,7 +92,6 @@ Count all reads in full BAM by BX:
 bxtools stats /data/cephfs/punim0010/projects/Saveliev_10X/NA12878-10x/NA12878_WGS_v2_phased_possorted_bam.bam > /data/cephfs/punim0010/projects/Saveliev_10X/NA12878-10x/qc/NA12878_WGS_v2_phased_possorted_bam.bxstats.txt
 
 bxtools stats /data/cephfs/punim0010/projects/Saveliev_10X/NA12878-10x/NA12878_WGS_v2_phased_possorted_bam.bam > /data/cephfs/punim0010/projects/Saveliev_10X/NA12878-10x/qc/NA12878_WGS_v2_phased_possorted_bam.bxstats.txt
-
 ```
 
 Extract BX with many unmapped:
@@ -108,8 +105,6 @@ grep -f <(cut -f1 NA12878_WGS_bx_counts_cnt1000.txt) /data/cephfs/punim0010/proj
 ```
 bxtools split NA12878_WGS_v2_phased_possorted_bam.bam -a bx_split/NA12878_WGS -m 1000 > bx_split/NA12878_WGS_bx_counts.txt
 ```
-
-## GEMs with a high unmapped rate
 
 The following barcodes have at least 1000 unmapped reads or reads with unmapped mate:
 
@@ -223,112 +218,242 @@ For comparison, this is how a regular region looks:
 ![alt text](img/NA12878_CEBPA_igv_snapshot_viewBX.png)
 
 
-## Trying de novo assembly of unmapped reads with Supernova
+## Extracting reads with BX tags and high quality
 
-Extracting reads. Making sure to name-sort the BAM file before converting it to FASTQ.
+Here, we swtich to the strategy with performed with DiploidNeverResponder sample, and will use cancer COLO829-10x sample.
 
-```
-samtools sort -n COLO829-10x.bam -O bam -o COLO829-10x.namesorted.bam
-samtools sort -n NA12878_WGS.bam -O bam -o NA12878_WGS.namesorted.bam
-
-bedtools bamtofastq -i COLO829-10x.namesorted.bam -fq COLO829-10x_S1_L001_R1_001.fastq -fq2 COLO829-10x_S1_L001_R2_001.fastq 2>COLO829-10x.unpaired
-bedtools bamtofastq -i NA12878_WGS.namesorted.bam -fq NA12878_WGS_S1_L001_R1_001.fastq -fq2 NA12878_WGS_S1_L001_R2_001.fastq 2>NA12878_WGS.unpaired
-```
-
-Try assemble with supernova:
+We use the `assemble/filter_bam.py` script to extract long high-quality reads (length >= 125, average qual >= 25, minimal quality >= 10, correct BX tags), and their mates:
 
 ```
-cd /g/data3/gx8/projects/Saveliev_10X/NA12878-10x/insertions/unmapped_or_mate_is_unmapped/assemble
-qsub run.sh
+mkdir with_bx_lng_hqual
+./filter_bam.py COLO829-10x.namesorted.bam with_bx_lng_hqual/COLO829-10x.bam --10x
+samtools stats COLO829-10x.bam > COLO829-10x.stats
+
+cd with_bx_lng_hqual
+samtools fastq COLO829-10x.bam -1 COLO829.R1.fq -2 COLO829.R2.fq -s COLO829.single.fq
+[M::bam2fq_mainloop] discarded 10657 singletons
+[M::bam2fq_mainloop] processed 75224563 reads
 ```
 
-However, it fails with error:
+
+## Viral content
+
+Aligning against the viral database:
 
 ```
-[error] The fraction of input reads having valid barcodes is 1.68 pct, whereas the ideal is at least 80 pct.  This condition could have multiple causes including wrong library type, failed library construction and low sequence quality on the barcode bases.  This could have a severe effect on assembly performance, and Supernova has not been tested on data with these properties, so execution will be terminated.
+bwa mem -t 5 /g/data3/gx8/extras/vlad/bcbio/genomes/Hsapiens/GRCh37/viral/gdc-viral.fa COLO829.R1.fq COLO829.R2.fq | bamsort inputthreads=5 outputthreads=5 inputformat=sam index=1 indexfilename=viral_mapping/COLO829_viral.bam.bai O=viral_mapping/COLO829_viral.bam
 
-We observe only 36.67 pct of bases on read two with quality scores at least 30. Ideally, we expect at least 75 pct. Data quality issues of this type are difficult to diagnose, but might be caused by defects in sequencing reagents or sequencing instrument condition. Use of low quality reads usually reduces assembly quality.
+samtools idxstats viral_mapping/COLO829_viral.bam | awk 'BEGIN {OFS="\t"} {print $1, $2, $3, ($2 != 0) ? $3/$2*150 : 0 }' | sort -nr -k4,4 | head | cols
+
+virus  size  reads  covearge 
+HPV71  8037  172533  3220.1
+HPV47  7726  110295  2141.37
+HCV-2  9711  127975  1976.75
+HPV82  7870   60355  1150.35
+HCV-1  9646   71112  1105.83
+HIV-1  9181   24792  405.054
+HPV42  7917   19058  361.084
+HPV20  7757   17376  336.006
+HPV21  7779   15443  297.782
+HPV51  7808   14408  276.793
 ```
 
-The reason is that extracted reads do no preserve barcodes. We need to extract those reads from the original `fastq` files. To save computational time, we first want to look for particular retroviruses as play with only reads mapping to one virus.
+Many viruses have a very high coverage in the unmapped reads or reads with unmapped rate. HPV71 seems to be self-amplified heavily like HPV18 in the DiploidNeverResponder sample, however [HPV71 is not cancerogenic](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3690501/). So we will explore the second most abundant virus here - HPV47.
 
-## Extracting viral sequences
 
-Searching viral sequences using 3 different approaches.
+## HPV47
 
-- Use Mash (http://mash.readthedocs.io/en/latest/tutorials.html)
-
-```
-mash sketch /g/data3/gx8/extras/vlad/bcbio/genomes/Hsapiens/GRCh37/viral/gdc-viral.fa -i -o mash/gdc-viral
-mash screen gdc-viral.msh ../NA12878_WGS_S1_L001_R1_001.fastq ../NA12878_WGS_S1_L001_R2_001.fastq > screen_gdc.tab
-sort -gr screen_gdc.tab | head
-```
-
-Also against RefSeq:
+Aligning reads to HPV47 only:
 
 ```
-mash screen refseq.genomes.k21s1000.msh ../NA12878_WGS_S1_L001_R1_001.fastq ../NA12878_WGS_S1_L001_R2_001.fastq > screen_refseq.tab
+samtools faidx /g/data3/gx8/extras/vlad/bcbio/genomes/Hsapiens/GRCh37/viral/gdc-viral.fa HPV47 > viral_mapping/HPV47.fa
+bwa index viral_mapping/HPV47.fa
+
+bwa mem -t 5 viral_mapping/HPV47.fa COLO829.R1.fq COLO829.R2.fq | bamsort inputthreads=5 outputthreads=5 inputformat=sam index=1 indexfilename=viral_mapping/COLO829_HPV47.bam.bai O=viral_mapping/COLO829_HPV47.bam
+
+samtools stats viral_mapping/COLO829_HPV47.bam > viral_mapping/COLO829_HPV47.stats
+
+samtools idxstats viral_mapping/COLO829_HPV47.bam | awk 'BEGIN {OFS="\t"} {print $1, $2, $3, ($2 != 0) ? $3/$2*150 : 0 }' | sort -nr -k4,4 | head | cols
+# HPV71  8037  84420  1575.59
 ```
 
-- Kraken against the minikraken database (http://ccb.jhu.edu/software/kraken/MANUAL.html)
+### De-novo assembling HPV47 region
+
+Getting reads that map to HPV18 and all their mate that might point us to an integration site:
 
 ```
-kraken --preload --db /g/data3/gx8/extras/kraken/minikraken_20171019_8GB --fastq-input NA12878_WGS_S1_L001_R1_001.fastq --threads 9 --out kraken/kraken_out --min-hits 2 --quick
+cd /g/data3/gx8/projects/Saveliev_10X/COLO829-10x/insertions/unmapped_or_mate_is_unmapped/with_bx_lng_hqual/viral_mapping
+
+samtools view COLO829_viral.bam HPV47 -O bam > to_HPV47.bam
+
+samtools sort -n to_HPV47.bam -O bam > to_HPV47.namesorted.bam
+
+samtools fastq to_HPV47.namesorted.bam -1 to_HPV47.R1.fq -2 to_HPV47.R2.fq -s to_HPV47.single.fq
 ```
 
-- Align against the viral database:
+Assembling with SPAdes:
 
 ```
-bwa mem -t 9 /g/data3/gx8/extras/vlad/bcbio/genomes/Hsapiens/GRCh37/viral/gdc-viral.fa ../NA12878_WGS_S1_L001_R1_001.fastq ../NA12878_WGS_S1_L001_R2_001.fastq | bamsort inputthreads=9 outputthreads=9 inputformat=sam index=1 indexfilename=viral_mapping/NA12878_viral.bam.bai O=viral_mapping/NA12878_viral.bam
-# Real time: 180.500 sec; CPU: 1553.289 sec
+spades.py --only-assembler -1 to_HPV47.R1.fq -2 to_HPV47.R2.fq -s to_HPV47.single.fq -o spades
 
-samtools idxstats viral_mapping/NA12878_viral.bam | py -x "'\t'.join([x.split()[0], x.split()[1], x.split()[2], str(int(x.split()[2]) / int(x.split()[1]))]) if int(x.split()[1]) > 0 else None" | sort -nr -k4,4 | head | cols
+# QC the assembly - stats and alignment back to HPV47
+quast.py spades/contigs.fasta -R HPV47.fa -o spades/quast --ref-bam to_HPV47.namesorted.bam --no-read-stats --no-sv -1 to_HPV47.R1.fq -2 to_HPV47.R2.fq --debug
 
-name    mapped coverage
-HPV71   87280  10.8597735473
-HPV47   45913  5.94266114419
-HPV82   20185  2.56480304956
-HPV42   10600  1.33889099406
-HCV-1   11845  1.22797014306
-HCV-2   10985  1.1311914324
-HPV51    8678  1.11142418033
-HPV21    8375  1.07661653169
-HPV105   5904  0.770053475936
-HPV20    5500  0.70903699884
+# Align contigs to the reference:
+minimap2 -a HPV47.fa spades/contigs.fasta | samtools sort > spades/contigs_to_HPV47.bam && samtools index spades/contigs_to_HPV47.bam
 ```
 
-### Mapping to HPV71
+![HPV47_IGV](img/COLO829_HPV47.png)
 
-According to the viral mapping, the top hit is HPV71 with 10x coverage. Aligning reads to HPV71 only:
+We see that all reads are piled up to a single small CAA repeat.
+
+Thoughts on that:
+
+1. We should exclude secondary, duplicate, and low-quality alignments from the unmapped BAM.
+2. We should exclude short aligments from viral BAM.
+2. We should not only count the mapped reads, but also calculate the sequence coverage completeness.
+
+### Extra filtering of unmapped
 
 ```
-samtools faidx /g/data3/gx8/extras/vlad/bcbio/genomes/Hsapiens/GRCh37/viral/gdc-viral.fa HPV71 > viral_mapping/HPV71.fa
+less COLO829-10x.stats
+SN      sequences:             75182853
+SN      reads mapped:          24223170
+SN      reads mapped and paired:      0       # paired-end technology bit set + both mates mapped
+SN      reads unmapped:        50959683
+SN      reads paired:   		 75182853       # paired-end technology bit set
+SN      reads duplicated:       6448345       # PCR or optical duplicate bit set
+SN      reads MQ0:              2975983       # mapped and MQ=0
+SN      reads QC failed:              0
+SN      non-primary alignments: 5252162
 
-bwa index viral_mapping/HPV71.fa
+~/bin/sambamba view -f bam -F "not secondary_alignment and not failed_quality_control and not duplicate" COLO829-10x.bam -o COLO829-10x.good_alignment.bam
 
-bwa mem -t 9 viral_mapping/HPV71.fa NA12878_WGS.R1.fq NA12878_WGS.R2.fq | bamsort inputthreads=9 outputthreads=9 inputformat=sam index=1 indexfilename=viral_mapping/NA12878_HPV71.bam.bai O=viral_mapping/NA12878_HPV71.bam
+samtools stats COLO829-10x.good_alignment.bam > COLO829-10x.good_alignment.stats
 
-samtools idxstats viral_mapping/NA12878_HPV71.bam | py -x "'\t'.join([x.split()[0], x.split()[2], str(int(x.split()[2]) / int(x.split()[1])), str(int(x.split()[3]) / int(x.split()[1]))]) if int(x.split()[1]) > 0 else None" | sort -nr -k3,3 | head | cols
-# HPV71  102573  12.7625979843  4.10240139355
+samtools sort -n COLO829-10x.good_alignment.bam -O bam > COLO829-10x.good_alignment.namesorted.bam
 
-samtools stats viral_mapping/NA12878_HPV71.bam > viral_mapping/NA12878_HPV71.stats
-SN      bases mapped (cigar):   3815054 # more accurate
-SN      bases trimmed:  0
-SN      bases duplicated:       0
-SN      mismatches:     180824  # from NM fields
-SN      error rate:     4.739749e-02    # mismatches / bases mapped (cigar)
-SN      average length: 135
-SN      maximum length: 151
-SN      average quality:        26.4
-SN      insert size average:    29.3
-SN      insert size standard deviation: 10.4
-SN      inward oriented pairs:  14357
-SN      outward oriented pairs: 11592
-SN      pairs with other orientation:   2819
-SN      pairs on different chromosomes: 0
+samtools fastq COLO829-10x.good_alignment.namesorted.bam -1 COLO829-10x.good_alignment.R1.fq -2 COLO829-10x.good_alignment.R2.fq -s COLO829-10x.good_alignment.single.fq
+
+# Aligning to viruses
+bwa mem -t 10 /g/data3/gx8/extras/vlad/bcbio/genomes/Hsapiens/GRCh37/viral/gdc-viral.fa COLO829-10x.good_alignment.R1.fq COLO829-10x.good_alignment.R2.fq  | bamsort inputthreads=10 outputthreads=10 inputformat=sam index=1 indexfilename=viral_mapping/COLO829_good_alignment_viral.bam.bai O=viral_mapping/COLO829_good_alignment_viral.bam
+
+samtools stats viral_mapping/COLO829_good_alignment_viral.bam > viral_mapping/COLO829_good_alignment_viral.stats
+
+samtools idxstats viral_mapping/COLO829_good_alignment_viral.bam | awk 'BEGIN {OFS="\t"} {print $1, $2, $3, ($2 != 0) ? $3/$2*150 : 0 }' | sort -nr -k4,4 | head | cols
+HPV71  8037  171999  3210.13
+HPV47  7726  110291  2141.3
+HCV-2  9711  127390  1967.72
+HPV82  7870   59678  1137.45
+HCV-1  9646   70707  1099.53
+HIV-1  9181   24827  405.626
+HPV42  7917   19194  363.66
+HPV20  7757   17325  335.02
+HPV21  7779   15484  298.573
+HPV51  7808   14453  277.658
 ```
 
-### Trying reads with BX tags and high quality
+The results are still quite similar. (TODO: try the updates to `filter_unmapped_bam.py`: remove pairs where the mapped read is low quality)
+
+### Extra filtering of viral BAM
+
+We also try to do extra filtering of the viral BAM: remove very short alignments (below 60):
+
+```
+python filter_viral_bam.py viral_mapping/COLO829_good_alignment_viral.bam viral_mapping/COLO829_good_alignment_viral.GOOD.bam
+
+samtools idxstats viral_mapping/COLO829_good_alignment_viral.long_alignments.bam | awk 'BEGIN {OFS="\t"} {print $1, $2, $3, ($2 != 0) ? $3/$2*150 : 0 }' | sort -nr -k4,4 | head
+
+HCV-2   9711    53762   830.429
+HCV-1   9646    11800   183.496
+HPV71   8037    9781    182.549
+HPV82   7870    328     6.25159
+HPV6    7996    148     2.77639
+KSHV    137969  629     0.683849
+HPV19   7685    33      0.644112
+HPV20   7757    3       0.0580121
+HPV21   7779    2       0.0385654
+HPV73   7700    1       0.0194805
+```
+
+We can see that `HPV47` just disappears from the list. However, we want to go futher, and also calculate the fraction of the virus covered with reads.
+
+### Viral coverage completeness
+
+We use mosdepth to check what percentage of the viral sequence is covered by at least 5 bases:
+
+```
+mosdepth COLO829_good_alignment_viral COLO829_good_alignment_viral.bam
+cat COLO829_good_alignment_viral.mosdepth.global.dist.txt | grep -w 5 | sort -r -k3,3 | less
+HPV71   5       0.03
+HPV82   5       0.02
+HPV77   5       0.02
+HPV73   5       0.02
+HPV72   5       0.02
+HPV6    5       0.02
+HPV62   5       0.02
+HPV56   5       0.02
+HPV51   5       0.02
+HPV43   5       0.02
+HPV34   5       0.02
+HPV26   5       0.02
+HPV21   5       0.02
+HPV20   5       0.02
+HPV14   5       0.02
+HPV114  5       0.02
+HCV-1   5       0.02
+```
+
+Only viruses above have a coverage above 2%. And if we take only long alignments, we will get almost nothing:
+
+```
+HPV82   5       0.01
+HPV71   5       0.01
+HPV6    5       0.01
+HPV19   5       0.01
+HCV-2   5       0.01
+HCV-1   5       0.01
+KSHV    5       0.00
+```
+
+Or more advanced (on diploid example)
+
+```
+mosdepth diploid_tumor_viral_mosdepth diploid_tumor_viral.bam -n --thresholds 1,5,25 --by <(awk 'BEGIN {FS="\t"}; {print $1 FS "0" FS $2}' /g/data/gx8/local/development/bcbio/genomes/Hsapiens/GRCh37/viral/gdc-viral.fa.fai)
+echo '#virus\tsize\tdepth\t1x\t5x\t25x'
+paste <(zcat diploid_tumor_viral_mosdepth.regions.bed.gz) <(zgrep -v ^# diploid_tumor_viral_mosdepth.thresholds.bed.gz) | awk 'BEGIN {FS="\t"} { print $1 FS $3 FS $4 FS $9/$3 FS $10/$3 FS $11/$3}' | sort -n -r -k 5,5
+HPV18  7857  2265.23  1           1           0.931144
+HCV-1  9646  1.93     0.0125441   0.0101597   0.0096413
+HCV-2  9711  2.68     0.0109155   0.00998867  0.00957677
+HPV71  8037  7.78     0.0121936   0.00970511  0.00783875
+HPV19  7685  1.02     0.00962915  0.0093689   0.00845804
+HPV82  7870  0.66     0.00991105  0.00762389  0.00508259
+HPV20  7757  0.18     0.012247    0.00747712  0.00360964
+HPV21  7779  0.22     0.0154261   0.00694177  0.00578481
+HPV25  7713  0.11     0.00700117  0.00609361  0
+HPV14  7713  0.05     0.00777907  0.00544535  0
+```
+
+
+### NA12878-10x
+
+Same for another sample:
+
+```
+mosdepth NA12878_viral NA12878_viral.bam -n
+cat NA12878_viral.mosdepth.dist.txt | grep -w 5 | sort -r -k3,3 | tsv
+HPV73     5  0.08
+HPV87     5  0.01
+HPV83     5  0.01
+```
+
+Only one virus has completeness above 1% on 5x, and that's even before long alignment filtering.
+
+
+
+## Playground
+
+### NA12878: extracting reads with BX tags and high quality
 
 NA12878_WGS read counts:
 
@@ -351,7 +476,7 @@ cat bx_split/*R2.fq > NA12878_WGS.bx_only.R2.fq
 
 Getting total 6_401_804 out of 10_438_043 read pairs - looks quite low.
 
-Aligning to viral fasta:
+Aligning to the viral fasta:
 
 ```
 <see commands above>
@@ -484,95 +609,77 @@ With BX only:
 HPV71  24  0.00298618887645  
 ```
 
-## Viruses in COLO829
 
-Merge fastq
-
-```
-cd /g/data3/gx8/projects/Saveliev_10X/COLO829-10x/insertions/unmapped_or_mate_is_unmapped/fastq
-gunzip -c COLO829-10x_S1_L001_R1_001.fastq.gz >> COLO829-10x_merged.fq
-gunzip -c COLO829-10x_S1_L001_R2_001.fastq.gz >> COLO829-10x_merged.fq
-  COLO829-10x_merged.fq - 121,428,506 reads
-```
+### NA12878: searching in viral databases
 
 Searching viral sequences using 3 different approaches.
 
-- Use Mash
+- Using Mash (http://mash.readthedocs.io/en/latest/tutorials.html)
+
 ```
 mash sketch /g/data3/gx8/extras/vlad/bcbio/genomes/Hsapiens/GRCh37/viral/gdc-viral.fa -i -o mash/gdc-viral
-mash screen mash/gdc-viral.msh COLO829-10x_merged.fq | sort -gr > mash/screen_gdc.tab
-head mash/screen_gdc.tab
+mash screen gdc-viral.msh ../NA12878_WGS_S1_L001_R1_001.fastq ../NA12878_WGS_S1_L001_R2_001.fastq > screen_gdc.tab
+sort -gr screen_gdc.tab | head
 ```
 
 Also against RefSeq:
 
 ```
-mash screen refseq.genomes.k21s1000.msh ../NA12878_WGS.merged.fq | sort -gr > screen_refseq.tab
+mash screen refseq.genomes.k21s1000.msh ../NA12878_WGS_S1_L001_R1_001.fastq ../NA12878_WGS_S1_L001_R2_001.fastq > screen_refseq.tab
 ```
 
-- Align against the viral database:
+- Kraken against the minikraken database (http://ccb.jhu.edu/software/kraken/MANUAL.html)
 
 ```
-bwa mem -t 9 /g/data3/gx8/extras/vlad/bcbio/genomes/Hsapiens/GRCh37/viral/gdc-viral.fa COLO829.R1.fq COLO829.R2.fq | bamsort inputthreads=9 outputthreads=9 inputformat=sam index=1 indexfilename=viral_mapping/COLO829_viral.bam.bai O=viral_mapping/COLO829_viral.bam
-
-samtools idxstats viral_mapping/COLO829_viral.bam | py -x "'\t'.join([x.split()[0], x.split()[1], x.split()[2], str(int(x.split()[2]) / int(x.split()[1]))]) if int(x.split()[1]) > 0 else None" | sort -nr -k4,4 | head | cols
-
-name   mapped  coverage        divide by 2033578410/1000000000 = 2.03 billion reads in genome
-HPV71  268404  33.3960432997   16.451252857
-HPV47  170086  22.0147553715
-HCV-2  178789  18.4109772423
-HCV-1  110412  11.4464026539
-HPV82   87949  11.1752223634
-HPV42   25999  3.28394593912
-HPV20   25253  3.25551115122
-HIV-1   28373  3.09040409541
-HPV73   20907  2.71519480519
-HPV21   20254  2.60367656511
+kraken --preload --db /g/data3/gx8/extras/kraken/minikraken_20171019_8GB --fastq-input NA12878_WGS_S1_L001_R1_001.fastq --threads 9 --out kraken/kraken_out --min-hits 2 --quick
 ```
 
-- Filtering reads
+- Aligning against the viral database:
 
 ```
-./filter_bam.py COLO829-10x.bam
+bwa mem -t 9 /g/data3/gx8/extras/vlad/bcbio/genomes/Hsapiens/GRCh37/viral/gdc-viral.fa COLO829-10x_S1_L001_R1_001.fastq COLO829-10x_S1_L001_R2_001.fastq | bamsort inputthreads=9 outputthreads=9 inputformat=sam index=1 indexfilename=viral_mapping/COLO829_viral.bam.bai O=viral_mapping/COLO829_viral.bam
 
-reads_without_quality:  1,664,954
-Total:                128,214,100
-bx_i:                 112,376,814
-lng_i:                 99,917,997
-hqual_i:               83,739,552
-lng_hqual_i:           57,912,594
-bx_lng_hqual_i:        51,738,038
-paired_i:             126,549,146
-paired_lng_hqual_i:    57,912,594
-paired_bx_lng_hqual_i: 51,738,038
+samtools idxstats viral_mapping/COLO829_viral.bam | awk 'BEGIN {OFS="\t"} {print $1, $2, $3, ($2 != 0) ? $3/$2*150 : 0 }' | sort -nr -k4,4 | head | cols
 
-cd with_bx_lng_hqual
-samtools fastq -f 1 -F 1536 COLO829-10x.bam -1 COLO829.R1.fq -2 COLO829.R2.fq -s COLO829.single.fq
-
-seq     len  reads  coverage         divide by 2033578410/1000000000 = 2.03 billion reads in genome
-HPV71  8037  70862  8.81697150678    4.3356929162
-HPV47  7726  30614  3.9624644059
-HCV-2  9711  36841  3.7937390588
-HPV82  7870  26405  3.35514612452
-HCV-1  9646  19666  2.03877254821
-HIV-1  9181  12356  1.34582289511
-HPV42  7917   9477  1.19704433498
-HPV51  7808   7293  0.934042008197
-HPV20  7757   6415  0.826994972283
+virus  size  reads  covearge
+HPV71  8037  71547  1335.33
+HPV47  7726  30695  595.942
+HCV-2  9711  37201  574.622
+HPV82  7870  27039  515.356
+HCV-1  9646  19699  306.329
+HIV-1  9181  12521  204.569
+HPV42  7917   9618  182.228
+HPV51  7808   7402  142.2
+HPV20  7757   6421  124.165
+HPV73  7700   6343  123.565
 ```
 
-- Only HPV71
+Many viruses have a very high coverage in the unmapped reads or reads with unmapped rate. HPV71 seems to be self-amplified heavily like HPV18 in the DiploidNeverResponder sample, however [HPV71 is not cancerogenic](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3690501/). So we will explore the second most abundant virus here - HPV47.
+
+
+### NA12878: trying de novo assembly of unmapped reads with Supernova
+
+Experimenting with NA12878. Extracting reads. Making sure to name-sort the BAM file before converting it to FASTQ.
 
 ```
-cd /g/data3/gx8/projects/Saveliev_10X/COLO829-10x/insertions/unmapped_or_mate_is_unmapped/with_bx_lng_hqual
-samtools faidx /g/data3/gx8/extras/vlad/bcbio/genomes/Hsapiens/GRCh37/viral/gdc-viral.fa HPV71 > viral_mapping/HPV71.fa
-
-bwa index viral_mapping/HPV71.fa
-
-bwa mem -t 10 viral_mapping/HPV71.fa COLO829.R1.fq COLO829.R2.fq | bamsort inputthreads=10 outputthreads=10 inputformat=sam index=1 indexfilename=viral_mapping/COLO829_HPV71.bam.bai O=viral_mapping/COLO829_HPV71.bam
-
-samtools idxstats viral_mapping/COLO829_HPV71.bam | py -x "'\t'.join([x.split()[0], x.split()[2], str(int(x.split()[2]) / int(x.split()[1])), str(int(x.split()[3]) / int(x.split()[1]))]) if int(x.split()[1]) > 0 else None" | sort -nr -k3,3 | head | cols
-
-seq    reads  coverage       divide by 2033578410/1000000000 = 2.03 billion reads in genome
-HPV71  91356  11.3669279582  5.5994718966
+samtools sort -n NA12878_WGS.bam -O bam -o NA12878_WGS.namesorted.bam
+samtools fastq NA12878_WGS.namesorted.bam -1 NA12878_WGS_S1_L001_R1_001.fastq -2 NA12878_WGS_S1_L001_R2_001.fastq -s NA12878_WGS_S1_L001_single.fastq
 ```
+
+Try assemble with supernova:
+
+```
+cd /g/data3/gx8/projects/Saveliev_10X/NA12878-10x/insertions/unmapped_or_mate_is_unmapped/assemble
+qsub run.sh
+```
+
+However, it fails with error:
+
+```
+[error] The fraction of input reads having valid barcodes is 1.68 pct, whereas the ideal is at least 80 pct.  This condition could have multiple causes including wrong library type, failed library construction and low sequence quality on the barcode bases.  This could have a severe effect on assembly performance, and Supernova has not been tested on data with these properties, so execution will be terminated.
+
+We observe only 36.67 pct of bases on read two with quality scores at least 30. Ideally, we expect at least 75 pct. Data quality issues of this type are difficult to diagnose, but might be caused by defects in sequencing reagents or sequencing instrument condition. Use of low quality reads usually reduces assembly quality.
+```
+
+The reason is that extracted reads do not preserve barcodes. We need to extract those reads from the original `fastq` files. To save computational time, we first want to look for particular retroviruses as play with only reads mapping to one virus.
+

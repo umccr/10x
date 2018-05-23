@@ -103,16 +103,18 @@ bwa mem -t 10 /g/data3/gx8/extras/vlad/bcbio/genomes/Hsapiens/GRCh37/viral/gdc-v
 
 samtools idxstats viral_mapping/diploid_tumor_viral.bam | awk 'BEGIN {OFS="\t"} {print $1, $2, $3, ($2 != 0) ? $3/$2*150 : 0 }' | sort -nr -k4,4 | head | cols
 
-name      len  mapped  coverage  normalize by dividing by 1173944366/1000000000 = 1.174 billion reads in genome
-HPV18    7857  151264  2888      2460
-HCV-2    9711   12828   198       169
-HPV71    8037    2661    49.6
-HCV-1    9646    2862    44.5
-HPV82    7870     242     4.6
-HPV19    7685     212     4.1
-HPV21    7779      59     1.1
-HPV20    7757      37     0.7
-HPV25    7713      34     0.7
+                      completeness at coverage
+name    len  ave cov  1x    5x    25x
+HPV18  7857  2265.23  1     1     0.93
+HCV-1  9646  1.93     0.01  0.01  0.01
+HCV-2  9711  2.68     0.01  0.01  0.01
+HPV71  8037  7.78     0.01  0.01  0.01
+HPV19  7685  1.02     0.01  0.01  0.01
+HPV82  7870  0.66     0.01  0.01  0.00
+HPV20  7757  0.18     0.01  0.01  0.00
+HPV21  7779  0.22     0.01  0.01  0.00
+HPV25  7713  0.11     0.01  0.01  0.00
+HPV14  7713  0.05     0.01  0.00  0.00
 ```
 
 HPV18 has an extremely high coveage. Aligning to HPV18 only to make sure none of the related virus didn't hijacked any reads:
@@ -251,7 +253,7 @@ Where N is around 10.
 
 The integration site overlaps long non-coding RNA genes CASC21 (Cancer Susceptibility 21, CARLo-2) and CASC8 (Cancer Susceptibility 8, CARLo-1) in their introns. Both genes are associated with cancer, and located in a region 8q24.21 nearby the oncogene MYC, which is amplified in this sample.
 
-8q24.21 is [well known](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4695887) as HPV integration site hotspot: [](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4695887)
+8q24.21 is [well known](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4695887) as HPV integration site hotspot:
 
 ["In genital cancers, HPV sequences were localized in chromosome band 8q24.1, in which the c-myc gene is mapped... In three of the four cases, the proto-oncogene located near integrated viral sequences was found to be structurally altered and/or overexpressed. These data indicate that HPV genomes are preferentially integrated near myc genes in invasive genital cancers and support the hypothesis that integration plays a part in tumor progression via an activation of cellular oncogenes."](https://www.ncbi.nlm.nih.gov/pubmed/1649348/)
 
