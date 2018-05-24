@@ -15,7 +15,6 @@ log.setLevel(logging.INFO)
 
 allowed_errs = 1 # How many errors in the telomeric pattern are allowed?
 length = 1000 # How much raw sequence to display?
-oliver_offset = 500 # "Can you calculate the number of hexamers around your established transition coordinates for, say, 500bp in each direction?"
 parse_threshold = 1000000 # How much raw sequence to parse through?
 
 # XXX: Do not use coordinates, but (BioPython) iterators instead (.next() and so on)
@@ -23,6 +22,7 @@ parse_threshold = 1000000 # How much raw sequence to parse through?
 # XXX: K-mer analysis: Tweak length variable and resulting bedfile according to that metric.
 # XXX: chrM    -499    501 # after applying Oliver offsets... treat as offlier?
 # XXX: Apply Vlad advise, do enumerate instead of iter sliding window.
+# XXX: Coordinate scanning per chromosome, i.e: ./telomere_coords.py hg38.gz --chrom='chr11', useful for debugging purposes
 
 def assess_repeats(seq, start, end):
     seq_s = str(seq).lower()
@@ -33,6 +33,10 @@ def assess_repeats(seq, start, end):
     
     pattern2 = 'ttaggg'
     pattern4 = 'aatccc'
+
+    # as observed in chr5
+    pattern5 = 'taaccc'
+
     seq_s = seq_s[start:end]
     
     hits = 0
@@ -48,6 +52,8 @@ def assess_repeats(seq, start, end):
             hits = hits + 1
         elif str(pattern4) in kmer_s:
             hits = hits + 1
+        elif str(pattern5) in kmer_s:
+            hits = hits + 1
         elif str(reversed(pattern2)) in kmer_s:
             hits = hits + 1
         elif str(reversed(pattern1)) in kmer_s:
@@ -55,6 +61,8 @@ def assess_repeats(seq, start, end):
         elif str(reversed(pattern3)) in kmer_s:
             hits = hits + 1
         elif str(reversed(pattern4)) in kmer_s:
+            hits = hits + 1
+        elif str(reversed(pattern5)) in kmer_s:
             hits = hits + 1
         else:
             if distance(pattern1, seq) == allowed_errs:
@@ -104,59 +112,55 @@ def window(iterable, n=6):
         consume(it, i)
     return zip(*iters)
 
+def scan_record(record, direction):
+    coordinates = 0
+    sequence = record.seq
+    oliver_offset = 500 # "Can you calculate the number of hexamers around your established transition coordinates for, say, 500bp in each direction?"
+    chrom_length = len(sequence)
+
+    for char in sequence:
+    for char in reversed(seq):
+
+        coordinates = coordinates + 1
+        if(char == 'N'):
+            continue
+        else:
+            start = coordinates-oliver_offset
+            end = coordinates+length
+
+            # XXX: Reverse
+            #            start = chrom_length-coordinates-length-oliver_offset
+            #            end = chrom_length-coordinates
+
+            
+            bedfile[record.id].append(start)
+            hits, partial_hits = assess_repeats(seq, start, end)
+            
+            log.info("{direction}: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(direction='forward', chrom=record.id, 
+                                                                                                       pos=start, chr_length=chrom_length))
+                                                                                                       # XXX: Reverse: format(chrom=record.id, pos=chrom_length-coordinates, chr_length=chrom_length))
+            log.info("Sequenc: {seq}".format(seq=seq[start:end]))
+            log.info("HexCnt for {chrom}: {mers}, {phits}".format(chrom=record.id, mers=hits, phits=partial_hits))
+
+            coordinates = 0
+            hits = 0
+            break
+
+    return bedline
+
 @click.command()
 @click.argument('genome_build', type=click.Path(exists=True))
-def main(genome_build='data/external/hg38.fa.gz'):
-    coordinates = 0
+@click.option('--only-chr', 'only_chr', help='Only processes the specified chromosome')
+def main(genome_build='data/external/hg38.fa.gz', only_chr=None):
     bedfile = defaultdict(list)
 
     with gzip.open(genome_build, "rt") as hg38_fa:
-        for record in SeqIO.parse(hg38_fa, "fasta"):
-            chrom_length = len(record.seq)
+        record_dict = SeqIO.to_dict(SeqIO.parse(hg38_fa, "fasta"))
+        for record in record_dict:
             if "_" not in record.id: #avoid extra assemblies
-                if "chrM" not in record.id: #skip Mitochondrial DNA
-                    seq = record.seq
-
-        #XXX: Remove code duplication here
-                    for char in seq:
-                        coordinates = coordinates + 1
-                        if(char == 'N'):
-                            continue
-                        else:
-                            start = coordinates-oliver_offset
-                            end = coordinates+length
-                            
-                            bedfile[record.id].append(start)
-                            hits, partial_hits = assess_repeats(seq, start, end)
-                            
-                            log.info("Forward: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(chrom=record.id, pos=start, chr_length=chrom_length))
-                            log.info("Sequenc: {seq}".format(seq=seq[start:end]))
-                            log.info("HexCnt for {chrom}: {mers}, {phits}".format(chrom=record.id, mers=hits, phits=partial_hits))
-
-                            coordinates = 0
-                            hits = 0
-                            break
-
-                    # in reverse now
-                    for char in reversed(seq):
-
-                        coordinates = coordinates + 1
-                        if(char == 'N'):
-                            continue
-                        else:
-                            start = chrom_length-coordinates-length-oliver_offset
-                            end = chrom_length-coordinates
-
-                            bedfile[record.id].append(start)
-                            hits, partial_hits = assess_repeats(seq, start, end)
-                            
-                            log.info("Reverse: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(chrom=record.id, pos=chrom_length-coordinates, chr_length=chrom_length))
-                            log.info("Sequenc: {seq}".format(seq=seq[start:end]))
-                            log.info("HexCnt for {chrom}: {mers}, {phits}".format(chrom=record.id, mers=hits, phits=partial_hits))
-                            
-                            coordinates = 0
-                            hits = 0
-                            break
+                if "chrM" not in record.id: #skip Mitochondrial DNA (circular so no point to search for telomeres)
+                    bedrow = scan_record(record, 'forward')
+                    bedfile[record.id].append(bedrow)
 
         with open(Path('data/processed/telomere_coords.bed'), "w+") as tel:
             for k, v in bedfile.items():
