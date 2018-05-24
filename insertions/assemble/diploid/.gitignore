@@ -2,3 +2,5 @@
 !img/
 !*.png
 !.gitignore
+!*.flat
+!*.bed

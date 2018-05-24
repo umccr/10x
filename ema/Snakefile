@@ -1,0 +1,168 @@
+shell.executable("bash")
+shell.prefix("export PATH=/g/data3/gx8/extras/10x/miniconda/bin:/home/563/vs2870/bin:$PATH; ")
+#
+# Spartan:
+# module load libzip/1.1.2-GCC-6.2.0
+# export PATH=/data/cephfs/punim0010/extras/10x/miniconda/bin:$PATH
+# BARCODES=/data/cephfs/punim0010/extras/10x/longranger-2.1.6/longranger-cs/2.1.6/tenkit/lib/python/tenkit/barcodes/4M-with-alts-february-2016.txt
+# REF=/data/cephfs/punim0010/projects/Saveliev_10X/EMA_REF
+
+# Raijin:
+# module load gcc/6.2.0
+# export PATH=/g/data3/gx8/extras/10x/miniconda/bin:/home/563/vs2870/bin:$PATH
+# BARCODES=/g/data3/gx8/extras/10x/longranger-2.1.6/longranger-cs/2.1.6/tenkit/lib/python/tenkit/barcodes/4M-with-alts-february-2016.txt
+# REF=/g/data3/gx8/projects/Saveliev_10X/COLO829-10x/EMA_REF
+
+
+
+
+# sample_name = config['sample']
+# fastq_dirs = config['fastq_dirs']
+# genome = config['genome']
+
+sample_name = 'Colo829_100pc_10x'
+# source run.sh /g/data3/gx8/data/Transfer/180307_A00130_0039_AH5GWHDMXX/Chromium_WGS_20180306/SI-GA-A3_? Colo829_100pc_10x hg38
+# source run.sh /g/data3/gx8/data/Transfer/180307_A00130_0040_BHCLKNDMXX/Chromium_WGS_20180306/SI-GA-A8_? Colo829Bl_10x hg38 2>&1
+
+genome = 'hg38'
+ref_folder = '/g/data3/gx8/projects/Saveliev_10X/COLO829-10x/EMA_REF'
+ref = ref_folder + '/' + genome + '.fa'
+
+rg = "@RG\\tID:" + sample_name + "_EMA\\tSM:" + sample_name + "_EMA"
+
+
+rule all:
+    input: 
+        expand('ema_work/ema-bin-{bc}.bam', bc=[f'{bc:03d}' for bc in range(500)])
+        # sample_name + '.bam',
+        # sample_name + '.stats.txt'
+
+
+
+# rule count:
+#     input:
+#         fastq = {fastq}
+#     shell:
+#         bash interleave_fq.sh {} | ema count -w $BARCODES -o {/.} 2>{/.}.log
+#
+#
+# rule preproc:
+#     input:
+#         input = fastqc
+#     output:
+#         fastq = dynamic('ema_work/ema-bin-{bc}')
+#     shell:
+#         'ls'
+
+
+rule align:
+    input:
+        fastq = 'ema_work/ema-bin-{bc}'
+    output:
+        bam = 'ema_work/ema-bin-{bc}.bam'
+    # wildcard_constraints:
+    #     bc = '\d\d\d'
+    threads: 4
+    # params: 
+    #     walltime='4:00:00',
+    #     mem='20G',
+    #     ncpus='4'
+    shell:
+        'ema align -R "' + rg + '" -t {threads} -d -r ' + ref  + ' -s {input.fastq} '
+        '| samtools sort -@ {threads} -O bam -l 0 -m 4G -o {output.bam}'
+
+
+rule align_nobc:
+    input:
+        fastq = 'ema_work/ema-nobc'
+    output:
+        bam = 'ema_work/ema-nobc.bam'
+    threads: 30
+    shell:
+        'bwa mem -p -t {threads} -M -R "' + rg + '" ' + ref + ' {input.fastq} '
+        '| samtools sort -@ {threads} -O bam -l 0 -m 4G -o {output.bam}'
+
+
+rule markdup_nobc:
+    input: 
+        rules.align_nobc.output[0]
+    output:
+        'ema_work/ema-nobc.markdup.bam'
+    threads: 30
+    shell:
+        'sambamba markdup -t {threads} -p -l 0 {input} {output}'
+
+
+rule merge:
+    input:
+        expand(rules.align.output, bc=[f'{bc:03d}' for bc in range(500)]),
+        rules.markdup_nobc.output
+    output:
+        sample_name + '.bam'
+    threads: 30
+    shell:
+        'sambamba merge -t {threads} -p {output} {input}'
+
+
+rule stats:
+    input:
+        rules.merge.output[0]
+    output:
+        sample_name + '.stats.txt'
+    threads: 30
+    shell:
+        'samtools stats -@ {threads} {input} > {output}'
+
+
+"""
+# Spartan:
+module load libzip/1.1.2-GCC-6.2.0
+export PATH=/data/cephfs/punim0010/extras/10x/miniconda/bin:$PATH
+BARCODES=/data/cephfs/punim0010/extras/10x/longranger-2.1.6/longranger-cs/2.1.6/tenkit/lib/python/tenkit/barcodes/4M-with-alts-february-2016.txt
+REF=/data/cephfs/punim0010/projects/Saveliev_10X/EMA_REF
+#
+# Raijin:
+# module load gcc/6.2.0
+# export PATH=/g/data3/gx8/extras/10x/miniconda/bin:/home/563/vs2870/bin:$PATH
+# BARCODES=/g/data3/gx8/extras/10x/longranger-2.1.6/longranger-cs/2.1.6/tenkit/lib/python/tenkit/barcodes/4M-with-alts-february-2016.txt
+# REF=/g/data3/gx8/projects/Saveliev_10X/COLO829-10x/EMA_REF
+
+GENOME=GRCh37
+SAMPLE=$1
+R1_FILES="${@:2}"
+
+echo $SAMPLE
+echo $GENOME
+
+THREADS=30
+BWA_JOBS=8
+BWA_THREADS=4
+
+echo 'paste <(pigz -c -d $1 | paste - - - -) <(pigz -c -d ${1/_R1_/_R2_} | paste - - - -) | tr "\\t" "\\n"' > interleave_fq.sh
+
+date
+parallel -j${THREADS} "bash interleave_fq.sh {} | ema count -w $BARCODES -o {/.} 2>{/.}.log" ::: $R1_FILES
+
+date
+ls $R1_FILES | xargs -I '{}' bash interleave_fq.sh '{}' | ema preproc -w $BARCODES -n 500 -t ${THREADS} -o ema_work *.ema-ncnt 2>&1 | tee ema_preproc.log
+
+date
+parallel -j${BWA_JOBS} "ema align -R $'@RG\tID:${SAMPLE}\tSM:${SAMPLE}' -t ${BWA_THREADS} -d -r $REF/$GENOME.fa -s {} | samtools sort -@ ${BWA_THREADS} -O bam -l 0 -m 4G -o {}.bam -" ::: ema_work/ema-bin-???
+
+date
+bwa mem -p -t ${THREADS} -M -R "@RG\tID:${SAMPLE}\tSM:${SAMPLE}" $REF/$GENOME.fa ema_work/ema-nobc |\
+  samtools sort -@ ${THREADS} -O bam -l 0 -m 4G -o ema_work/ema-nobc.bam
+
+date
+sambamba markdup -t ${THREADS} -p -l 0 ema_work/ema-nobc.bam ema_work/ema-bin-nobc-dupsmarked.bam && rm ema_work/ema-nobc.bam
+
+date
+sambamba merge -t ${THREADS} -p ${SAMPLE}.bam ema_work/*.bam
+
+date
+samtools stats -@ ${THREADS} ${SAMPLE}.bam > ${SAMPLE}.stats.txt
+
+date
+
+# bash run.sh NeverResponder10x_normal_EMA /data/cephfs/punim0010/data/FASTQ/180312_A00130_0041_AHCLLMDMXX/Chromium_20180312/SI-GA-A11_*/*_R1_*.gz
+"""

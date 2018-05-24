@@ -15,9 +15,10 @@ Some insertions in human samples cannot be reconstructed by the read alignment t
   + [HPV oncogenes](#hpv-oncogenes)
 * [10x COLO829](#10x-colo829)
 
+
 ## Extracting unmapped reads
 
-Reads from novel insertions are expected to end up as "unmapped" in a human genome BAM file file. So we start the analysis with getting reads unmapped to the human genome, as well as the reads unmapped mates which can support integration breakpoints.
+Reads from novel insertions are expected to end up as "unmapped" in a human genome BAM file. So we start the analysis with getting reads unmapped to the human genome, as well as the reads unmapped mates which can support integration breakpoints.
 
 ```
 sambamba view -f bam -F "unmapped or mate_is_unmapped" -t 20 diploid_tumor-ready.bam | samtools sort diploid_tumor-unmapped_or_mate.unsorted.bam -n -@ 10 > diploid_tumor-unmapped_or_mate.namesorted.bam
@@ -47,11 +48,12 @@ samtools fastq diploid_tumor-unmapped_or_mate.namesorted.bam -1 diploid_tumor.R1
 [M::bam2fq_mainloop] processed 14878054 reads
 ```
 
+
 ## Exploring taxonomic content
 
 Querying the target reads against the oncovirus database. First using a fast k-mer approach to give a quick outline, then using exact BWA-MEM alignment to get reads aligned to particular species.
 
-### Mash
+### Mash vs GDC-viral
 
 Applying a fast [k-mer based approach](http://mash.readthedocs.io/en/latest/tutorials.html?highlight=screen#screening-a-read-set-for-containment-of-refseq-genomes). First, querying against a oncoviral database from GDC:
 
@@ -88,7 +90,8 @@ mash screen mash/refseq.genomes.k21s1000.msh diploid_tumor.R1.fq diploid_tumor.R
 
 Confirmed HPV18.
 
-### BWA-MEM
+
+### BWA-MEM vs GDC-viral
 
 First aligning to the GDC oncoviruses fasta:
 
@@ -100,16 +103,18 @@ bwa mem -t 10 /g/data3/gx8/extras/vlad/bcbio/genomes/Hsapiens/GRCh37/viral/gdc-v
 
 samtools idxstats viral_mapping/diploid_tumor_viral.bam | awk 'BEGIN {OFS="\t"} {print $1, $2, $3, ($2 != 0) ? $3/$2*150 : 0 }' | sort -nr -k4,4 | head | cols
 
-name      len  mapped  coverage  normalize by dividing by 1173944366/1000000000 = 1.174 billion reads in genome
-HPV18    7857  151264  2888      2460
-HCV-2    9711   12828   198       169
-HPV71    8037    2661    49.6
-HCV-1    9646    2862    44.5
-HPV82    7870     242     4.6
-HPV19    7685     212     4.1
-HPV21    7779      59     1.1
-HPV20    7757      37     0.7
-HPV25    7713      34     0.7
+                      completeness at coverage
+name    len  ave cov  1x    5x    25x
+HPV18  7857  2265.23  1     1     0.93
+HCV-1  9646  1.93     0.01  0.01  0.01
+HCV-2  9711  2.68     0.01  0.01  0.01
+HPV71  8037  7.78     0.01  0.01  0.01
+HPV19  7685  1.02     0.01  0.01  0.01
+HPV82  7870  0.66     0.01  0.01  0.00
+HPV20  7757  0.18     0.01  0.01  0.00
+HPV21  7779  0.22     0.01  0.01  0.00
+HPV25  7713  0.11     0.01  0.01  0.00
+HPV14  7713  0.05     0.01  0.00  0.00
 ```
 
 HPV18 has an extremely high coveage. Aligning to HPV18 only to make sure none of the related virus didn't hijacked any reads:
@@ -125,6 +130,7 @@ samtools idxstats viral_mapping/to_HPV18.bam | awk 'BEGIN {OFS="\t"} {print $1, 
 ```
 
 Getting same coverage.
+
 
 ## De-novo assembling HPV18 region
 
@@ -162,13 +168,14 @@ Reads getting assembled pretty well into 4 long contigs:
 
 ![icarus](assemble/diploid/img/icarus_HPV18.png)
 
-All 4 contigs touch each other and cover the assembly fully uniformly, which is a strong evidence of the virus being present in the dataset with possible breakpoints in integration sites. NODE_2, NODE_4 and NODE_4 are amplified heavily up to 5kX coverage, and NODE_1 has a much smaller coverage. The genome is clearly circular - NODE_2 spans the edges, and the breakpoing supported by discordant pairs:
+All 4 contigs touch each other and cover the assembly fully uniformly, which is a strong evidence of the virus being present in the dataset with possible breakpoints in integration sites. NODE_2, NODE_3 and NODE_4 are amplified heavily up to 5kX coverage, and NODE_1 has a much smaller coverage. The genome is clearly circular - NODE_2 spans the edges, and the breakpoing supported by discordant pairs:
 
 ![igv](assemble/diploid/img/igv_HPV18.png)
 
+
 ## Looking for integration sites
 
-To identify if the virus is integrated into human, we need to review the viral read whose mates map to the human genome. We would expect reads of forward orienation to pile up to the left of the breakpoint, and reads of the opposite orientation to pile up to the right of the breakpoint; a simmetrical picture would be expected in the human chromosome as well. In order to figure that out, we are creating a GRCh37-HPV18 spike reference, and remap reads against this artificial genome:
+To identify if the virus is integrated into human, we need to review the viral read whose mates map to the human genome. We would expect reads of forward orientation to pile up to the left of the breakpoint, and reads of the opposite orientation to pile up to the right of the breakpoint; a simmetrical picture would be expected in the human chromosome as well. In order to figure that out, we are creating a GRCh37-HPV18 spike reference, and remap reads against this artificial genome:
 
 ```
 mkdir GRCh37_HPV18
@@ -211,6 +218,7 @@ Another interesting obervation comes from blasting the contigs against all human
 
 It would be interesting to repeat the whole experiment with hg38.
 
+
 ## chr8 integration site
 
 The read orientations spanning the breakpoints suggest a quite complex event rather than a simple insertion of the virus. Exploring the full 16kb GRCh37 region covering all of 3 breakpoints:
@@ -245,7 +253,7 @@ Where N is around 10.
 
 The integration site overlaps long non-coding RNA genes CASC21 (Cancer Susceptibility 21, CARLo-2) and CASC8 (Cancer Susceptibility 8, CARLo-1) in their introns. Both genes are associated with cancer, and located in a region 8q24.21 nearby the oncogene MYC, which is amplified in this sample.
 
-8q24.21 is [well known](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4695887) as HPV integration site hotspot: [](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4695887)
+8q24.21 is [well known](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4695887) as HPV integration site hotspot:
 
 ["In genital cancers, HPV sequences were localized in chromosome band 8q24.1, in which the c-myc gene is mapped... In three of the four cases, the proto-oncogene located near integrated viral sequences was found to be structurally altered and/or overexpressed. These data indicate that HPV genomes are preferentially integrated near myc genes in invasive genital cancers and support the hypothesis that integration plays a part in tumor progression via an activation of cellular oncogenes."](https://www.ncbi.nlm.nih.gov/pubmed/1649348/)
 
@@ -276,6 +284,7 @@ By overlaying [HPV18 genes](https://www.ncbi.nlm.nih.gov/gene/1489088) on covera
 However, the integration site doesn't disrupt E2, but it's covered in a much lower rate than the oncogenes. It would be interesting to perform and RNAseq on this sample and quantify the expression of E6, E7, E2, MYC, MYC, TP53, and RB1; additionally, MYC significantly upregulates genes with already high expression, so it would be interesting to look for overexpressed genes.
 
 More on HPV integration: [1](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC395710/pdf/520275.pdf), [2](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3912410/).
+
 
 ## Exprerimenting with 10x
 

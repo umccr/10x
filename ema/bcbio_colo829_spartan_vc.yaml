@@ -11,10 +11,11 @@ details:
         tools_off: [gemini, upload_alignment]
         # Variant calling, 2-out-of-3. All callers handle InDels
         variantcaller:
-            germline: [vardict, strelka2, gatk-haplotype]
-            somatic: [vardict, strelka2, mutect2]
-        ensemble:
-            numpass: 2
+#            germline: [vardict, strelka2, gatk-haplotype]
+#            somatic: [vardict, strelka2, mutect2]
+            strelka2
+#        ensemble:
+#            numpass: 2
     description: Colo829_10x_80pc_LR  # RG:Colo829_10x_80pc_LR
     files: /data/cephfs/punim0010/projects/Saveliev_10X/COLO829-10x/bams/Colo829_10x_80pc_LR.bam
     genome_build: GRCh37
@@ -34,10 +35,11 @@ details:
         tools_off: [gemini, upload_alignment]
         # Variant calling, 2-out-of-3. All callers handle InDels
         variantcaller:
-            germline: [vardict, strelka2, gatk-haplotype]
-            somatic: [vardict, strelka2, mutect2]
-        ensemble:
-            numpass: 2
+#            germline: [vardict, strelka2, gatk-haplotype]
+#            somatic: [vardict, strelka2, mutect2]
+            strelka2
+#        ensemble:
+#            numpass: 2
     description: Colo829Bl_10x_LR # RG:Colo829Bl_10x_LR
     files: /data/cephfs/punim0010/projects/Saveliev_10X/COLO829-10x/bams/Colo829Bl_10x_80pc_LR.bam
     genome_build: GRCh37
@@ -57,10 +59,11 @@ details:
         tools_off: [gemini, upload_alignment]
         # Variant calling, 2-out-of-3. All callers handle InDels
         variantcaller:
-            germline: [vardict, strelka2, gatk-haplotype]
-            somatic: [vardict, strelka2, mutect2]
-        ensemble:
-            numpass: 2
+#            germline: [vardict, strelka2, gatk-haplotype]
+#            somatic: [vardict, strelka2, mutect2]
+            strelka2
+#        ensemble:
+#            numpass: 2
     description: Colo829_80pc_EMA
     files: /data/cephfs/punim0010/projects/Saveliev_10X/COLO829-10x/bams/Colo829_10x_80pc_EMA.bam
     genome_build: GRCh37
@@ -80,10 +83,11 @@ details:
         tools_off: [gemini, upload_alignment]
         # Variant calling, 2-out-of-3. All callers handle InDels
         variantcaller:
-            germline: [vardict, strelka2, gatk-haplotype]
-            somatic: [vardict, strelka2, mutect2]
-        ensemble:
-            numpass: 2
+#            germline: [vardict, strelka2, gatk-haplotype]
+#            somatic: [vardict, strelka2, mutect2]
+            strelka2
+#        ensemble:
+#            numpass: 2
     description: Colo829Bl_10x_80pc_EMA
     files: /data/cephfs/punim0010/projects/Saveliev_10X/COLO829-10x/bams/Colo829Bl_10x_80pc_EMA.bam
     genome_build: GRCh37
