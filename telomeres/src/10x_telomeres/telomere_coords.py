@@ -18,10 +18,7 @@ length = 1000 # How much raw sequence to display?
 parse_threshold = 1000000 # How much raw sequence to parse through?
 
 # XXX: Do not use coordinates, but (BioPython) iterators instead (.next() and so on)
-# XXX: Use brentp's cruzdb to compare sequences side by side?
 # XXX: K-mer analysis: Tweak length variable and resulting bedfile according to that metric.
-# XXX: chrM    -499    501 # after applying Oliver offsets... treat as offlier?
-# XXX: Apply Vlad advise, do enumerate instead of iter sliding window.
 # XXX: Coordinate scanning per chromosome, i.e: ./telomere_coords.py hg38.gz --chrom='chr11', useful for debugging purposes
 
 def assess_repeats(seq, start, end):
@@ -54,9 +51,9 @@ def assess_repeats(seq, start, end):
             hits = hits + 1
         elif str(pattern5) in kmer_s:
             hits = hits + 1
-        elif str(reversed(pattern2)) in kmer_s:
-            hits = hits + 1
         elif str(reversed(pattern1)) in kmer_s:
+            hits = hits + 1
+        elif str(reversed(pattern2)) in kmer_s:
             hits = hits + 1
         elif str(reversed(pattern3)) in kmer_s:
             hits = hits + 1
@@ -94,6 +91,7 @@ def distance(a,b):
             count += 1
     return count
 
+# https://stackoverflow.com/questions/6822725/rolling-or-sliding-window-iterator
 def consume(iterator, n):
     "Advance the iterator n-steps ahead. If n is none, consume entirely."
     # Use functions that consume iterators at C speed.
@@ -113,40 +111,20 @@ def window(iterable, n=6):
     return zip(*iters)
 
 def scan_record(record, direction):
-    coordinates = 0
     sequence = record.seq
     oliver_offset = 500 # "Can you calculate the number of hexamers around your established transition coordinates for, say, 500bp in each direction?"
     chrom_length = len(sequence)
 
-    for char in sequence:
-    for char in reversed(seq):
+    for it in enumerate(sequence):
+        print(it)
+        # if(char == 'N'):
+        #     continue
+        # else:
+        #     hits, partial_hits = assess_repeats(sequence)
+        #     log.info("{direction}: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(direction='forward', chrom=record.id, 
+        #                                                                                                pos=char, chr_length=chrom_length))
 
-        coordinates = coordinates + 1
-        if(char == 'N'):
-            continue
-        else:
-            start = coordinates-oliver_offset
-            end = coordinates+length
-
-            # XXX: Reverse
-            #            start = chrom_length-coordinates-length-oliver_offset
-            #            end = chrom_length-coordinates
-
-            
-            bedfile[record.id].append(start)
-            hits, partial_hits = assess_repeats(seq, start, end)
-            
-            log.info("{direction}: Telomere for chrom {chrom} from coord {pos} of {chr_length}".format(direction='forward', chrom=record.id, 
-                                                                                                       pos=start, chr_length=chrom_length))
-                                                                                                       # XXX: Reverse: format(chrom=record.id, pos=chrom_length-coordinates, chr_length=chrom_length))
-            log.info("Sequenc: {seq}".format(seq=seq[start:end]))
-            log.info("HexCnt for {chrom}: {mers}, {phits}".format(chrom=record.id, mers=hits, phits=partial_hits))
-
-            coordinates = 0
-            hits = 0
-            break
-
-    return bedline
+    return "foo bar baz"
 
 @click.command()
 @click.argument('genome_build', type=click.Path(exists=True))
@@ -155,12 +133,13 @@ def main(genome_build='data/external/hg38.fa.gz', only_chr=None):
     bedfile = defaultdict(list)
 
     with gzip.open(genome_build, "rt") as hg38_fa:
+        #record_dict = SeqIO.index(genome_build, "fasta")
         record_dict = SeqIO.to_dict(SeqIO.parse(hg38_fa, "fasta"))
-        for record in record_dict:
-            if "_" not in record.id: #avoid extra assemblies
-                if "chrM" not in record.id: #skip Mitochondrial DNA (circular so no point to search for telomeres)
-                    bedrow = scan_record(record, 'forward')
-                    bedfile[record.id].append(bedrow)
+        for chrom_name, chrom_attrs in enumerate(record_dict):
+            if "_" not in chrom_name: #avoid extra assemblies
+                if "chrM" not in chrom_attrs: #skip Mitochondrial DNA (circular so no point to search for telomeres)
+                    bedrow = scan_record(chrom_attrs, 'forward')
+                    bedfile[chrom_name].append(bedrow)
 
         with open(Path('data/processed/telomere_coords.bed'), "w+") as tel:
             for k, v in bedfile.items():
