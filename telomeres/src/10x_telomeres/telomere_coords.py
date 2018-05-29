@@ -15,13 +15,8 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 
 motif_size = 6
-allowed_errs = 1 # How many errors in the telomeric pattern are allowed?
-length = 1000 # How much raw sequence to display?
-parse_threshold = 10000 # How much raw sequence to parse through?
+oliver_offset = 500 # "Can you calculate the number of hexamers around your established transition coordinates for, say, 500bp in each direction?"
 
-# XXX: Do not use coordinates, but (BioPython) iterators instead (.next() and so on)
-# XXX: K-mer analysis: Tweak length variable and resulting bedfile according to that metric.
-# XXX: Coordinate scanning per chromosome, i.e: ./telomere_coords.py hg38.gz --chrom='chr11', useful for debugging purposes
 
 def assess_repeats(seq: str):
     seq_s = str(seq).lower()
@@ -82,7 +77,6 @@ def rev_string(s: str):
 
 def scan_record(record: SeqIO, direction: str):
     sequence = record.seq
-    oliver_offset = 500 # "Can you calculate the number of hexamers around your established transition coordinates for, say, 500bp in each direction?"
     chrom_length = len(sequence)
     hits = 0
     pos = 0 

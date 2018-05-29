@@ -17,6 +17,7 @@ configfile: Path("config/config.yml")
 
 include: "src/snakemake/hg38_telomere_coords.smk"
 #include: "src/snakemake/bamprep.smk"
+#include: "src/snakemake/mosdepth.smk"
 #include: "src/snakemake/multimapping.smk"
 #include: "src/snakemake/stats.smk"
 #include: "src/snakemake/telomerecat.smk"
