@@ -3,6 +3,7 @@
 import sys
 import click
 import gzip
+from typing import List
 from pathlib import Path
 from collections import defaultdict, deque
 from itertools import islice, tee
@@ -16,25 +17,24 @@ log.setLevel(logging.INFO)
 motif_size = 6
 allowed_errs = 1 # How many errors in the telomeric pattern are allowed?
 length = 1000 # How much raw sequence to display?
-parse_threshold = 1000000 # How much raw sequence to parse through?
+parse_threshold = 10000 # How much raw sequence to parse through?
 
 # XXX: Do not use coordinates, but (BioPython) iterators instead (.next() and so on)
 # XXX: K-mer analysis: Tweak length variable and resulting bedfile according to that metric.
 # XXX: Coordinate scanning per chromosome, i.e: ./telomere_coords.py hg38.gz --chrom='chr11', useful for debugging purposes
 
-def assess_repeats(seq):
+def assess_repeats(seq: str):
     seq_s = str(seq).lower()
     
     pattern1 = 'ccctaa'
     pattern3 = 'gggatt'
     pattern2 = 'ttaggg'
     pattern4 = 'aatccc'
-    pattern5 = 'taaccc'
+    pattern5 = 'taaccc'  # as found in hg38 chr5, not in literature
 
     hits = 0
 
     for kmer in window(seq_s, len(pattern1)):
-        kmer_s = ''.join(kmer) # fuse tuple back to string
         if pattern1 in kmer_s:
             hits = hits + 1
         elif pattern2 in kmer_s:
@@ -58,13 +58,6 @@ def assess_repeats(seq):
 
     return hits
 
-def distance(a,b):
-    count = 0
-    for i in range (0,len(a)):
-        if a[i] != b[i]:
-            count += 1
-    return count
-
 # https://stackoverflow.com/questions/6822725/rolling-or-sliding-window-iterator
 def consume(iterator, n):
     "Advance the iterator n-steps ahead. If n is none, consume entirely."
@@ -84,7 +77,7 @@ def window(iterable, n=motif_size):
         consume(it, i)
     return zip(*iters)
 
-def scan_record(record, direction):
+def scan_record(record: SeqIO, direction: str):
     sequence = record.seq
     oliver_offset = 500 # "Can you calculate the number of hexamers around your established transition coordinates for, say, 500bp in each direction?"
     chrom_length = len(sequence)
@@ -101,15 +94,12 @@ def scan_record(record, direction):
         else:
             break
 
-    #import ipdb
-    #ipdb.set_trace()
-
     # start
     bedrow.append(pos)
 
     # Test the kmers for patterns, store the position and count hits
     for hexamer in window(sequence[pos:pos+parse_threshold]):
-        hits = assess_repeats(hexamer)
+        hits = assess_repeats(''.join(hexamer)) # fuse tuple back to string
         pos = pos+1
 
     # end
@@ -130,9 +120,10 @@ def main(genome_build='data/external/hg38.fa.gz', only_chr=None):
             if "_" not in chrom_name: #avoid extra assemblies
                 if "chrM" not in chrom_name: #skip Mitochondrial DNA (circular so no point to search for telomeres)
                     bedrow, hits = scan_record(chrom_attrs, 'forward')
-                    bedfile[chrom_name].append(bedrow)
-                    log.info("{bedrow} ## hits: {hits}".format(bedrow=bedrow,
+                    #bedrow, hits = scan_record(chrom_attrs, 'reverse')
+                    print("{bedrow} ## hits: {hits}".format(bedrow=bedrow,
                                                                hits=hits))
+                    bedfile[chrom_name].append(bedrow)
 
 if __name__ == "__main__":
     main()
