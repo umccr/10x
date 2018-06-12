@@ -25,7 +25,7 @@ def assess_repeats(seq: str):
     pattern3 = 'gggatt'
     pattern2 = 'ttaggg'
     pattern4 = 'aatccc'
-    pattern5 = 'taaccc'  # as found in hg38 chr5, not in literature
+    pattern5 = 'taaccc'
 
     hits = 0
 
