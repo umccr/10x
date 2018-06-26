@@ -1,6 +1,7 @@
-shell.executable("bash")
-shell.prefix("export PATH=/g/data3/gx8/extras/10x/miniconda/bin:/home/563/vs2870/bin:$PATH; ")
-#
+import os
+shell.executable(os.environ.get('SHELL', "bash"))
+# shell.prefix("export PATH=/g/data3/gx8/extras/10x/miniconda/bin:/home/563/vs2870/bin:$PATH; ")
+
 # Spartan:
 # module load libzip/1.1.2-GCC-6.2.0
 # export PATH=/data/cephfs/punim0010/extras/10x/miniconda/bin:$PATH
@@ -14,52 +15,42 @@ shell.prefix("export PATH=/g/data3/gx8/extras/10x/miniconda/bin:/home/563/vs2870
 # REF=/g/data3/gx8/projects/Saveliev_10X/COLO829-10x/EMA_REF
 
 
-
-
-# sample_name = config['sample']
-# fastq_dirs = config['fastq_dirs']
-# genome = config['genome']
-
-sample_name = 'Colo829_100pc_10x'
-# source run.sh /g/data3/gx8/data/Transfer/180307_A00130_0039_AH5GWHDMXX/Chromium_WGS_20180306/SI-GA-A3_? Colo829_100pc_10x hg38
-# source run.sh /g/data3/gx8/data/Transfer/180307_A00130_0040_BHCLKNDMXX/Chromium_WGS_20180306/SI-GA-A8_? Colo829Bl_10x hg38 2>&1
-
-genome = 'hg38'
-ref_folder = '/g/data3/gx8/projects/Saveliev_10X/COLO829-10x/EMA_REF'
-ref = ref_folder + '/' + genome + '.fa'
+sample_name = config['sample']
+r1_fastq_paths = config['r1_fastq_paths']
+ref_fa = config['ref_fa']
+bwa_fa = config['bwa_fa']
 
 rg = "@RG\\tID:" + sample_name + "_EMA\\tSM:" + sample_name + "_EMA"
 
 
 rule all:
     input: 
-        expand('ema_work/ema-bin-{bc}.bam', bc=[f'{bc:03d}' for bc in range(500)])
+        expand('work/ema-bin-{bc}.bam', bc=[f'{bc:03d}' for bc in range(500)])
         # sample_name + '.bam',
         # sample_name + '.stats.txt'
 
 
+rule count:
+    input:
+        fastq = {fastq}
+    shell:
+        'bash interleave_fq.sh {} | ema count -w $BARCODES -o {/.} 2>{/.}.log'
 
-# rule count:
-#     input:
-#         fastq = {fastq}
-#     shell:
-#         bash interleave_fq.sh {} | ema count -w $BARCODES -o {/.} 2>{/.}.log
-#
-#
-# rule preproc:
-#     input:
-#         input = fastqc
-#     output:
-#         fastq = dynamic('ema_work/ema-bin-{bc}')
-#     shell:
-#         'ls'
+
+rule preproc:
+    input:
+        input = fastqc
+    output:
+        fastq = dynamic('work/ema-bin-{bc}')
+    shell:
+        'ls'
 
 
 rule align:
     input:
-        fastq = 'ema_work/ema-bin-{bc}'
+        fastq = 'work/ema-bin-{bc}'
     output:
-        bam = 'ema_work/ema-bin-{bc}.bam'
+        bam = 'work/ema-bin-{bc}.bam'
     # wildcard_constraints:
     #     bc = '\d\d\d'
     threads: 4
@@ -74,9 +65,9 @@ rule align:
 
 rule align_nobc:
     input:
-        fastq = 'ema_work/ema-nobc'
+        fastq = 'work/ema-nobc'
     output:
-        bam = 'ema_work/ema-nobc.bam'
+        bam = 'work/ema-nobc.bam'
     threads: 30
     shell:
         'bwa mem -p -t {threads} -M -R "' + rg + '" ' + ref + ' {input.fastq} '
@@ -87,7 +78,7 @@ rule markdup_nobc:
     input: 
         rules.align_nobc.output[0]
     output:
-        'ema_work/ema-nobc.markdup.bam'
+        'work/ema-nobc.markdup.bam'
     threads: 30
     shell:
         'sambamba markdup -t {threads} -p -l 0 {input} {output}'
@@ -166,3 +157,4 @@ date
 
 # bash run.sh NeverResponder10x_normal_EMA /data/cephfs/punim0010/data/FASTQ/180312_A00130_0041_AHCLLMDMXX/Chromium_20180312/SI-GA-A11_*/*_R1_*.gz
 """
+
