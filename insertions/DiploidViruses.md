@@ -21,7 +21,7 @@ Some insertions in human samples cannot be reconstructed by the read alignment t
 Reads from novel insertions are expected to end up as "unmapped" in a human genome BAM file. So we start the analysis with getting reads unmapped to the human genome, as well as the reads unmapped mates which can support integration breakpoints.
 
 ```
-sambamba view -f bam -F "unmapped or mate_is_unmapped" -t 20 diploid_tumor-ready.bam | samtools sort diploid_tumor-unmapped_or_mate.unsorted.bam -n -@ 10 > diploid_tumor-unmapped_or_mate.namesorted.bam
+sambamba view -f bam -F "unmapped or mate_is_unmapped" -t 20 diploid_tumor-ready.bam | samtools sort -n -@ 10 > diploid_tumor-unmapped_or_mate.namesorted.bam
 ```
 
 Then we filter high quality reads:
@@ -388,6 +388,26 @@ Not clear about this one.
 #### Expreriment with 10x data
 
 In [this document](README.md), we are experimenting with an external 10x dataset NA12878 and an internally sequences COLO829.
+
+#### Local assembly of chr8+HPV region
+
+```
+samtools sort -n to_GRCh37_HPV18__plus_human_reads_and_MYC.bam -O bam -o to_GRCh37_HPV18__plus_human_reads_and_MYC.sorted.bam
+
+samtools fastq to_GRCh37_HPV18__plus_human_reads_and_MYC.sorted.bam -1 to_GRCh37_HPV18__plus_human_reads_and_MYC.R1.fq -2 to_GRCh37_HPV18__plus_human_reads_and_MYC.R2.fq -s to_GRCh37_HPV18__plus_human_reads_and_MYC.SINGLE.fq
+
+spades.py --only-assembler -1 to_GRCh37_HPV18__plus_human_reads_and_MYC.R1.fq -2 to_GRCh37_HPV18__plus_human_reads_and_MYC.R2.fq -s to_GRCh37_HPV18__plus_human_reads_and_MYC.SINGLE.fq -o spades
+
+quast spades/contigs.fasta -1 to_GRCh37_HPV18__plus_human_reads_and_MYC.R1.fq -2 to_GRCh37_HPV18__plus_human_reads_and_MYC.R2.fq -s to_GRCh37_HPV18__plus_human_reads_and_MYC.SINGLE.fq -o quasted
+
+minimap2 -a spades/contigs.fasta to_GRCh37_HPV18__plus_human_reads_and_MYC.R1.fq to_GRCh37_HPV18__plus_human_reads_and_MYC.R2.fq | samtools sort > spades/reads_to_contigs.bam && samtools index spades/reads_to_contigs.bam
+
+# Mapping contigs to reference?
+cd /Users/vsaveliev/git/umccr/oncoviruses/neverresponder
+samtools faidx GRCh37_HPV18.fa 8 > 8_HPV18.fa                                                                                                                        samtools faidx GRCh37_HPV18.fa HPV18 >> 8_HPV18.fa
+cd with_MYC
+minimap2 -a ../8_HPV18.fa spades/contigs.fasta | samtools sort > spades/contigs_to_ref.bam && samtools index spades/contigs_to_ref.bam
+```
 
 
 
