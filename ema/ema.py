@@ -43,13 +43,14 @@ ema.py /data/cephfs/punim0010/data/FASTQ/180312_A00130_0041_AHCLLMDMXX/Chromium_
 @click.option('-j', '--jobs', 'jobs', default=1, help='Maximum number of cores to use at single time (works both for local '
               'and cluster runs)')
 @click.option('-s', '--sample', 'sample_name', help='Sample name; required')
+@click.option('--bins', help='Number of bins to split fastqs', default=500)
 @click.option('-c', '--cluster-auto', 'cluster', is_flag=True, help='Submit jobs to cluster')
 @click.option('-g', '--genome', help='Genome build (GRCh37 or hg38)', type=click.Choice(['GRCh37', 'hg38']), default='GRCh37')
 @click.option('--unlock', is_flag=True, help='Propagaded to snakemake')
 @click.option('--bc-whitelist', help='Whitelist of 10x barcodes')
 @click.option('--bcbio-genomes', help='Path to bcbio-nextgen reference data (e.g. /bcbio/genomes; '
               'Hsapiens/{genome}/seq/{genome}.fa(.fai) and Hsapiens/{genome}/validation/giab-NA12878/truth_regions.bed are used)')
-def main(r1_fastq_paths, output_dir=None, jobs=None, sample_name=None,
+def main(r1_fastq_paths, output_dir=None, jobs=None, sample_name=None, bins=None,
          cluster=False, genome=None, unlock=False, bc_whitelist=None, bcbio_genomes=None):
     """
 EMA wrapper.\n
@@ -68,6 +69,7 @@ r1_fastq_paths: paths to R1 fastq files for each sample\n
     #################################
 
     conf = dict()
+    conf['package_path'] = package_path()
     conf['r1_fastq_paths'] = [verify_file(fp, is_critical=True) for fp in r1_fastq_paths]
 
     ###########################
@@ -111,8 +113,8 @@ r1_fastq_paths: paths to R1 fastq files for each sample\n
 
     #####################################
     #### Setting non-path parameters ####
-    if sample_name:
-        conf['sample'] = sample_name
+    conf['sample'] = sample_name
+    conf['bins'] = bins
 
     # Saving config to file
     conf_path = join(output_dir, 'conf.yml')
