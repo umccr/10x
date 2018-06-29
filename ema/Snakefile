@@ -23,13 +23,17 @@ r1_fastq_paths = config['r1_fastq_paths']
 ref_fa = config['ref_fa']
 bwa_fa = config['bwa_fa']
 bc_whitelist = config['bc_whitelist']
+package_path = config['package_path']
 
 read_group = "@RG\\tID:" + sample_name + "_EMA\\tSM:" + sample_name + "_EMA"
 
 r1_fastq_by_fname = {splitext(basename(r1_fastq_path))[0]: r1_fastq_path for r1_fastq_path in r1_fastq_paths}
 
-BINS_NUM = 500
+BINS_NUM = config['bins']
 MAX_THREADS = 32
+
+
+localrules: prep_ref_folder
 
 
 rule all:
@@ -37,13 +41,6 @@ rule all:
         # expand('work/ema-bin-{bc}.bam', bc=[f'{bc:03d}' for bc in range(BINS_NUM)])
         sample_name + '.bam',
         sample_name + '.stats.txt'
-
-
-# rule interleave_sh:
-#     output:
-#         'work/interleave.sh'
-#     shell:
-
 
 
 rule count:
@@ -59,7 +56,11 @@ rule count:
     params:
         output_prefix = 'cnt/{r1_fastq_name}'
     log:
-        'log/{r1_fastq_name}.cnt.log'
+        'log/cnt/{r1_fastq_name}.log'
+    benchmark:
+        "benchamrks/count_{r1_fastq_name}.tsv"
+    resources:
+        mem_mb=4500
     shell:
         'paste <(pigz -c -d {input.fq1} | paste - - - -) <(pigz -c -d {input.fq2} | paste - - - -) | tr "\\t" "\\n"'
         ' | ema count -w {input.bc_whitelist} -o {params.output_prefix} 2>{log}'
@@ -77,16 +78,31 @@ rule preproc:
         fastq_nobc = 'bins/fastq/ema-nobc'
     log:
         'log/preproc.log'
-    threads: 32
+    threads: MAX_THREADS
+    benchmark:
+        "benchamrks/preproc.tsv"
+    resources:
+        mem_mb=4500
     shell:
         'paste <(pigz -c -d {input.fq1} | paste - - - -) <(pigz -c -d {input.fq2} | paste - - - -) | tr "\\t" "\\n"'
         ' | ema preproc -w {input.bc_whitelist} -n {BINS_NUM}'
         ' -t {threads} -o bins/fastq {input.ncnt} 2>&1 | tee {log}'
 
 
-rule preproc_all:
+rule trim:
     input:
-        rules.preproc.output.fastq_bc
+        'bins/fastq/ema-bin-{bc}'
+    output:
+        'bins/trimmed/ema-bin-{bc}'
+    log:
+        'log/trim/atropos_report_{bc}.json'
+    shell:
+        join(package_path, 'trim.sh') + ' {input} {output} {log} ema-bin-{bc}'
+
+
+# rule preproc_all:
+#     input:
+#         rules.preproc.output.fastq_bc
 
 
 rule prep_ref_folder:
@@ -105,21 +121,23 @@ rule align:
     # parallel -j${BWA_JOBS} "ema align -R $'@RG\tID:${SAMPLE}\tSM:${SAMPLE}' -t ${BWA_THREADS} -d -r $REF/$GENOME.fa -s {}
     #  | samtools sort -@ ${BWA_THREADS} -O bam -l 0 -m 4G -o {}.bam -" ::: ema_work/ema-bin-???
     input:
-        fastq = 'bins/fastq/ema-bin-{bc}',
+        fastq = rules.trim.output,
         ref_fa = rules.prep_ref_folder.output.ref_fa
     output:
         bam = 'bins/ema-bin-{bc}.bam'
     # wildcard_constraints:
     #     bc = '\d\d\d'
-    threads: MAX_THREADS
+    benchmark:
+        "benchamrks/align_bin_{bc}.tsv"
+    threads: 4
     resources:
-        mem_mb=4000
+        mem_mb=5000
     # params:
     #     mem='20G',
     #     ncpus='4'
     shell:
         'ema align -R "' + read_group + '" -t {threads} -d -r {input.ref_fa} -s {input.fastq}'
-        ' | samtools sort -@ {threads} -O bam -l 0 -m {resources.mem_mb}M -o {output.bam}'
+        ' | samtools sort -@ {threads} -O bam -l 0 -m 4G -o {output.bam}'
 
 
 rule align_nobc:
@@ -132,10 +150,12 @@ rule align_nobc:
         bam = 'bins/ema-nobc.bam'
     threads: MAX_THREADS
     resources:
-        mem_mb=4000
+        mem_mb=5000
+    benchmark:
+        "benchamrks/align_nobc.tsv"
     shell:
         'bwa mem -p -t {threads} -M -R "' + read_group + '" {input.ref_fa} {input.fastq}'
-        ' | samtools sort -@ {threads} -O bam -l 0 -m {resources.mem_mb}M -o {output.bam}'
+        ' | samtools sort -@ {threads} -O bam -l 0 -m 4G -o {output.bam}'
 
 
 rule markdup_nobc:
@@ -145,6 +165,8 @@ rule markdup_nobc:
     output:
         'bins/ema-nobc.markdup.bam'
     threads: MAX_THREADS
+    benchmark:
+        "benchamrks/markdup_nobc.tsv"
     shell:
         'sambamba markdup -t {threads} -p -l 0 {input} {output}'
 
@@ -157,6 +179,8 @@ rule merge:
         no_bc_bam = rules.markdup_nobc.output
     output:
         sample_name + '.bam'
+    benchmark:
+        "benchamrks/merge.tsv"
     threads: MAX_THREADS
     shell:
         'sambamba merge -t {threads} -p {output} {input}'
@@ -169,6 +193,8 @@ rule stats:
     output:
         sample_name + '.stats.txt'
     threads: MAX_THREADS
+    benchmark:
+        "benchamrks/stats.tsv"
     shell:
         'samtools stats -@ {threads} {input} > {output}'
 
