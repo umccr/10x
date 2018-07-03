@@ -31,6 +31,8 @@ r1_fastq_by_fname = {splitext(basename(r1_fastq_path))[0]: r1_fastq_path for r1_
 
 BINS_NUM = config['bins']
 MAX_THREADS = 32
+FQ_THREADS = 8
+BIN_THREADS = 4
 
 
 localrules: prep_ref_folder
@@ -43,13 +45,54 @@ rule all:
         sample_name + '.stats.txt'
 
 
-rule count:
-    #parallel -j${THREADS} "bash interleave_fq.sh {} | ema count -w $BARCODES -o {/.} 2>{/.}.log" ::: $R1_FILES
+rule trim_input:
     input:
         fq1 = lambda wc: r1_fastq_by_fname[wc.r1_fastq_name],
-        fq2 = lambda wc: r1_fastq_by_fname[wc.r1_fastq_name].replace('_R1_', '_R2_'),
+        fq2 = lambda wc: r1_fastq_by_fname[wc.r1_fastq_name].replace('_R1_', '_R2_')
+    output:
+        'trimmed/{r1_fastq_name}.fq'
+    log:
+        'log/trim/atropos_report_{r1_fastq_name}.json'
+    params:
+        sample_name = sample_name
+    threads: FQ_THREADS
+    benchmark:
+        "benchamrks/trim_{r1_fastq_name}.tsv"
+    resources:
+        mem_mb=8000
+    shell:
+        'bash -x ' + join(package_path, 'trim.sh') + ' {input.fq1} {input.fq2} {output} {log} ' \
+        '{params.sample_name} {threads}'
+
+
+# rule count:
+#     #parallel -j${THREADS} "bash interleave_fq.sh {} | ema count -w $BARCODES -o {/.} 2>{/.}.log" ::: $R1_FILES
+#     input:
+#         fq1 = lambda wc: r1_fastq_by_fname[wc.r1_fastq_name],
+#         fq2 = lambda wc: r1_fastq_by_fname[wc.r1_fastq_name].replace('_R1_', '_R2_'),
+#         bc_whitelist = bc_whitelist
+#         # interleave_sh = rules.interleave_sh.output
+#     output:
+#         fcnt = 'cnt/{r1_fastq_name}.ema-fcnt',
+#         ncnt = 'cnt/{r1_fastq_name}.ema-ncnt'
+#     params:
+#         output_prefix = 'cnt/{r1_fastq_name}'
+#     log:
+#         'log/cnt/{r1_fastq_name}.log'
+#     benchmark:
+#         "benchamrks/count_{r1_fastq_name}.tsv"
+#     resources:
+#         mem_mb=4500
+#     shell:
+#         'paste <(pigz -c -d {input.fq1} | paste - - - -) <(pigz -c -d {input.fq2} | paste - - - -) | tr "\\t" "\\n"'
+#         ' | ema count -w {input.bc_whitelist} -o {params.output_prefix} 2>{log}'
+
+
+rule count_trimmed:
+    #parallel -j${THREADS} "bash interleave_fq.sh {} | ema count -w $BARCODES -o {/.} 2>{/.}.log" ::: $R1_FILES
+    input:
+        interleaved_fq = rules.trim_input.output,
         bc_whitelist = bc_whitelist
-        # interleave_sh = rules.interleave_sh.output
     output:
         fcnt = 'cnt/{r1_fastq_name}.ema-fcnt',
         ncnt = 'cnt/{r1_fastq_name}.ema-ncnt'
@@ -62,20 +105,41 @@ rule count:
     resources:
         mem_mb=4500
     shell:
-        'paste <(pigz -c -d {input.fq1} | paste - - - -) <(pigz -c -d {input.fq2} | paste - - - -) | tr "\\t" "\\n"'
-        ' | ema count -w {input.bc_whitelist} -o {params.output_prefix} 2>{log}'
+        'cat {input.interleaved_fq} | ema count -w {input.bc_whitelist} -o {params.output_prefix} 2>{log}'
 
 
-rule preproc:
+# rule preproc:
+#     #ls $R1_FILES | xargs -I '{}' bash interleave_fq.sh '{}' | ema preproc -w $BARCODES -n 500 -t ${THREADS} -o ema_work *.ema-ncnt 2>&1 | tee ema_preproc.log
+#     input:
+#         fq1 = r1_fastq_by_fname.values(),
+#         fq2 = [fp.replace('_R1_', '_R2_') for fp in r1_fastq_by_fname.values()],
+#         bc_whitelist = bc_whitelist,
+#         ncnt = expand(rules.count.output.ncnt, r1_fastq_name=r1_fastq_by_fname.keys())
+#     output:
+#         fastq_bc = expand('bins/fastq/ema-bin-{bc}', bc=[f'{bc:03d}' for bc in range(BINS_NUM)]),
+#         fastq_nobc = 'bins/fastq/ema-nobc'
+#     log:
+#         'log/preproc.log'
+#     threads: MAX_THREADS
+#     benchmark:
+#         "benchamrks/preproc.tsv"
+#     resources:
+#         mem_mb=4500
+#     shell:
+#         'paste <(pigz -c -d {input.fq1} | paste - - - -) <(pigz -c -d {input.fq2} | paste - - - -) | tr "\\t" "\\n"'
+#         ' | ema preproc -b -w {input.bc_whitelist} -n {BINS_NUM}'
+#         ' -t {threads} -o bins/fastq {input.ncnt} 2>&1 | tee {log}'
+
+
+rule preproc_trimmed:
     #ls $R1_FILES | xargs -I '{}' bash interleave_fq.sh '{}' | ema preproc -w $BARCODES -n 500 -t ${THREADS} -o ema_work *.ema-ncnt 2>&1 | tee ema_preproc.log
     input:
-        fq1 = r1_fastq_by_fname.values(),
-        fq2 = [fp.replace('_R1_', '_R2_') for fp in r1_fastq_by_fname.values()],
+        interleaved_fq = expand(rules.trim_input.output, r1_fastq_name=r1_fastq_by_fname.keys()),
         bc_whitelist = bc_whitelist,
-        ncnt = expand(rules.count.output.ncnt, r1_fastq_name=r1_fastq_by_fname.keys())
+        ncnt = expand(rules.count_trimmed.output.ncnt, r1_fastq_name=r1_fastq_by_fname.keys())
     output:
-        fastq_bc = expand('bins/fastq/ema-bin-{bc}', bc=[f'{bc:03d}' for bc in range(BINS_NUM)]),
-        fastq_nobc = 'bins/fastq/ema-nobc'
+        fastq_bc = expand('bins/ema-bin-{bc}', bc=[f'{bc:03d}' for bc in range(BINS_NUM)]),
+        fastq_nobc = 'bins/ema-nobc'
     log:
         'log/preproc.log'
     threads: MAX_THREADS
@@ -84,54 +148,85 @@ rule preproc:
     resources:
         mem_mb=4500
     shell:
-        'paste <(pigz -c -d {input.fq1} | paste - - - -) <(pigz -c -d {input.fq2} | paste - - - -) | tr "\\t" "\\n"'
-        ' | ema preproc -w {input.bc_whitelist} -n {BINS_NUM}'
-        ' -t {threads} -o bins/fastq {input.ncnt} 2>&1 | tee {log}'
+        'cat {input.interleaved_fq} | ema preproc -w {input.bc_whitelist} -n {BINS_NUM}'
+        ' -t {threads} -o bins {input.ncnt} 2>&1 | tee {log}'
 
 
-rule trim:
-    input:
-        'bins/fastq/ema-bin-{bc}'
-    output:
-        'bins/trimmed/ema-bin-{bc}'
-    log:
-        'log/trim/atropos_report_{bc}.json'
-    shell:
-        join(package_path, 'trim.sh') + ' {input} {output} {log} ema-bin-{bc}'
-
-
-# rule preproc_all:
+# rule trim_preprocced:
 #     input:
-#         rules.preproc.output.fastq_bc
+#         'bins/fastq/ema-bin-{bc}'
+#     output:
+#         'bins/trimmed/ema-bin-{bc}'
+#     log:
+#         'log/trim/atropos_report_{bc}.json'
+#     shell:
+#         'bash -x ' + join(package_path, 'trim.sh') + ' {input} {output} {log} ' + sample_name
 
+
+ref_base = join('ref', splitext(basename(ref_fa))[0])
 
 rule prep_ref_folder:
     input:
         fa_dir = dirname(ref_fa),
         bwa_dir = dirname(bwa_fa)
     output:
-        ref_fa = join('ref', basename(ref_fa))
+        ref_base + '.fa',
+        ref_base + '.dict',
+        ref_base + '.fa.amb',
+        ref_base + '.fa.ann',
+        ref_base + '.fa.bwt',
+        ref_base + '.fa.fai',
+        ref_base + '.fa.gz',
+        ref_base + '.fa.gz.fai',
+        ref_base + '.fa.gz.gzi',
+        ref_base + '.fa.pac',
+        ref_base + '.fa.sa'
     params:
         ref_dir = 'ref'
     shell:
         'ln -s {input.fa_dir}/* {params.ref_dir} && ln -s {input.bwa_dir}/* {params.ref_dir}'
 
 
-rule align:
+
+# rule align_fastq:
+#     # parallel -j${BWA_JOBS} "ema align -R $'@RG\tID:${SAMPLE}\tSM:${SAMPLE}' -t ${BWA_THREADS} -d -r $REF/$GENOME.fa -s {}
+#     #  | samtools sort -@ ${BWA_THREADS} -O bam -l 0 -m 4G -o {}.bam -" ::: ema_work/ema-bin-???
+#     input:
+#         fq1 = rules.trim_preprocced.output,  # preproc then trim
+#         fq2 = ,  # preproc then trim
+#         ref_fa = rules.prep_ref_folder.output[0]
+#     output:
+#         bam = 'bins/ema-bin-{bc}.bam'
+#     # wildcard_constraints:
+#     #     bc = '\d\d\d'
+#     benchmark:
+#         "benchamrks/align_bin_{bc}.tsv"
+#     threads: 4
+#     resources:
+#         mem_mb=5000
+#     # params:
+#     #     mem='20G',
+#     #     ncpus='4'
+#     shell:
+#         'ema align -R "' + read_group + '" -t {threads} -d -r {input.ref_fa} -1 {input.fq1} -2 {input.fq2}'
+#         ' | samtools sort -@ {threads} -O bam -l 0 -m 4G -o {output.bam}'
+
+
+rule align_s:
     # parallel -j${BWA_JOBS} "ema align -R $'@RG\tID:${SAMPLE}\tSM:${SAMPLE}' -t ${BWA_THREADS} -d -r $REF/$GENOME.fa -s {}
     #  | samtools sort -@ ${BWA_THREADS} -O bam -l 0 -m 4G -o {}.bam -" ::: ema_work/ema-bin-???
     input:
-        fastq = rules.trim.output,
-        ref_fa = rules.prep_ref_folder.output.ref_fa
+        fastq = 'bins/ema-bin-{bc}',   # trim then preproc
+        ref_fa = rules.prep_ref_folder.output[0]
     output:
         bam = 'bins/ema-bin-{bc}.bam'
     # wildcard_constraints:
     #     bc = '\d\d\d'
     benchmark:
         "benchamrks/align_bin_{bc}.tsv"
-    threads: 4
+    threads: BIN_THREADS
     resources:
-        mem_mb=5000
+        mem_mb=8000
     # params:
     #     mem='20G',
     #     ncpus='4'
@@ -144,13 +239,13 @@ rule align_nobc:
     # bwa mem -p -t ${THREADS} -M -R "@RG\tID:${SAMPLE}\tSM:${SAMPLE}" $REF/$GENOME.fa ema_work/ema-nobc |\
     #  samtools sort -@ ${THREADS} -O bam -l 0 -m 4G -o ema_work/ema-nobc.bam
     input:
-        fastq = 'bins/fastq/ema-nobc',
-        ref_fa = rules.prep_ref_folder.output.ref_fa
+        fastq = 'bins/ema-nobc',
+        ref_fa = rules.prep_ref_folder.output[0]
     output:
         bam = 'bins/ema-nobc.bam'
     threads: MAX_THREADS
     resources:
-        mem_mb=5000
+        mem_mb=8000
     benchmark:
         "benchamrks/align_nobc.tsv"
     shell:
@@ -167,6 +262,8 @@ rule markdup_nobc:
     threads: MAX_THREADS
     benchmark:
         "benchamrks/markdup_nobc.tsv"
+    resources:
+        mem_mb=4000
     shell:
         'sambamba markdup -t {threads} -p -l 0 {input} {output}'
 
@@ -175,12 +272,14 @@ rule merge:
     # sambamba merge -t ${THREADS} -p ${SAMPLE}.bam ema_work/*.bam
     input:
         # expand(rules.align.output, bc=[f'{bc:03d}' for bc in range(500)]),
-        bc_bams = expand(rules.align.output, bc=[f'{bc:03d}' for bc in range(BINS_NUM)]),
+        bc_bams = expand(rules.align_s.output, bc=[f'{bc:03d}' for bc in range(BINS_NUM)]),
         no_bc_bam = rules.markdup_nobc.output
     output:
         sample_name + '.bam'
     benchmark:
         "benchamrks/merge.tsv"
+    resources:
+        mem_mb=4000
     threads: MAX_THREADS
     shell:
         'sambamba merge -t {threads} -p {output} {input}'
