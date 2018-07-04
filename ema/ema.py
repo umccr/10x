@@ -159,8 +159,8 @@ r1_fastq_paths: paths to R1 fastq files for each sample\n
         logger.error(f'Error: snakemake returned a non-zero status. Working directory: {output_dir}')
         raise
 
-    logger.info('Generating snakemake benchmark report...')
-    run_simple(cmd + f' --report {log_dir}/snakemake_report.html')
+    # logger.info('Generating snakemake benchmark report...')
+    # run_simple(cmd + f' --report {log_dir}/snakemake_report.html')
 
     logger.error('--------')
     logger.info(f'Finished. Output directory: {output_dir}')

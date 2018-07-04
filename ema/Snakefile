@@ -146,7 +146,7 @@ rule preproc_trimmed:
     benchmark:
         "benchamrks/preproc.tsv"
     resources:
-        mem_mb=4500
+        mem_mb=16000
     shell:
         'cat {input.interleaved_fq} | ema preproc -w {input.bc_whitelist} -n {BINS_NUM}'
         ' -t {threads} -o bins {input.ncnt} 2>&1 | tee {log}'
@@ -263,7 +263,7 @@ rule markdup_nobc:
     benchmark:
         "benchamrks/markdup_nobc.tsv"
     resources:
-        mem_mb=4000
+        mem_mb=8000
     shell:
         'sambamba markdup -t {threads} -p -l 0 {input} {output}'
 
@@ -279,7 +279,7 @@ rule merge:
     benchmark:
         "benchamrks/merge.tsv"
     resources:
-        mem_mb=4000
+        mem_mb=8000
     threads: MAX_THREADS
     shell:
         'sambamba merge -t {threads} -p {output} {input}'
