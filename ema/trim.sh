@@ -7,6 +7,13 @@ REPORT=$4
 SAMPLE_ID=$5
 THREADS=$6
 
+thread_opt=""
+if [ ${THREADS} -eq "1" ] ; then
+    thread_opt=""
+else
+    thread_opt="--threads ${THREADS}"
+fi
+
 # paired-> interleaved
 atropos trim \
   --quality-base 33 \
@@ -22,7 +29,7 @@ atropos trim \
   --sample-id ${SAMPLE_ID} \
   --quality-cutoff=5 \
   --minimum-length=25 \
-  --threads ${THREADS} \
+  ${thread_opt} \
   --nextseq-trim 25
 
 #  -a 'A{200}' -a 'C{200}' -a 'G{200}' -a 'T{200}' \
