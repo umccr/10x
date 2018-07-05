@@ -147,6 +147,7 @@ r1_fastq_paths: paths to R1 fastq files for each sample\n
         f'--rerun-incomplete ' 
         f'{cluster_param} '
         f'--configfile {conf_path} '
+        f'--restart-times 5 '
     )
 
     if unlock:

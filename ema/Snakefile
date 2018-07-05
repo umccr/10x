@@ -113,7 +113,7 @@ rule count_trimmed:
     benchmark:
         "benchamrks/count_{r1_fastq_name}.tsv"
     resources:
-        mem_mb=4500
+        mem_mb=lambda wildcards, attempt: attempt * 4000
     shell:
         'cat {input.interleaved_fq} | ema count -w {input.bc_whitelist} -o {params.output_prefix} 2>{log}'
 
@@ -156,7 +156,7 @@ rule preproc_trimmed:
     benchmark:
         "benchamrks/preproc.tsv"
     resources:
-        mem_mb=16000
+        mem_mb=lambda wildcards, attempt: attempt * 16000
     shell:
         'cat {input.interleaved_fq} | ema preproc -w {input.bc_whitelist} -n {BINS_NUM}'
         ' -t {threads} -o bins {input.ncnt} 2>&1 | tee {log}'
@@ -236,10 +236,9 @@ rule align_s:
         "benchamrks/align_bin_{bc}.tsv"
     threads: BIN_THREADS
     resources:
-        mem_mb=8000
+        mem_mb=lambda wildcards, attempt: attempt * 8000
     # params:
-    #     mem='20G',
-    #     ncpus='4'
+    #     mem_samtools=lambda wildcards, attempt: attempt * 3000
     shell:
         'ema align -R "' + read_group + '" -t {threads} -d -r {input.ref_fa} -s {input.fastq}'
         ' | samtools sort -@ {threads} -O bam -l 0 -m 4G -o {output.bam}'
@@ -255,12 +254,14 @@ rule align_nobc:
         bam = 'bins/ema-nobc.bam'
     threads: MAX_THREADS
     resources:
-        mem_mb=8000
+        mem_mb=lambda wildcards, attempt: 30000 + attempt*20000
+    # params:
+    #     mem_samtools=lambda wildcards, attempt: 4000 + attempt*2000
     benchmark:
         "benchamrks/align_nobc.tsv"
     shell:
         'bwa mem -p -t {threads} -M -R "' + read_group + '" {input.ref_fa} {input.fastq}'
-        ' | samtools sort -@ {threads} -O bam -l 0 -m 4G -o {output.bam}'
+        ' | samtools sort -@ {threads} -O bam -l 0 -m 8G -o {output.bam}'
 
 
 rule markdup_nobc:
@@ -273,7 +274,7 @@ rule markdup_nobc:
     benchmark:
         "benchamrks/markdup_nobc.tsv"
     resources:
-        mem_mb=8000
+        mem_mb=lambda wildcards, attempt: 20000 + attempt*15000
     shell:
         'sambamba markdup -t {threads} -p -l 0 {input} {output}'
 
@@ -289,7 +290,7 @@ rule merge:
     benchmark:
         "benchamrks/merge.tsv"
     resources:
-        mem_mb=8000
+        mem_mb=lambda wildcards, attempt: 20000 + attempt*15000
     threads: MAX_THREADS
     shell:
         'sambamba merge -t {threads} -p {output} {input}'
