@@ -50,8 +50,9 @@ ema.py /data/cephfs/punim0010/data/FASTQ/180312_A00130_0041_AHCLLMDMXX/Chromium_
 @click.option('--bc-whitelist', help='Whitelist of 10x barcodes')
 @click.option('--bcbio-genomes', help='Path to bcbio-nextgen reference data (e.g. /bcbio/genomes; '
               'Hsapiens/{genome}/seq/{genome}.fa(.fai) and Hsapiens/{genome}/validation/giab-NA12878/truth_regions.bed are used)')
+@click.option('--trim', '--trim-polyg', is_flag=True, help='Trim polyG in input reads')
 def main(r1_fastq_paths, output_dir=None, jobs=None, sample_name=None, bins=None,
-         cluster=False, genome=None, unlock=False, bc_whitelist=None, bcbio_genomes=None):
+         cluster=False, genome=None, unlock=False, bc_whitelist=None, bcbio_genomes=None, trim_polyg=False):
     """
 EMA wrapper.\n
 r1_fastq_paths: paths to R1 fastq files for each sample\n
@@ -115,6 +116,7 @@ r1_fastq_paths: paths to R1 fastq files for each sample\n
     #### Setting non-path parameters ####
     conf['sample'] = sample_name
     conf['bins'] = bins
+    conf['trim_polyg'] = trim_polyg
 
     # Saving config to file
     conf_path = join(output_dir, 'conf.yml')

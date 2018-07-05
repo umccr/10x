@@ -1,5 +1,6 @@
 import os
 from os.path import dirname, abspath, join, basename, splitext
+from ngs_utils.file_utils import splitext_plus
 
 shell.executable(os.environ.get('SHELL', "bash"))
 shell.prefix("")
@@ -27,7 +28,7 @@ package_path = config['package_path']
 
 read_group = "@RG\\tID:" + sample_name + "_EMA\\tSM:" + sample_name + "_EMA"
 
-r1_fastq_by_fname = {splitext(basename(r1_fastq_path))[0]: r1_fastq_path for r1_fastq_path in r1_fastq_paths}
+r1_fastq_by_fname = {splitext_plus(basename(r1_fastq_path))[0]: r1_fastq_path for r1_fastq_path in r1_fastq_paths}
 
 BINS_NUM = config['bins']
 MAX_THREADS = 32
@@ -45,24 +46,33 @@ rule all:
         sample_name + '.stats.txt'
 
 
-rule trim_input:
-    input:
-        fq1 = lambda wc: r1_fastq_by_fname[wc.r1_fastq_name],
-        fq2 = lambda wc: r1_fastq_by_fname[wc.r1_fastq_name].replace('_R1_', '_R2_')
-    output:
-        'trimmed/{r1_fastq_name}.fq'
-    log:
-        'log/trim/atropos_report_{r1_fastq_name}.json'
-    params:
-        sample_name = sample_name
-    threads: FQ_THREADS
-    benchmark:
-        "benchamrks/trim_{r1_fastq_name}.tsv"
-    resources:
-        mem_mb=8000
-    shell:
-        'bash -x ' + join(package_path, 'trim.sh') + ' {input.fq1} {input.fq2} {output} {log} ' \
-        '{params.sample_name} {threads}'
+if config.get('trim_polyg'):
+    rule trim_input:
+        input:
+            fq1 = lambda wc: r1_fastq_by_fname[wc.r1_fastq_name],
+            fq2 = lambda wc: r1_fastq_by_fname[wc.r1_fastq_name].replace('_R1_', '_R2_')
+        output:
+            'trimmed/{r1_fastq_name}.fq'
+        log:
+            'log/trim/atropos_report_{r1_fastq_name}.json'
+        params:
+            sample_name = sample_name
+        threads: FQ_THREADS
+        benchmark:
+            "benchamrks/trim_{r1_fastq_name}.tsv"
+        resources:
+            mem_mb=lambda wildcards, attempt: attempt * 8000
+        shell:
+            'bash -x ' + join(package_path, 'trim.sh') + ' {input.fq1} {input.fq2} {output} {log} ' \
+            '{params.sample_name} {threads}'
+else:
+    rule trim_input:
+        input:
+            fq1 = lambda wc: r1_fastq_by_fname[wc.r1_fastq_name]
+        output:
+            'trimmed/{r1_fastq_name}.fq'
+        shell:
+            'bash -x ' + join(package_path, 'interleave.sh') + ' {input.fq1} > {output}'
 
 
 # rule count:
