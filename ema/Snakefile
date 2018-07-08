@@ -59,7 +59,7 @@ if config.get('trim_polyg'):
             sample_name = sample_name
         threads: FQ_THREADS
         benchmark:
-            "benchamrks/trim_{r1_fastq_name}.tsv"
+            "benchmarks/trim_{r1_fastq_name}.tsv"
         resources:
             mem_mb=lambda wildcards, attempt: attempt * 8000
         shell:
@@ -90,7 +90,7 @@ else:
 #     log:
 #         'log/cnt/{r1_fastq_name}.log'
 #     benchmark:
-#         "benchamrks/count_{r1_fastq_name}.tsv"
+#         "benchmarks/count_{r1_fastq_name}.tsv"
 #     resources:
 #         mem_mb=4500
 #     shell:
@@ -111,7 +111,7 @@ rule count_trimmed:
     log:
         'log/cnt/{r1_fastq_name}.log'
     benchmark:
-        "benchamrks/count_{r1_fastq_name}.tsv"
+        "benchmarks/count_{r1_fastq_name}.tsv"
     resources:
         mem_mb=lambda wildcards, attempt: attempt * 4000
     shell:
@@ -132,7 +132,7 @@ rule count_trimmed:
 #         'log/preproc.log'
 #     threads: MAX_THREADS
 #     benchmark:
-#         "benchamrks/preproc.tsv"
+#         "benchmarks/preproc.tsv"
 #     resources:
 #         mem_mb=4500
 #     shell:
@@ -148,18 +148,18 @@ rule preproc_trimmed:
         bc_whitelist = bc_whitelist,
         ncnt = expand(rules.count_trimmed.output.ncnt, r1_fastq_name=r1_fastq_by_fname.keys())
     output:
-        fastq_bc = expand('bins/ema-bin-{bc}', bc=[f'{bc:03d}' for bc in range(BINS_NUM)]),
-        fastq_nobc = 'bins/ema-nobc'
+        fastq_bc = expand('bins/fq/ema-bin-{bc}', bc=[f'{bc:03d}' for bc in range(BINS_NUM)]),
+        fastq_nobc = 'bins/fq/ema-nobc'
     log:
         'log/preproc.log'
     threads: MAX_THREADS
     benchmark:
-        "benchamrks/preproc.tsv"
+        "benchmarks/preproc.tsv"
     resources:
         mem_mb=lambda wildcards, attempt: attempt * 16000
     shell:
         'cat {input.interleaved_fq} | ema preproc -w {input.bc_whitelist} -n {BINS_NUM}'
-        ' -t {threads} -o bins {input.ncnt} 2>&1 | tee {log}'
+        ' -t {threads} -o bins/fq {input.ncnt} 2>&1 | tee {log}'
 
 
 # rule trim_preprocced:
@@ -210,7 +210,7 @@ rule prep_ref_folder:
 #     # wildcard_constraints:
 #     #     bc = '\d\d\d'
 #     benchmark:
-#         "benchamrks/align_bin_{bc}.tsv"
+#         "benchmarks/align_bin_{bc}.tsv"
 #     threads: 4
 #     resources:
 #         mem_mb=5000
@@ -226,39 +226,41 @@ rule align_s:
     # parallel -j${BWA_JOBS} "ema align -R $'@RG\tID:${SAMPLE}\tSM:${SAMPLE}' -t ${BWA_THREADS} -d -r $REF/$GENOME.fa -s {}
     #  | samtools sort -@ ${BWA_THREADS} -O bam -l 0 -m 4G -o {}.bam -" ::: ema_work/ema-bin-???
     input:
-        fastq = 'bins/ema-bin-{bc}',   # trim then preproc
+        fastq = 'bins/fq/ema-bin-{bc}',   # trim then preproc
         ref_fa = rules.prep_ref_folder.output[0]
     output:
-        bam = 'bins/ema-bin-{bc}.bam'
+        bam = 'bins/bam/ema-bin-{bc}.bam'
     # wildcard_constraints:
     #     bc = '\d\d\d'
     benchmark:
-        "benchamrks/align_bin_{bc}.tsv"
+        "benchmarks/align_bin_{bc}.tsv"
     threads: BIN_THREADS
+    priority: 50
     resources:
         mem_mb=lambda wildcards, attempt: attempt * 8000
     # params:
     #     mem_samtools=lambda wildcards, attempt: attempt * 3000
     shell:
         'ema align -R "' + read_group + '" -t {threads} -d -r {input.ref_fa} -s {input.fastq}'
-        ' | samtools sort -@ {threads} -O bam -l 0 -m 4G -o {output.bam}'
+        ' | samtools sort -@ {threads} -O bam -l 0 -m 4G -o {output.bam} && ' \
+        ' [ $(samtools view -c {output.bam}) -gt 0 ]'
 
 
 rule align_nobc:
     # bwa mem -p -t ${THREADS} -M -R "@RG\tID:${SAMPLE}\tSM:${SAMPLE}" $REF/$GENOME.fa ema_work/ema-nobc |\
     #  samtools sort -@ ${THREADS} -O bam -l 0 -m 4G -o ema_work/ema-nobc.bam
     input:
-        fastq = 'bins/ema-nobc',
+        fastq = 'bins/fq/ema-nobc',
         ref_fa = rules.prep_ref_folder.output[0]
     output:
-        bam = 'bins/ema-nobc.bam'
+        bam = 'bins/bam/ema-nobc.bam'
     threads: MAX_THREADS
     resources:
         mem_mb=lambda wildcards, attempt: 30000 + attempt*20000
     # params:
     #     mem_samtools=lambda wildcards, attempt: 4000 + attempt*2000
     benchmark:
-        "benchamrks/align_nobc.tsv"
+        "benchmarks/align_nobc.tsv"
     shell:
         'bwa mem -p -t {threads} -M -R "' + read_group + '" {input.ref_fa} {input.fastq}'
         ' | samtools sort -@ {threads} -O bam -l 0 -m 8G -o {output.bam}'
@@ -269,14 +271,15 @@ rule markdup_nobc:
     input:
         rules.align_nobc.output[0]
     output:
-        'bins/ema-nobc.markdup.bam'
+        'bins/bam/ema-nobc.markdup.bam'
     threads: MAX_THREADS
     benchmark:
-        "benchamrks/markdup_nobc.tsv"
+        "benchmarks/markdup_nobc.tsv"
     resources:
         mem_mb=lambda wildcards, attempt: 20000 + attempt*15000
     shell:
-        'sambamba markdup -t {threads} -p -l 0 {input} {output}'
+        'sambamba markdup -t {threads} -l 0 {input} {output} --tmpdir tmp'
+        # 'bamsormadup threads={threads} tmpfile={output}-bamsormaduptmp < {input} > {output}'
 
 
 rule merge:
@@ -286,14 +289,19 @@ rule merge:
         bc_bams = expand(rules.align_s.output, bc=[f'{bc:03d}' for bc in range(BINS_NUM)]),
         no_bc_bam = rules.markdup_nobc.output
     output:
-        sample_name + '.bam'
+        bam = sample_name + '.bam',
+        bai = sample_name + '.bam.bai'
     benchmark:
-        "benchamrks/merge.tsv"
+        "benchmarks/merge.tsv"
     resources:
         mem_mb=lambda wildcards, attempt: 20000 + attempt*15000
     threads: MAX_THREADS
     shell:
-        'sambamba merge -t {threads} -p {output} {input}'
+        'sambamba merge -t {threads} {output.bam} {input}'
+    # run:
+    #     inp_cmd = ''.join([' -I ' + inp for inp in input])
+    #     shell('bammerge index=1 indexfilename={output.bai} tmpfile={output.bam}.tmp' +
+    #           inp_cmd + ' > {output.bam}')
 
 
 rule stats:
@@ -304,7 +312,7 @@ rule stats:
         sample_name + '.stats.txt'
     threads: MAX_THREADS
     benchmark:
-        "benchamrks/stats.tsv"
+        "benchmarks/stats.tsv"
     shell:
         'samtools stats -@ {threads} {input} > {output}'
 
