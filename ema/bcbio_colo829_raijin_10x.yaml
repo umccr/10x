@@ -46,7 +46,7 @@ details:
     files: /g/data3/gx8/projects/Saveliev_10X/COLO829-10x/ema_trimmed_runs/ema_COLO829BL/COLO829BL.bam
     genome_build: GRCh37
     metadata:
-        batch: COLO829BL_EMA_batch
+        batch: COLO829_100pc_EMA_batch
         phenotype: normal
 
 upload:
