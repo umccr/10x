@@ -34,3 +34,9 @@ vignettes/*.pdf
 
 .idea
 .DS_Store
+
+multiqc_report*.html
+*.bam
+*.bam.bai
+ema_notebook.ipynb
+NA12878_WGS_v2_phased_possorted_chr21.bxstats.txt

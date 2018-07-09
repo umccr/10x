@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Session genome="hg19" hasGeneTrack="true" hasSequenceTrack="true" locus="chr6:31964817-31965667" path="/Users/vsaveliev/git/umccr/10x/qc/coverage/sliced_bams/igv_session.xml" version="8">
+    <Resources>
+        <Resource path="/Users/vsaveliev/git/umccr/10x/qc/coverage/sliced_bams/COLO829_80pc.OLD_EMA.SLICED3.bam"/>
+        <Resource path="/Users/vsaveliev/git/umccr/10x/qc/coverage/sliced_bams/COLO829_40pc.SLICED_3.bam"/>
+        <Resource path="/Users/vsaveliev/git/umccr/10x/qc/coverage/sliced_bams/COLO829_20pc.SLICED_3.bam"/>
+        <Resource path="/Users/vsaveliev/git/umccr/10x/qc/coverage/sliced_bams/COLO829_80pc.LR.SLICED3.bam"/>
+        <Resource path="/Users/vsaveliev/git/umccr/10x/qc/coverage/sliced_bams/COLO829_100pc.SLICED_3.bam"/>
+    </Resources>
+    <Panel height="301" name="Panel1531103269467" width="3823">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;129.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/qc/coverage/sliced_bams/COLO829_20pc.SLICED_3.bam_coverage" name="COLO829_20pc.SLICED_3.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="129.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="60" id="/Users/vsaveliev/git/umccr/10x/qc/coverage/sliced_bams/COLO829_20pc.SLICED_3.bam_junctions" name="COLO829_20pc.SLICED_3.bam Junctions" sortable="false" visible="false" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="60.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="SQUISHED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/qc/coverage/sliced_bams/COLO829_20pc.SLICED_3.bam" name="COLO829_20pc.SLICED_3.bam" sortable="true" visible="true">
+            <RenderOptions/>
+        </Track>
+    </Panel>
+    <Panel height="347" name="Panel1531103274510" width="3823">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;74.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/qc/coverage/sliced_bams/COLO829_40pc.SLICED_3.bam_coverage" name="COLO829_40pc.SLICED_3.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="74.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="60" id="/Users/vsaveliev/git/umccr/10x/qc/coverage/sliced_bams/COLO829_40pc.SLICED_3.bam_junctions" name="COLO829_40pc.SLICED_3.bam Junctions" sortable="false" visible="false" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="60.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="SQUISHED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/qc/coverage/sliced_bams/COLO829_40pc.SLICED_3.bam" name="COLO829_40pc.SLICED_3.bam" sortable="true" visible="true">
+            <RenderOptions/>
+        </Track>
+    </Panel>
+    <Panel height="352" name="Panel1531103285165" width="3823">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;87.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/qc/coverage/sliced_bams/COLO829_100pc.SLICED_3.bam_coverage" name="COLO829_100pc.SLICED_3.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="87.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="60" id="/Users/vsaveliev/git/umccr/10x/qc/coverage/sliced_bams/COLO829_100pc.SLICED_3.bam_junctions" name="COLO829_100pc.SLICED_3.bam Junctions" sortable="false" visible="false" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="60.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="SQUISHED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/qc/coverage/sliced_bams/COLO829_100pc.SLICED_3.bam" name="COLO829_100pc.SLICED_3.bam" sortable="true" visible="true">
+            <RenderOptions/>
+        </Track>
+    </Panel>
+    <Panel height="407" name="Panel1531103296601" width="3823">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;84.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/qc/coverage/sliced_bams/COLO829_80pc.OLD_EMA.SLICED3.bam_coverage" name="COLO829_80pc.OLD_EMA.SLICED3.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="84.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="60" id="/Users/vsaveliev/git/umccr/10x/qc/coverage/sliced_bams/COLO829_80pc.OLD_EMA.SLICED3.bam_junctions" name="COLO829_80pc.OLD_EMA.SLICED3.bam Junctions" sortable="false" visible="false" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="60.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="SQUISHED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/qc/coverage/sliced_bams/COLO829_80pc.OLD_EMA.SLICED3.bam" name="COLO829_80pc.OLD_EMA.SLICED3.bam" sortable="true" visible="true">
+            <RenderOptions/>
+        </Track>
+    </Panel>
+    <Panel height="517" name="Panel1531103313673" width="3823">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;98.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/qc/coverage/sliced_bams/COLO829_80pc.LR.SLICED3.bam_coverage" name="COLO829_80pc.LR.SLICED3.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="98.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="60" id="/Users/vsaveliev/git/umccr/10x/qc/coverage/sliced_bams/COLO829_80pc.LR.SLICED3.bam_junctions" name="COLO829_80pc.LR.SLICED3.bam Junctions" sortable="false" visible="false" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="60.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="SQUISHED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/git/umccr/10x/qc/coverage/sliced_bams/COLO829_80pc.LR.SLICED3.bam" name="COLO829_80pc.LR.SLICED3.bam" sortable="true" visible="true">
+            <RenderOptions/>
+        </Track>
+    </Panel>
+    <Panel height="74" name="FeaturePanel" width="3823">
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="Reference sequence" name="Reference sequence" sortable="false" visible="true"/>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" colorScale="ContinuousColorScale;0.0;423.0;255,255,255;0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="35" id="hg19_genes" name="RefSeq Genes" renderer="BASIC_FEATURE" sortable="false" visible="true" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="423.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+    </Panel>
+    <PanelLayout dividerFractions="0.003115264797507788,0.16199376947040497,0.32087227414330216,0.5005192107995846,0.6879543094496365,0.9589823468328141"/>
+    <HiddenAttributes>
+        <Attribute name="DATA FILE"/>
+        <Attribute name="DATA TYPE"/>
+        <Attribute name="NAME"/>
+    </HiddenAttributes>
+</Session>
