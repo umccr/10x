@@ -77,6 +77,13 @@ cat log.txt
 ARC needs a target/set of targets to map reads against for assembly.  
 1. Begin with the HLA region as defined above
 
+No joy, didn't complete.  In hindsight ARC was probably not a smart choice, begins by [aligning the reads](https://ibest.github.io/ARC/#ARCAlgorithm) but has no ability to take advantage of the read cloud attributes of 10X data, so EMA or LongRanger would generate superior alignments.  Supernova would probably be a better option, but the resources were not available.
+
 ## Part 3 - call somatic variants against new HLA reference
 
+Using variants called on Raijin (COLO829 10X dilution series run with EMA, variants called with bcbio)
+On Raijin, 10X data is here - /g/data/gx8/data/10X/10X_EMA
+
 ## Part 4 - compare standard somatic calls vs 10X calls vs new reference calls
+
+Compare COLO829 bwa bcbio variants vs COLO829 EMA bcbio variants
