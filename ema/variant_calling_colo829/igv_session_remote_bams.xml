@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Session genome="hg19" hasGeneTrack="true" hasSequenceTrack="true" locus="chr5:9123-12722" nextAutoscaleGroup="2" path="/Users/vsaveliev/git/umccr/10x/ema/variant_calling_colo829/igv_session_remote_bams.xml" version="8">
+    <Resources>
+        <Resource path="/Users/vsaveliev/rjn/data/10X/TruSeq/final/Colo829_B/Colo829_B-ready.bam"/>
+        <Resource path="/Users/vsaveliev/rjn/projects/Saveliev_10X/COLO829-10x/vcfs/COLO829_1-ensemble-annotated.vcf.gz"/>
+        <Resource path="/Users/vsaveliev/rjn/data/10X/TruSeq/final/2018-07-08_10X-Collaboration_WGS-merged/COLO829_1-germline-ensemble-annotated.vcf.gz"/>
+        <Resource path="/Users/vsaveliev/rjn/projects/Saveliev_10X/COLO829-10x/ema_trimmed_runs/ema_COLO829_100pc/COLO829_100pc.bam"/>
+        <Resource path="/Users/vsaveliev/rjn/projects/Saveliev_10X/COLO829-10x/bcbio_10x/bcbio_somatic_1/final/2018-07-10_project/COLO829_100pc_EMA_batch-ensemble-annotated.vcf.gz"/>
+        <Resource path="/Users/vsaveliev/rjn/projects/Saveliev_10X/COLO829-10x/ema_trimmed_runs/ema_COLO829BL/COLO829BL.bam"/>
+        <Resource path="/Users/vsaveliev/rjn/data/10X/TruSeq/final/Colo829/Colo829-ready.bam"/>
+    </Resources>
+    <Panel height="150" name="DataPanel" width="1663">
+        <Track SQUISHED_ROW_HEIGHT="1" altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" colorMode="GENOTYPE" displayMode="EXPANDED" featureVisibilityWindow="1998000" fontSize="10" id="/Users/vsaveliev/rjn/data/10X/TruSeq/final/2018-07-08_10X-Collaboration_WGS-merged/COLO829_1-germline-ensemble-annotated.vcf.gz" name="COLO829_1-germline-ensemble-annotated.vcf.gz" renderer="BASIC_FEATURE" siteColorMode="ALLELE_FREQUENCY" sortable="false" visible="true" windowFunction="count"/>
+        <Track SQUISHED_ROW_HEIGHT="1" altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" colorMode="GENOTYPE" displayMode="EXPANDED" featureVisibilityWindow="1996000" fontSize="10" id="/Users/vsaveliev/rjn/projects/Saveliev_10X/COLO829-10x/bcbio_10x/bcbio_somatic_1/final/2018-07-10_project/COLO829_100pc_EMA_batch-ensemble-annotated.vcf.gz" name="COLO829_100pc_EMA_batch-ensemble-annotated.vcf.gz" renderer="BASIC_FEATURE" siteColorMode="ALLELE_FREQUENCY" sortable="false" visible="true" windowFunction="count"/>
+        <Track SQUISHED_ROW_HEIGHT="1" altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" colorMode="GENOTYPE" displayMode="EXPANDED" featureVisibilityWindow="1996000" fontSize="10" id="/Users/vsaveliev/rjn/projects/Saveliev_10X/COLO829-10x/vcfs/COLO829_1-ensemble-annotated.vcf.gz" name="COLO829_1-ensemble-annotated.vcf.gz" renderer="BASIC_FEATURE" siteColorMode="ALLELE_FREQUENCY" sortable="false" visible="true" windowFunction="count"/>
+    </Panel>
+    <Panel height="4823" name="Panel1531206525309" width="1663">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;48.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/rjn/projects/Saveliev_10X/COLO829-10x/ema_trimmed_runs/ema_COLO829_100pc/COLO829_100pc.bam_coverage" name="COLO829_100pc.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="340259.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="60" id="/Users/vsaveliev/rjn/projects/Saveliev_10X/COLO829-10x/ema_trimmed_runs/ema_COLO829_100pc/COLO829_100pc.bam_junctions" name="COLO829_100pc.bam Junctions" sortable="false" visible="false" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="60.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="SQUISHED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/rjn/projects/Saveliev_10X/COLO829-10x/ema_trimmed_runs/ema_COLO829_100pc/COLO829_100pc.bam" name="COLO829_100pc.bam" sortable="true" visible="true">
+            <RenderOptions showAllBases="true" sortByTag="BX"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;36.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/rjn/projects/Saveliev_10X/COLO829-10x/ema_trimmed_runs/ema_COLO829BL/COLO829BL.bam_coverage" name="COLO829BL.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="695765.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="SQUISHED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/rjn/projects/Saveliev_10X/COLO829-10x/ema_trimmed_runs/ema_COLO829BL/COLO829BL.bam" name="COLO829BL.bam" sortable="true" visible="true">
+            <RenderOptions sortByTag="BX"/>
+        </Track>
+    </Panel>
+    <Panel height="591" name="Panel1531206614067" width="1663">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;134.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/rjn/data/10X/TruSeq/final/Colo829/Colo829-ready.bam_coverage" name="Colo829-ready.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="3150.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="60" id="/Users/vsaveliev/rjn/data/10X/TruSeq/final/Colo829/Colo829-ready.bam_junctions" name="Colo829-ready.bam Junctions" sortable="false" visible="false" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="60.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="SQUISHED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/rjn/data/10X/TruSeq/final/Colo829/Colo829-ready.bam" name="Colo829-ready.bam" sortable="true" visible="true">
+            <RenderOptions showAllBases="true"/>
+        </Track>
+    </Panel>
+    <Panel height="670" name="Panel1531208530322" width="1663">
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="60" id="/Users/vsaveliev/rjn/projects/Saveliev_10X/COLO829-10x/ema_trimmed_runs/ema_COLO829BL/COLO829BL.bam_junctions" name="COLO829BL.bam Junctions" sortable="false" visible="false" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="60.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;98.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/rjn/data/10X/TruSeq/final/Colo829_B/Colo829_B-ready.bam_coverage" name="Colo829_B-ready.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="8230.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="SQUISHED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/rjn/data/10X/TruSeq/final/Colo829_B/Colo829_B-ready.bam" name="Colo829_B-ready.bam" sortable="true" visible="true">
+            <RenderOptions showAllBases="true"/>
+        </Track>
+    </Panel>
+    <Panel height="887" name="Panel1531446970331" width="1663">
+        <Track altColor="0,0,178" autoScale="true" color="175,175,175" colorScale="ContinuousColorScale;0.0;695765.0;255,255,255;175,175,175" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/rjn/projects/Saveliev_10X/COLO829-10x/ema_trimmed_runs/ema_COLO829BL/COLO829BL.bam_coverage" name="COLO829BL.bam Coverage" showReference="false" snpThreshold="0.2" sortable="true" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="695765.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="60" id="/Users/vsaveliev/rjn/projects/Saveliev_10X/COLO829-10x/ema_trimmed_runs/ema_COLO829BL/COLO829BL.bam_junctions" name="COLO829BL.bam Junctions" sortable="false" visible="false" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="60.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="SQUISHED" featureVisibilityWindow="-1" fontSize="10" id="/Users/vsaveliev/rjn/projects/Saveliev_10X/COLO829-10x/ema_trimmed_runs/ema_COLO829BL/COLO829BL.bam" name="COLO829BL.bam" sortable="true" visible="true">
+            <RenderOptions showAllBases="true"/>
+        </Track>
+    </Panel>
+    <Panel height="40" name="FeaturePanel" width="1663">
+        <Track altColor="0,0,178" autoScale="false" color="0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" id="Reference sequence" name="Reference sequence" sortable="false" visible="true"/>
+        <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" colorScale="ContinuousColorScale;0.0;423.0;255,255,255;0,0,178" displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10" height="35" id="hg19_genes" name="RefSeq Genes" renderer="BASIC_FEATURE" sortable="false" visible="true" windowFunction="count">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="423.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+    </Panel>
+    <PanelLayout dividerFractions="0.0857843137254902,0.21691176470588236,0.6213235294117647,0.7843137254901961,0.9546568627450981"/>
+    <HiddenAttributes>
+        <Attribute name="DATA FILE"/>
+        <Attribute name="DATA TYPE"/>
+        <Attribute name="NAME"/>
+    </HiddenAttributes>
+</Session>
