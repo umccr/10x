@@ -42,7 +42,7 @@ ema.py /data/cephfs/punim0010/data/FASTQ/180312_A00130_0041_AHCLLMDMXX/Chromium_
 @click.option('-o', 'output_dir', type=click.Path(), help='Output directory (default is "ema_<sample_name>")')
 @click.option('-j', '--jobs', 'jobs', default=1, help='Maximum number of cores to use at single time (works both for local '
               'and cluster runs)')
-@click.option('-s', '--sample', 'sample_name', help='Sample name; required')
+@click.option('-s', '--sample', 'sample_name', help='Sample name; required', required=True)
 @click.option('--bins', help='Number of bins to split fastqs', default=500)
 @click.option('-c', '--cluster-auto', 'cluster', is_flag=True, help='Submit jobs to cluster')
 @click.option('-g', '--genome', help='Genome build (GRCh37 or hg38)', type=click.Choice(['GRCh37', 'hg38']), default='GRCh37')
