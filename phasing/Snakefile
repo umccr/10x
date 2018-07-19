@@ -87,7 +87,7 @@ rule extractHAIRS_ema:
     output:
         frag = 'work/unlinked_frag/EMA_{sname}'
     shell:
-        'extractHAIRS --10X 1 --bam {input.bam} --VCF {input.vcf} > {output.frag} --ref {ref}'
+        'extractHAIRS --10X 1 --bam {input.bam} --VCF {input.vcf} --ref {ref} > {output.frag}'
 
 
 # extract UNLINKED haplotype informative reads
@@ -98,7 +98,7 @@ rule extractHAIRS_truseq:
     output:
         frag = 'work/frag/TruSeq_{sname}'
     shell:
-        'extractHAIRS 1 --bam {input.bam} --VCF {input.vcf} > {output.frag} --ref {ref}'
+        'extractHAIRS --bam {input.bam} --VCF {input.vcf} --ref {ref} > {output.frag}'
 
 
 # link reads into 10X molecule haplotype fragments
@@ -128,7 +128,7 @@ rule run_hapcut2_10x:
 # run HapCUT2 to assemble haplotypes from combined 10X haplotype fragments
 rule run_hapcut2_truseq:
     input:
-        frag = rules.link_fragments.output.hairs,
+        frag = rules.extractHAIRS_truseq.output.frag,
         vcf = rules.unzip_truseq_vcf.output
     output:
         hap = 'output/TruSeq_{sname}.hap'
