@@ -1,0 +1,50 @@
+```bcbio_qc.yaml
+details:
+  - analysis: variant2
+    algorithm:
+        aligner: none
+        recalibrate: false
+        realign: false
+        mark_duplicates: false
+        remove_lcr: false
+        maxcov_downsample: false
+        coverage: /g/data/gx8/extras/2018-02-16_PMCC_Panel_Regions.bed
+        tools_on: [gatk4, qualimap_full, noalt_calling]
+        tools_off: [gemini, upload_alignment]
+    genome_build: GRCh37
+
+upload:
+  dir: ../final
+```
+
+```bcbio_qc.csv
+sample,description
+COLO829BL,COLO829BL_EMA
+COLO829_20pc,COLO829_20pc_EMA
+COLO829_40pc,COLO829_40pc_EMA
+COLO829_60pc,COLO829_60pc_EMA
+COLO829_80pc,COLO829_80pc_EMA
+COLO829_100pc,COLO829_100pc_EMA
+# Older EMA runs
+Colo829_80pc_EMA,Colo829_80pc_EMA
+Colo829Bl_10x_EMA,Colo829Bl_10x_80pc_EMA
+# Longranger
+COLO829_80pc_LR,Colo829_10x_80pc_LR
+#COLO829BL_LR,Colo829Bl_10x_LR
+# TruSeq+BWA
+Colo829_20pc-ready,Colo829_20pc
+Colo829_40pc-ready,Colo829_40pc
+Colo829_60pc-ready,Colo829_60pc
+Colo829_80pc-ready,Colo829_80pc
+Colo829_B-ready,Colo829_B
+Colo829-ready,Colo829
+```
+
+```
+bcbio_nextgen.py -w template bcbio_qc.yaml bcbio_qc.csv \
+/g/data3/gx8/projects/Saveliev_10X/COLO829-10x/ema_trimmed_runs/ema_*/*.bam \
+/g/data3/gx8/projects/Saveliev_10X/COLO829-10x/longranger/bams/COLO829_80pc_LR.bam \
+/g/data3/gx8/projects/Saveliev_10X/COLO829-10x/ema_older_runs/bams/*.bam \
+/g/data3/gx8/data/10X/TruSeq/final/*/*.bam
+```
+

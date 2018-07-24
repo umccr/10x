@@ -2,7 +2,7 @@
 
 1. `cd /data/cephfs/punim0010/projects/Saveliev_10X/NA12878-10x/bcbio_grch37`
 
-2. Put [QC config](bcbio_qc.yaml) into `config` (for extranal BAMs, set `bam_clean: fixrg` to make that `RG` equals the `description` you use, and turn off `mark_duplicates`)
+2. Put [QC config](bcbio_na12878_spartan_qc.yaml) into `config` (for extranal BAMs, set `bam_clean: fixrg` to make that `RG` equals the `description` you use, and turn off `mark_duplicates`)
 
 3. Run bcbio
 
@@ -53,6 +53,19 @@ longranger_decoy_pos_sorted_bam/qc/coverage/longranger_decoy_pos_sorted_bam-cove
 4. Copy `cp 2018-03-20_project/multiqc/multiqc_config.yaml .` and add fix the `table_columns_visible` section with the following:
 
 ```
+bcftools:
+  write_separate_table: true
+module_order:
+- bcbio
+- samtools
+- goleft_indexcov
+- peddy
+- bcftools
+- picard
+- qualimap
+- snpeff
+- fastqc
+- preseq
 table_columns_visible:
   FastQC:
     percent_gc: false
@@ -60,6 +73,11 @@ table_columns_visible:
     Average_insert_size: true
     Usable_pct: false
     Ontarget_pct: false
+  Peddy:
+    error_sex_check: false
+    family_id: false
+    sex_het_ratio: false
+    percent_gc: false
   QualiMap:
     1_x_pc: true
     5_x_pc: true

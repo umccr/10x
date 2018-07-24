@@ -40,3 +40,5 @@ multiqc_report*.html
 *.bam.bai
 ema_notebook.ipynb
 NA12878_WGS_v2_phased_possorted_chr21.bxstats.txt
+
+.ipynb_checkpoints
