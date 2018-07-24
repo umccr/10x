@@ -1,10 +1,20 @@
 ## HapCUT2
 
+To phase the variants, we use [HapCUT2](https://github.com/vibansal/HapCUT2) that can phase both on linked reads (for 10x data) and paired information (for TruSeq data). 
+
+To phase all dilution series both EMA and TruSeq, I prepared a [Snakefile](Snakefile) (see in this repo) that can be run on Raijin cluster (see a finished run in `/home/563/vs2870/gx8/data/10X/Phasing/full_run`). 
+It contains the [10x HapCUT2 steps](https://github.com/vibansal/HapCUT2#10x-genomics-linked-reads) and [normal paired read steps](https://github.com/vibansal/HapCUT2#to-run), 
+plus a [fgbio tool HapCutToVcf](https://github.com/fulcrumgenomics/fgbio#list-of-tools) to convert HAPCUT2 output back into a phased VCF (and populate the `GT` and `PS` FORMAT tags).
+
+The generated can be plotted with the Jypter notebook [Plot phase blocks.ipynb](Plot phase blocks.ipynb).
+
+![phasing_hist_100pc.png]
+
+### Exploring process
+
 ```
 cd /home/563/vs2870/gx8/data/10X/Phasing/test_small
 ```
-
-### Pipeline
 
 Script `run.sh` will phase a 10x VCF file.
 
@@ -54,7 +64,7 @@ samtools view Colo829-ready.bam 21 -O BAM > Colo829-ready.21.bam
 samtools index Colo829-ready.21.bam
 ```
 
-Running sligrly different workflow `run_TruSeq.sh`:
+Running slightly different workflow `run_TruSeq.sh`:
 
 ```
 bash run_TruSeq.sh results/TruSeq_ TruSeq_COLO829_100pc-strelka2.21.vcf TruSeq_COLO829_100pc.21.bam
@@ -100,36 +110,6 @@ BLOCK: offset: 218 len: 2 phased: 2 SPAN: 497 fragments 4
 218     0       0       21      24511717        C       T       0/0:54:1:0:0:0,0:53,57:0,0:0,0:0        0       .       100.00
 219     0       0       21      24512214        G       A       0/0:37:0:0:0:0,0:0,0:37,42:0,0:0        0       .       100.00
 ********
-BLOCK: offset: 222 len: 2 phased: 2 SPAN: 402 fragments 2
-222     0       0       21      24597761        G       A       0/0:41:0:0:0:0,0:0,0:40,43:1,1:0        0       .       68.63
-223     0       0       21      24598163        T       G       0/0:36:0:0:0:0,0:0,0:0,0:36,39:0        0       .       68.63
-********
-BLOCK: offset: 296 len: 2 phased: 2 SPAN: 1 fragments 49
-296     0       0       21      26638431        G       A       0/0:31:0:0:0:0,0:0,0:31,32:0,0:0        0       .       100.00
-297     0       0       21      26638432        G       A       0/0:31:0:0:0:0,0:0,0:31,32:0,0:0        0       .       100.00
-********
-BLOCK: offset: 299 len: 2 phased: 2 SPAN: 202 fragments 3
-299     0       0       21      26702893        A       C       0/0:56:0:0:0:56,56:0,0:0,0:0,0:0        0       .       33.99
-300     0       0       21      26703095        G       A       0/0:40:0:0:0:1,1:0,0:39,44:0,0:0.025    0       .       33.99
-********
-BLOCK: offset: 316 len: 2 phased: 2 SPAN: 127 fragments 6
-316     0       0       21      27334036        C       T       0/0:36:0:0:0:0,0:36,37:0,0:0,0:0        0       .       100.00
-317     0       0       21      27334163        A       T       0/0:29:0:0:0:29,32:0,0:0,0:0,0:0        0       .       100.00
-********
-BLOCK: offset: 323 len: 2 phased: 2 SPAN: 298 fragments 11
-323     0       0       21      27584635        G       A       0/0:18:0:0:0:0,0:0,0:18,21:0,0:0        0       .       100.00
-324     0       0       21      27584933        G       A       0/0:23:0:0:0:0,0:0,0:23,25:0,0:0        0       .       100.00
-********
-BLOCK: offset: 380 len: 2 phased: 2 SPAN: 250 fragments 5
-380     0       0       21      30396916        T       G       0/0:30:1:0:0:0,0:0,0:0,2:29,33:0        0       .       100.00
-381     0       0       21      30397166        T       C       0/0:39:0:0:0:0,0:0,0:0,0:39,44:0        0       .       100.00
-********
-BLOCK: offset: 421 len: 2 phased: 2 SPAN: 1 fragments 59
-421     0       0       21      32392453        G       A       0/0:54:0:0:0:0,0:0,0:54,58:0,0:0        0       .       100.00
-422     0       0       21      32392454        G       A       0/0:53:0:0:0:0,0:0,0:53,57:0,0:0        0       .       100.00
-********
-BLOCK: offset: 426 len: 2 phased: 2 SPAN: 1 fragments 29
-426     0       0       21      32668849        A       G       0/0:29:1:0:0:28,32:0,0:0,0:0,0:0        0       .       100.00
 ```
 
 When the linked reads information, getting some longer contiguous haplotype blocks:
@@ -165,33 +145,6 @@ BLOCK: offset: 26 len: 10 phased: 10 SPAN: 118186 fragments 56
 33      0       0       21      17422069        C       T       0/0:43:0:0:0:0,0:43,51:0,0:0,0:0        0       .       100.00
 34      0       0       21      17439383        C       T       0/0:40:0:0:0:0,0:40,43:0,0:0,0:0        0       .       100.00
 35      0       0       21      17442932        G       A       0/0:78:2:0:0:0,0:0,0:76,81:0,1:0        0       .       100.00
-********
-BLOCK: offset: 44 len: 2 phased: 2 SPAN: 19931 fragments 4
-44      0       0       21      17956272        C       T       0/0:35:0:0:0:0,0:35,42:0,0:0,0:0        0       .       100.00
-45      0       0       21      17976203        G       C       0/0:40:0:0:0:0,0:0,0:40,44:0,0:0        0       .       100.00
-********
-BLOCK: offset: 49 len: 2 phased: 2 SPAN: 30653 fragments 1
-49      0       0       21      18100108        G       A       0/0:37:0:0:0:0,0:0,0:37,39:0,0:0        0       .       24.74
-50      0       0       21      18130761        T       C       0/0:58:0:0:0:0,0:1,7:0,0:57,68:0.0172414        0       .       24.74
-********
-BLOCK: offset: 51 len: 2 phased: 2 SPAN: 1541 fragments 18
-51      0       0       21      18176661        G       A       0/0:44:0:0:0:0,0:0,0:44,49:0,1:0        0       .       100.00
-52      0       0       21      18178202        G       A       0/0:32:0:0:0:0,0:0,0:32,38:0,0:0        0       .       100.00
-********
-BLOCK: offset: 54 len: 4 phased: 4 SPAN: 66763 fragments 10
-54      0       0       21      18411545        G       A       0/0:40:0:0:0:0,0:0,0:40,48:0,0:0        0       .       30.03
-55      0       0       21      18451276        C       A       0/0:49:0:0:0:0,0:49,58:0,0:0,0:0        0       .       100.00
-56      0       0       21      18470001        A       C       0/0:28:0:0:0:28,29:0,0:0,0:0,0:0        0       .       100.00
-57      0       0       21      18478308        G       C       0/0:48:0:0:0:0,0:0,0:48,53:0,0:0        0       .       100.00
-********
-BLOCK: offset: 58 len: 8 phased: 7 SPAN: 105564 fragments 38
-58      0       0       21      18519809        C       A       0/0:40:3:3:0:1,2:36,42:0,0:0,0:0.025    0       .       100.00
-59      0       0       21      18521238        G       A       0/0:40:0:0:0:0,0:0,1:40,42:0,0:0        0       .       100.00
-60      0       0       21      18527329        G       A       0/0:55:0:0:0:0,0:0,0:55,64:0,0:0        0       .       100.00
-61      0       0       21      18571255        G       A       0/0:30:0:0:0:0,0:0,0:30,42:0,0:0        0       .       100.00
-62      0       0       21      18580219        G       A       0/0:23:0:0:0:0,0:0,0:23,23:0,0:0        0       .       100.00
-64      0       0       21      18602856        G       A       0/0:63:0:0:0:0,0:0,0:63,69:0,0:0        0       .       100.00
-65      0       0       21      18625373        G       A       0/0:45:0:0:0:0,0:0,0:45,46:0,0:0        0       .       100.00
 ********
 BLOCK: offset: 68 len: 3 phased: 2 SPAN: 112 fragments 17
 ```
@@ -241,44 +194,21 @@ BLOCK: offset: 256 len: 2 phased: 2 SPAN: 1 fragments 39
 256     0       0       21      26638431        G       A       0/0:37:0:0:0:0,0:0,0:37,37:0,0:0        0       .       100.00
 257     0       0       21      26638432        G       A       0/0:37:0:0:0:0,0:0,0:37,37:0,0:0        0       .       100.00
 ********
-BLOCK: offset: 259 len: 2 phased: 2 SPAN: 202 fragments 6
-259     -       -       21      26702893        A       C       0/0:39:0:0:0:39,39:0,0:0,0:0,0:0        0       .       3.01
-260     -       -       21      26703095        G       A       0/0:25:0:0:0:0,0:0,0:25,25:0,0:0        0       .       3.01
-********
-BLOCK: offset: 271 len: 2 phased: 2 SPAN: 127 fragments 13
-271     0       0       21      27334036        C       T       0/0:49:0:0:0:0,0:49,49:0,0:0,0:0        0       .       100.00
-272     0       0       21      27334163        A       T       0/0:36:0:0:0:36,36:0,0:0,0:0,0:0        0       .       100.00
-********
-BLOCK: offset: 276 len: 2 phased: 2 SPAN: 298 fragments 15
-276     0       0       21      27584635        G       A       0/0:34:0:0:0:0,0:0,0:34,34:0,0:0        0       .       100.00
-277     0       0       21      27584933        G       A       0/0:45:0:0:0:0,0:0,0:45,45:0,0:0        0       .       100.00
-********
-BLOCK: offset: 279 len: 2 phased: 2 SPAN: 562 fragments 3
-279     0       0       21      27627709        C       T       0/0:34:0:0:0:0,0:34,34:0,0:0,0:0        0       .       100.00
-280     0       0       21      27628271        G       A       0/0:37:4:0:0:0,0:0,0:33,35:0,1:0        0       .       100.00
-********
-BLOCK: offset: 351 len: 2 phased: 2 SPAN: 1 fragments 40
-351     0       0       21      32392453        G       A       0/0:41:0:0:0:0,0:0,0:41,42:0,0:0        0       .       100.00
-352     0       0       21      32392454        G       A       0/0:41:0:0:0:0,0:0,0:41,42:0,0:0        0       .       100.00
-********
-BLOCK: offset: 357 len: 2 phased: 2 SPAN: 1 fragments 49
-357     0       0       21      32668849        A       G       0/0:33:1:0:0:32,33:0,0:0,0:0,0:0        0       .       100.00
-358     0       0       21      32668850        A       T       0/0:33:1:0:0:32,32:0,1:0,0:0,0:0        0       .       100.00
-********
-BLOCK: offset: 372 len: 2 phased: 2 SPAN: 1 fragments 43
-372     0       0       21      33318540        C       T       0/0:33:0:0:0:0,0:33,33:0,0:0,0:0        0       .       100.00
-373     0       0       21      33318541        C       T       0/0:33:0:0:0:1,1:32,32:0,0:0,0:0        0       .       100.00
-********
-BLOCK: offset: 376 len: 2 phased: 2 SPAN: 1 fragments 40
-376     0       0       21      33688063        G       A       0/0:61:0:0:0:0,0:0,0:61,61:0,0:0        0       .       100.00
-377     0       0       21      33688064        G       A       0/0:61:0:0:0:0,0:0,0:61,61:0,0:0        0       .       100.00
 ```
 
-Now running on full all of the 5 TruSeq samples and 5 EMA samples, using a Snakefile
+However after poking, figuring out that the reason it didn't run on some VCFs was that the VCFs have 2 samples, so need to extract one with:
 
 ```
-cd /g/data3/gx8/data/10X/Phasing/test_small/full_run
-# copy `Snakefile` into that directory
-snakemake -p -j30
+bcftools view -s Colo829_80pc_downsample ensemble.vcf > ensemble.sample.vcf
 ```
 
+Also, to compare more apple-to-apple, filtering all variants only to true possives with:
+
+```
+bcftools isec TruSeq_100pc-downsample-strelka2.phased.vcf.gz EGAZ00001226241_ListforNatureReports.IndelsandSNVs.final.Suppl1.snpEff.validated.SORTED.vcf.gz -p isec_bwa -n=2 -w1
+# writes to isec_bwa/0001.vcf
+```
+
+Also, the `.hap` files contain only non-trivial phasing groups. To plot all variants, we need to convert back to VCF, and use the `PS` FORMAT tags (that contain the phasing group ID).
+
+All these steps are a part of the [Snakefile](Snakefile).
