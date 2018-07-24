@@ -212,3 +212,24 @@ bcftools isec TruSeq_100pc-downsample-strelka2.phased.vcf.gz EGAZ00001226241_Lis
 Also, the `.hap` files contain only non-trivial phasing groups. To plot all variants, we need to convert back to VCF, and use the `PS` FORMAT tags (that contain the phasing group ID).
 
 All these steps are a part of the [Snakefile](Snakefile).
+
+### Adding germline
+
+Somatic variants are sparce, but we want to undestand if we can phase together germline and somatic variants within a gene. We modify the Snakefile to include germline variants
+from the blood control sample, however for performance reasons we subset all varaints to key genes only (from 3m to 30k). There are only 300 somatic variants in key genes, so we can as well ignore them.
+
+Also, some germline variants have dots in `GT` fields, which leads `extractHAIRS` to error out with:
+
+```
+ERROR: Non-diploid VCF entry detected. Each VCF entry must have a diploid genotype (GT) field consisting of two alleles in the set {0,1,2} separated by either '/' or '|'. For example, "1/1", "0/1", and "0|2" are valid diploid genotypes for HapCUT2, but "1", "0/3", and "0/0/1" are not.
+The invalid entry is:
+```
+
+Adding a line to filter out those into the Snakemake:
+
+```
+bcftools filter -e "GT=='.|.' | GT=='.|1' | GT=='1|.'" 
+```
+
+### Ideas: 
+- Germline varaints were called from a normal sample, so we can improve phasing by combining phasing information from both tumor and blood BAMs.
