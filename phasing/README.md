@@ -8,7 +8,7 @@ plus a [fgbio tool HapCutToVcf](https://github.com/fulcrumgenomics/fgbio#list-of
 
 The generated can be plotted with the Jypter notebook [Plot phase blocks.ipynb](Plot phase blocks.ipynb).
 
-![phasing_hist_100pc.png]
+![phasing_hist_100pc.png](phasing_hist_100pc.png)
 
 ### Exploring process
 
