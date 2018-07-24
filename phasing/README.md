@@ -6,9 +6,9 @@ To phase all dilution series both EMA and TruSeq, I prepared a [Snakefile](Snake
 It contains the [10x HapCUT2 steps](https://github.com/vibansal/HapCUT2#10x-genomics-linked-reads) and [normal paired read steps](https://github.com/vibansal/HapCUT2#to-run), 
 plus a [fgbio tool HapCutToVcf](https://github.com/fulcrumgenomics/fgbio#list-of-tools) to convert HAPCUT2 output back into a phased VCF (and populate the `GT` and `PS` FORMAT tags).
 
-The generated can be plotted with the Jypter notebook [Plot phase blocks.ipynb](Plot phase blocks.ipynb).
+The generated can be plotted with the Jypter notebook [Plot phase blocks.ipynb]("Plot phase blocks.ipynb").
 
-![phasing_hist_100pc.png](phasing_hist_100pc.png)
+![phasing_hist_100pc_log.png](phasing_hist_100pc_log.png)
 
 ### Exploring process
 
