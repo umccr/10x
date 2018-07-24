@@ -1,15 +1,19 @@
 localrules: all
 
 import sys, os
+from collections import defaultdict
+from ngs_utils.vcf_utils import get_tumor_sample_name
 
 ref = '/g/data3/gx8/local/development/bcbio/genomes/Hsapiens/GRCh37/seq/GRCh37.fa'
 
-truseq_bams = [
+colo_truth = '/g/data3/gx8/extras/colo829_truth/EGAZ00001226241_ListforNatureReports.IndelsandSNVs.final.Suppl1.snpEff.validated.SORTED.vcf.gz'
+
+bwa_bams = [
     '/g/data/gx8/data/10X/TruSeq/bcbio_original/BAMs/Colo829-ready_downsample.bam',
-    '/g/data/gx8/data/10X/TruSeq/bcbio_original/BAMs/Colo829_20pc-ready_downsample.bam',
-    '/g/data/gx8/data/10X/TruSeq/bcbio_original/BAMs/Colo829_40pc-ready_downsample.bam',
-    '/g/data/gx8/data/10X/TruSeq/bcbio_original/BAMs/Colo829_60pc-ready_downsample.bam',
     '/g/data/gx8/data/10X/TruSeq/bcbio_original/BAMs/Colo829_80pc-ready_downsample.bam',
+    '/g/data/gx8/data/10X/TruSeq/bcbio_original/BAMs/Colo829_60pc-ready_downsample.bam',
+    '/g/data/gx8/data/10X/TruSeq/bcbio_original/BAMs/Colo829_40pc-ready_downsample.bam',
+    '/g/data/gx8/data/10X/TruSeq/bcbio_original/BAMs/Colo829_20pc-ready_downsample.bam',
 ]
 
 ema_bams = [
@@ -20,119 +24,156 @@ ema_bams = [
     '/g/data/gx8/data/10X/10X_EMA/BAMs/COLO829_20pc.bam',
 ]
 
-truseq_vcfs = [
-    '/g/data/gx8/data/10X/TruSeq/bcbio_downsampled/final/2018-07-17_10X-Collaboration_downsample/COLO829_100pc-downsample-batch-strelka2-annotated.vcf.gz',
-    '/g/data/gx8/data/10X/TruSeq/bcbio_downsampled/final/2018-07-17_10X-Collaboration_downsample/COLO829_20pc-downsample-batch-strelka2-annotated.vcf.gz',
-    '/g/data/gx8/data/10X/TruSeq/bcbio_downsampled/final/2018-07-17_10X-Collaboration_downsample/COLO829_40pc-downsample-batch-strelka2-annotated.vcf.gz',
-    '/g/data/gx8/data/10X/TruSeq/bcbio_downsampled/final/2018-07-17_10X-Collaboration_downsample/COLO829_60pc-downsample-batch-strelka2-annotated.vcf.gz',
-    '/g/data/gx8/data/10X/TruSeq/bcbio_downsampled/final/2018-07-17_10X-Collaboration_downsample/COLO829_80pc-downsample-batch-strelka2-annotated.vcf.gz',
+# ENSEMBLE, UMCCRISED
+#
+bwa_vcfs = [
+    '/g/data3/gx8/data/10X/TruSeq/bcbio_downsampled/umccrised/COLO829_100pc-downsample-batch__Colo829_downsample/small_variants/COLO829_100pc-downsample-batch__Colo829_downsample-somatic-ensemble-pon_hardfiltered.vcf.gz',
+    '/g/data3/gx8/data/10X/TruSeq/bcbio_downsampled/umccrised/COLO829_80pc-downsample-batch__Colo829_80pc_downsample/small_variants/COLO829_80pc-downsample-batch__Colo829_80pc_downsample-somatic-ensemble-pon_hardfiltered.vcf.gz',
+    '/g/data3/gx8/data/10X/TruSeq/bcbio_downsampled/umccrised/COLO829_40pc-downsample-batch__Colo829_40pc_downsample/small_variants/COLO829_40pc-downsample-batch__Colo829_40pc_downsample-somatic-ensemble-pon_hardfiltered.vcf.gz',
+    '/g/data3/gx8/data/10X/TruSeq/bcbio_downsampled/umccrised/COLO829_20pc-downsample-batch__Colo829_20pc_downsample/small_variants/COLO829_20pc-downsample-batch__Colo829_20pc_downsample-somatic-ensemble-pon_hardfiltered.vcf.gz',
+    '/g/data3/gx8/data/10X/TruSeq/bcbio_downsampled/umccrised/COLO829_60pc-downsample-batch__Colo829_60pc_downsample/small_variants/COLO829_60pc-downsample-batch__Colo829_60pc_downsample-somatic-ensemble-pon_hardfiltered.vcf.gz',
 ]
 
 ema_vcfs = [
-    '/g/data/gx8/data/10X/10X_EMA/bcbio_original/final/2018-07-14_10X-Collaboration_EMA/COLO829_100pc-batch-strelka2-annotated.vcf.gz',
-    '/g/data/gx8/data/10X/10X_EMA/bcbio_original/final/2018-07-14_10X-Collaboration_EMA/COLO829_80pc-batch-strelka2-annotated.vcf.gz',
-    '/g/data/gx8/data/10X/10X_EMA/bcbio_original/final/2018-07-14_10X-Collaboration_EMA/COLO829_60pc-batch-strelka2-annotated.vcf.gz',
-    '/g/data/gx8/data/10X/10X_EMA/bcbio_original/final/2018-07-14_10X-Collaboration_EMA/COLO829_40pc-batch-strelka2-annotated.vcf.gz',
-    '/g/data/gx8/data/10X/10X_EMA/bcbio_original/final/2018-07-14_10X-Collaboration_EMA/COLO829_20pc-batch-strelka2-annotated.vcf.gz',
+    '/g/data3/gx8/data/10X/10X_EMA/bcbio_original/umccrised/COLO829_100pc-batch__COLO829_100pc_EMA/small_variants/COLO829_100pc-batch__COLO829_100pc_EMA-somatic-ensemble-pon_hardfiltered.vcf.gz',
+    '/g/data3/gx8/data/10X/10X_EMA/bcbio_original/umccrised/COLO829_80pc-batch__COLO829_80pc_EMA/small_variants/COLO829_80pc-batch__COLO829_80pc_EMA-somatic-ensemble-pon_hardfiltered.vcf.gz',
+    '/g/data3/gx8/data/10X/10X_EMA/bcbio_original/umccrised/COLO829_60pc-batch__COLO829_60pc_EMA/small_variants/COLO829_60pc-batch__COLO829_60pc_EMA-somatic-ensemble-pon_hardfiltered.vcf.gz',
+    '/g/data3/gx8/data/10X/10X_EMA/bcbio_original/umccrised/COLO829_40pc-batch__COLO829_40pc_EMA/small_variants/COLO829_40pc-batch__COLO829_40pc_EMA-somatic-ensemble-pon_hardfiltered.vcf.gz',
+    '/g/data3/gx8/data/10X/10X_EMA/bcbio_original/umccrised/COLO829_20pc-batch__COLO829_20pc_EMA/small_variants/COLO829_20pc-batch__COLO829_20pc_EMA-somatic-ensemble-pon_hardfiltered.vcf.gz',
 ]
+
+# STRELKA2, BCBIO
+#
+# bwa_vcfs = [
+#     '/g/data/gx8/data/10X/TruSeq/bcbio_downsampled/final/2018-07-17_10X-Collaboration_downsample/COLO829_100pc-downsample-batch-strelka2-annotated.vcf.gz',
+#     '/g/data/gx8/data/10X/TruSeq/bcbio_downsampled/final/2018-07-17_10X-Collaboration_downsample/COLO829_80pc-downsample-batch-strelka2-annotated.vcf.gz',
+#     '/g/data/gx8/data/10X/TruSeq/bcbio_downsampled/final/2018-07-17_10X-Collaboration_downsample/COLO829_60pc-downsample-batch-strelka2-annotated.vcf.gz',
+#     '/g/data/gx8/data/10X/TruSeq/bcbio_downsampled/final/2018-07-17_10X-Collaboration_downsample/COLO829_40pc-downsample-batch-strelka2-annotated.vcf.gz',
+#     '/g/data/gx8/data/10X/TruSeq/bcbio_downsampled/final/2018-07-17_10X-Collaboration_downsample/COLO829_20pc-downsample-batch-strelka2-annotated.vcf.gz',
+# ]
+
+# ema_vcfs = [
+#     '/g/data/gx8/data/10X/10X_EMA/bcbio_original/final/2018-07-14_10X-Collaboration_EMA/COLO829_100pc-batch-strelka2-annotated.vcf.gz',
+#     '/g/data/gx8/data/10X/10X_EMA/bcbio_original/final/2018-07-14_10X-Collaboration_EMA/COLO829_80pc-batch-strelka2-annotated.vcf.gz',
+#     '/g/data/gx8/data/10X/10X_EMA/bcbio_original/final/2018-07-14_10X-Collaboration_EMA/COLO829_60pc-batch-strelka2-annotated.vcf.gz',
+#     '/g/data/gx8/data/10X/10X_EMA/bcbio_original/final/2018-07-14_10X-Collaboration_EMA/COLO829_40pc-batch-strelka2-annotated.vcf.gz',
+#     '/g/data/gx8/data/10X/10X_EMA/bcbio_original/final/2018-07-14_10X-Collaboration_EMA/COLO829_20pc-batch-strelka2-annotated.vcf.gz',
+# ]
 
 snames = [
-    '100pc-downsample-strelka2',
-    '20pc-downsample-strelka2',
-    '40pc-downsample-strelka2',
-    '60pc-downsample-strelka2',
-    '80pc-downsample-strelka2',
+    '100pc',
+    '80pc',
+    '60pc',
+    '40pc',
+    '20pc',
 ]
 
-samples = dict()
-for sname, t_bam, e_bam, t_vcf, e_vcf in zip(snames, truseq_bams, ema_bams, truseq_vcfs, ema_vcfs):
-    samples[sname] = dict(
-        t_bam=t_bam,
-        e_bam=e_bam,
-        t_vcf=t_vcf,
-        e_vcf=e_vcf,
-        t_prefix='TruSeq_' + sname,
-        e_prefix='EMA_' + sname,
+BWA_PREF = 'BWA'
+EMA_PREF = 'EMA'
+
+samples = defaultdict(dict)
+for sname, bwa_bam, ema_bam, bwa_vcf, ema_vcf in zip(snames, bwa_bams, ema_bams, bwa_vcfs, ema_vcfs):
+    samples[sname][BWA_PREF] = dict(
+        bam=bwa_bam,
+        vcf=bwa_vcf,
     )
+    samples[sname][EMA_PREF] = dict(
+        bam=ema_bam,
+        vcf=ema_vcf,
+    )
+
 
 rule all:
     input:
-        expand('output/TruSeq_{sname}.hap', sname=snames),
-        expand('output/EMA_{sname}.hap', sname=snames)
+        expand('output/{tech}_{sname}.phased.vcf', tech=[BWA_PREF, EMA_PREF], sname=snames)
 
 
-rule unzip_ema_vcf:
+# generate phased VCF with populated GT tags
+rule to_vcf:
     input:
-        lambda wc: samples[wc.sname]['e_vcf']
+        vcf = 'work/vcf_input/{tech}_{sname}.vcf',
+        hap = 'work/hap/{tech}_{sname}.hap'
     output:
-        'work/EMA_{sname}.vcf'
+        'output/{tech}_{sname}.phased.vcf'
     shell:
-        'bcftools view -f.,PASS {input} > {output}'
+        'fgbio HapCutToVcf -v {input.vcf} -i {input.hap} -o {output} && [[ -s {output} ]]'
+    
 
-
-rule unzip_truseq_vcf:
+# run HapCUT2 to assemble haplotypes from combined haplotype fragments
+rule run_hapcut2:
     input:
-        lambda wc: samples[wc.sname]['t_vcf']
+        frag = 'work/frag/{tech}_{sname}.frag',
+        vcf = 'work/vcf_input/{tech}_{sname}.vcf'
     output:
-        'work/TruSeq_{sname}.vcf'
+        'work/hap/{tech}_{sname}.hap'
+    params:
+        args = lambda wc: '--nf 1' if wc.tech == EMA_PREF else ''
     shell:
-        'bcftools view -f.,PASS {input} > {output}'
-
-
-# extract UNLINKED haplotype informative reads
-rule extractHAIRS_ema:
-    input:
-        bam = lambda wc: samples[wc.sname]['e_bam'],
-        vcf = rules.unzip_ema_vcf.output
-    output:
-        frag = 'work/unlinked_frag/EMA_{sname}'
-    shell:
-        'extractHAIRS --10X 1 --bam {input.bam} --VCF {input.vcf} --ref {ref} > {output.frag}'
-
-
-# extract UNLINKED haplotype informative reads
-rule extractHAIRS_truseq:
-    input:
-        bam = lambda wc: samples[wc.sname]['t_bam'],
-        vcf = rules.unzip_truseq_vcf.output
-    output:
-        frag = 'work/frag/TruSeq_{sname}'
-    shell:
-        'extractHAIRS --bam {input.bam} --VCF {input.vcf} --ref {ref} > {output.frag}'
+        'HAPCUT2 --fragments {input.frag} --vcf {input.vcf} --output {output} {params.args} && [[ -s {output} ]]'
 
 
 # link reads into 10X molecule haplotype fragments
 rule link_fragments:
     input:
-        bam = lambda wc: samples[wc.sname]['e_bam'],
-        bai = lambda wc: samples[wc.sname]['e_bam'] + '.bai',
-        vcf = rules.unzip_ema_vcf.output,
-        frag = rules.extractHAIRS_ema.output.frag
+        bam = lambda wc: samples[wc.sname][EMA_PREF]['bam'],
+        bai = lambda wc: samples[wc.sname][EMA_PREF]['bam'] + '.bai',
+        vcf = 'work/vcf_input/EMA_{sname}.vcf',
+        frag = 'work/unlinked_frag/EMA_{sname}.frag'
     output:
-        hairs = 'work/hairs/EMA_{sname}'
+        'work/frag/EMA_{sname}.frag'
     shell:
-        'LinkFragments.py --bam {input.bam} --VCF {input.vcf} --fragments {input.frag} --out {output.hairs}'
+        'LinkFragments.py --bam {input.bam} --VCF {input.vcf} --fragments {input.frag} --out {output} && [[ -s {output} ]]'
 
 
-# run HapCUT2 to assemble haplotypes from combined 10X haplotype fragments
-rule run_hapcut2_10x:
+# extract haplotype informative reads
+rule extractHAIRS_truseq:
     input:
-        frag = rules.link_fragments.output.hairs,
-        vcf = rules.unzip_ema_vcf.output
+        bam = lambda wc: samples[wc.sname][BWA_PREF]['bam'],
+        vcf = 'work/vcf_input/BWA_{sname}.vcf'
     output:
-        hap = 'output/EMA_{sname}.hap'
+        'work/frag/BWA_{sname}.frag'
     shell:
-        'HAPCUT2 --fragments {input.frag} --vcf {input.vcf} --output {output.hap} --nf 1'
+        'extractHAIRS --bam {input.bam} --VCF {input.vcf} --ref {ref} > {output} && [[ -s {output} ]]'
 
 
-# run HapCUT2 to assemble haplotypes from combined 10X haplotype fragments
-rule run_hapcut2_truseq:
+# extract haplotype informative reads
+rule extractHAIRS_10x:
     input:
-        frag = rules.extractHAIRS_truseq.output.frag,
-        vcf = rules.unzip_truseq_vcf.output
+        bam = lambda wc: samples[wc.sname][EMA_PREF]['bam'],
+        vcf = 'work/vcf_input/EMA_{sname}.vcf'
     output:
-        hap = 'output/TruSeq_{sname}.hap'
+        'work/unlinked_frag/EMA_{sname}.frag'
     shell:
-        'HAPCUT2 --fragments {input.frag} --vcf {input.vcf} --output {output.hap}'
+        'extractHAIRS --10X 1 --bam {input.bam} --VCF {input.vcf} --ref {ref} > {output} && [[ -s {output} ]]'
+
+
+# overlap with the truth set to get identical number of variants
+rule filter_vcf:
+    input:
+        vcf = 'work/vcf_input/{tech}_{sname}.prep.vcf.gz',
+        truth = colo_truth
+    output:
+        'work/vcf_input/{tech}_{sname}.vcf'
+    params:
+        isec_dir = 'work/vcf_input/{tech}_{sname}'
+    shell:
+        '''
+        bcftools isec {input.vcf} {input.truth} -n=2 -w1 -p {params.isec_dir}
+        mv {params.isec_dir}/0000.vcf {output}
+        '''
+
+
+# extract the tumor sample (HapCUT doesn't like multi-sample VCFs)
+rule prep_vcf:
+    input:
+        lambda wc: samples[wc.sname][wc.tech]['vcf']
+    output:
+        'work/vcf_input/{tech}_{sname}.prep.vcf.gz'
+    run:
+        tumor_name = get_tumor_sample_name(input[0])
+        shell(f'''
+        bcftools view -f.,PASS -s {tumor_name} {input[0]} -Oz -o {output}
+        tabix -p vcf {output}
+        ''')
 
 
