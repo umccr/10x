@@ -10,17 +10,17 @@ The generated phasing blocks are plotted with the Jypter notebook [Plot phase bl
 
 Somatic variants:
 
-![phasing_hist_100pc_log.png](phasing_hist_100pc_log.png)
+![phasing_hist_100pc_somatic_log.png](phasing_hist_100pc_somatic_log.png)
 
 Somatic+germline variants in 100 key genes:
 
 ![phasing_hist_100pc_germline_keygenes_log.fixed.png](phasing_hist_100pc_germline_keygenes_log.fixed.png)
 
-Phased blocks per gene in key genes (only high/moderate impact, somatic+germline, in 100 key genes), first 10 bins. 
-
-10x has a lower mean block size (1.89 vs 2.16), which is good.
+Phased blocks per gene in key genes (only high/moderate impact, somatic+germline, in 100 key genes), first 10 bins.
 
 ![highimpact_phased_per_gene.first10.fixed.png](highimpact_phased_per_gene.first10.fixed.png)
+
+10x has a lower mean block size (1.89 vs 2.16), which is good.
 
 10x + EMA total genes: 98 | phased blocks distribution: [37, 15, 9, 4, 4, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] | mean blocks per gene: 1.89795918367
 
