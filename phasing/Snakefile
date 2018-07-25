@@ -12,7 +12,7 @@ colo_truth = '/g/data3/gx8/extras/colo829_truth/EGAZ00001226241_ListforNatureRep
 BWA = 'BWA'
 EMA = 'EMA'
 
-CANCER_GENES = True
+CANCER_GENES = False
 
 snames = [
     '100pc',

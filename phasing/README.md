@@ -34,13 +34,15 @@ From the plot above, it looks like the linked reads barely help to phase. But in
 
 
 
-### Making the pipeline
+### Developing the pipeline
+
+Start with a small data:
 
 ```
 cd /home/563/vs2870/gx8/data/10X/Phasing/test_small
 ```
 
-Script `run.sh` will phase a 10x VCF file.
+And make a shell script `run.sh` that will phase a 10x VCF file.
 
 It contains of several HAPCUT2 steps according to https://github.com/vibansal/HapCUT2#10x-genomics-linked-reads
 Plus a fgbio tool to convert HAPCUT2 output back into a phased VCF: https://github.com/fulcrumgenomics/fgbio#list-of-tools -> HapCutToVcf
@@ -253,6 +255,39 @@ Adding a line to filter out those into the Snakemake:
 
 ```
 bcftools filter -e "GT=='.|.' | GT=='.|1' | GT=='1|.' | GT=='1'" 
+```
+
+### Running for HIGH and MODERATE impact variants
+
+We are mainly interested in how high-impact somatic variants phase together with surrounding germline variants. Modifying the Snakefile to filter by impact:
+
+```
+egrep "^#|MODERATE|HIGH"
+```
+
+The updated plots are in the notebook.
+
+Manually checking for somatic variants
+
+```
+grep -v ^# EMA_100pc.phased.vcf | grep -w SOMATIC | egrep  "MODERATE|HIGH" | grep -w PS
+```
+
+And counting surrounding phased germline calls with
+
+```
+grep -v ^# EMA_100pc.phased.vcf | egrep  "MODERATE|HIGH" | grep -w 52187612 | wc
+...
+```
+
+TruSeq: among 8 true positive high/moderate impact somatic variants in key genes, 1 phase together with 2 high/moderate germline variants. 
+
+EMA: in 7 variants, even 6 phase together with some germline calls, 4 of which phase with high/moderate impact germline variants (3, 2, 2, 1 correspondingly)
+
+We can try that on the whole genome - there is quite a lower number of high and moderate variants so the performance shouldn't be a problem. Modifying the Snakefile by setting `CANCER_GENES = False` and running here:
+
+```
+cd /g/data3/gx8/data/10X/Phasing/high_moderate_all
 ```
 
 ### Ideas: 
