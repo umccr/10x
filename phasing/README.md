@@ -14,7 +14,7 @@ Somatic variants:
 
 Somatic+germline variants in 100 key genes:
 
-![phasing_hist_100pc_germline_keygenes_log.png](phasing_hist_100pc_germline_keygenes_log.png)
+![phasing_hist_100pc_germline_keygenes_log.fixed.png](phasing_hist_100pc_germline_keygenes_log.fixed.png)
 
 Phased blocks per gene in key genes (only high/moderate impact, somatic+germline, in 100 key genes), first 10 bins. 
 
