@@ -12,11 +12,26 @@ Somatic variants:
 
 ![phasing_hist_100pc_log.png](phasing_hist_100pc_log.png)
 
-Somatic+germline variants in key genes:
+Somatic+germline variants in 100 key genes:
 
 ![phasing_hist_100pc_germline_keygenes_log.png](phasing_hist_100pc_germline_keygenes_log.png)
 
-### Exploring process
+Variants per gene in key genes (somatic+germline high/moderate impact, in 100 key genes)
+
+![variants_per_gene.png](variants_per_gene.png)
+
+Phased blocks per gene in key genes (somatic+germline high/moderate impact, in 100 key genes)
+
+![phased_block_per_gene.png](phased_block_per_gene.png)
+
+We want to be able to phase somatic variants together with germline varaints.
+
+- TruSeq: 1 somatic high/moderate variant is phased together with 2 high/moderate germline varaints.
+
+- 10x: total 6 high/moderate somatic variants are phased, with 5, 3, 2, 0, 2, 0, and 1 germline high/moderate variant.
+
+
+### Making the pipeline
 
 ```
 cd /home/563/vs2870/gx8/data/10X/Phasing/test_small
@@ -239,3 +254,4 @@ bcftools filter -e "GT=='.|.' | GT=='.|1' | GT=='1|.' | GT=='1'"
 
 ### Ideas: 
 - Germline varaints were called from a normal sample, so we can improve phasing by combining phasing information from both tumor and blood BAMs.
+
