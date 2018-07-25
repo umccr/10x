@@ -20,7 +20,7 @@ Phased blocks per gene in key genes (only high/moderate impact, somatic+germline
 
 10x has a lower mean block size (1.89 vs 2.16), which is good.
 
-![highimpact_phased_per_gene.first10.png](highimpact_phased_per_gene.first10.png)
+![highimpact_phased_per_gene.first10.fixed.png](highimpact_phased_per_gene.first10.fixed.png)
 
 10x + EMA total genes: 98 | phased blocks distribution: [37, 15, 9, 4, 4, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] | mean blocks per gene: 1.89795918367
 
