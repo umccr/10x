@@ -2,11 +2,11 @@
 
 To phase the variants, we use [HapCUT2](https://github.com/vibansal/HapCUT2) that can phase both on linked reads (for 10x data) and paired information (for TruSeq data). 
 
-To phase all dilution series both EMA and TruSeq, I prepared a [Snakefile](Snakefile) (see in this repo) that can be run on Raijin cluster (see a finished run in `/home/563/vs2870/gx8/data/10X/Phasing/full_run`). 
+To phase all dilution series both EMA and TruSeq, we prepared a [Snakefile](Snakefile) (see in this repo) that can be run on Raijin cluster (see a finished run in `/home/563/vs2870/gx8/data/10X/Phasing/full_run`). 
 It contains the [10x HapCUT2 steps](https://github.com/vibansal/HapCUT2#10x-genomics-linked-reads) and [normal paired read steps](https://github.com/vibansal/HapCUT2#to-run), 
 plus a [fgbio tool HapCutToVcf](https://github.com/fulcrumgenomics/fgbio#list-of-tools) to convert HAPCUT2 output back into a phased VCF (and populate the `GT` and `PS` FORMAT tags).
 
-The generated phasing blocks can be plotted with the Jypter notebook [Plot phase blocks.ipynb]("Plot phase blocks.ipynb").
+The generated phasing blocks are plotted with the Jypter notebook [Plot phase blocks.ipynb]("Plot phase blocks.ipynb").
 
 Somatic variants:
 
@@ -14,21 +14,24 @@ Somatic variants:
 
 Somatic+germline variants in 100 key genes:
 
-![phasing_hist_100pc_germline_keygenes_log.png](phasing_hist_100pc_germline_keygenes_log.png)
+![phasing_hist_100pc_germline_keygenes_log.fixed.png](phasing_hist_100pc_germline_keygenes_log.fixed.png)
 
-Variants per gene in key genes (somatic+germline high/moderate impact, in 100 key genes)
+Phased blocks per gene in key genes (only high/moderate impact, somatic+germline, in 100 key genes), first 10 bins. 
 
-![variants_per_gene.png](variants_per_gene.png)
+10x has a lower mean block size (1.89 vs 2.16), which is good.
 
-Phased blocks per gene in key genes (somatic+germline high/moderate impact, in 100 key genes)
+![highimpact_phased_per_gene.first10.fixed.png](highimpact_phased_per_gene.first10.fixed.png)
 
-![phased_block_per_gene.png](phased_block_per_gene.png)
+10x + EMA total genes: 98 | phased blocks distribution: [37, 15, 9, 4, 4, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] | mean blocks per gene: 1.89795918367
 
-We want to be able to phase somatic variants together with germline varaints.
+TruSeq + BWA-MEM total genes: 98 | phased blocks distribution: [38, 15, 9, 8, 6, 5, 4, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] | mean blocks per gene: 2.16326530612
 
-- TruSeq: 1 somatic high/moderate variant is phased together with 2 high/moderate germline varaints.
+From the plot above, it looks like the linked reads barely help to phase. But in fact it works well to phase together somatic variants with surrounding germline calls.
 
-- 10x: total 6 high/moderate somatic variants are phased, with 5, 3, 2, 0, 2, 0, and 1 germline high/moderate variant.
+- TruSeq: among 8 true positive high/moderate impact somatic variants in key genes, 1 phase together with 2 high/moderate germline variants. 
+
+- EMA: in 7 variants, even 6 phase together with some germline calls, 4 of which phase with high/moderate impact germline variants (3, 2, 2, 1 correspondingly)
+
 
 
 ### Making the pipeline
