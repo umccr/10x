@@ -16,9 +16,15 @@ Somatic+germline variants in 100 key genes:
 
 ![phasing_hist_100pc_germline_keygenes_log.png](phasing_hist_100pc_germline_keygenes_log.png)
 
-Phased blocks per gene in key genes (only high/moderate impact, somatic+germline, in 100 key genes), first 10 bins. 10x has a lower mean block size (1.89 vs 2.16), which is good.
+Phased blocks per gene in key genes (only high/moderate impact, somatic+germline, in 100 key genes), first 10 bins. 
+
+10x has a lower mean block size (1.89 vs 2.16), which is good.
 
 ![highimpact_phased_per_gene.first10.png](highimpact_phased_per_gene.first10.png)
+
+10x + EMA total genes: 98 | phased blocks distribution: [37, 15, 9, 4, 4, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] | mean blocks per gene: 1.89795918367
+
+TruSeq + BWA-MEM total genes: 98 | phased blocks distribution: [38, 15, 9, 8, 6, 5, 4, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] | mean blocks per gene: 2.16326530612
 
 From the plot above, it looks like the linked reads barely help to phase. But in fact it works well to phase together somatic variants with surrounding germline calls.
 
