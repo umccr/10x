@@ -9,14 +9,6 @@ ref = '/g/data3/gx8/local/development/bcbio/genomes/Hsapiens/GRCh37/seq/GRCh37.f
 
 colo_truth = '/g/data3/gx8/extras/colo829_truth/EGAZ00001226241_ListforNatureReports.IndelsandSNVs.final.Suppl1.snpEff.validated.SORTED.vcf.gz'
 
-# TODO:
-# 1. Add germline variants in cancer genes. Filter somatic variants down to cancer genes only. 
-# 2. Add all germline variants to the true somatic varinants.
-# 3. We know the genes for each variant from SnpEff, so can just plot the number of blocks per gene?
-# 4. For germline: 
-#   plot number of PS per gene
-#   plot number of variants per gene
-
 BWA = 'BWA'
 EMA = 'EMA'
 
