@@ -32,6 +32,13 @@ From the plot above, it looks like the linked reads barely help to phase. But in
 
 - EMA: in 7 variants, even 6 phase together with some germline calls, 4 of which phase with high/moderate impact germline variants (3, 2, 2, 1 correspondingly)
 
+Now the full run - high confidence somatic+germline in all genes:
+
+![phasing_hist_log.all_high_moderate.png](phasing_hist_log.all_high_moderate.png)
+
+And phased blocks per gene (less is better):
+
+![highimpact_phased_per_gene.all_high_moderate.first10.png](highimpact_phased_per_gene.all_high_moderate.first10.png)
 
 
 ### Developing the pipeline
