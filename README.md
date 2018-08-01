@@ -30,6 +30,8 @@ feel free to dump it in here.
 | [HapCut2][hc2]     | haplotype assembly                                                                   | -                   |
 | [EMA][ema]         | align 10X reads                                                                      | -                   |
 | [ZoomX][zoomx]     | somatic SV calling                                                                   | on bitbucket        |
+| [bazam][bazam]     | extract paired reads in FASTQ format from coordinate sorted BAM files                | Simon Sadedin at 10X symposium |
+| [gemtools][gemtools] | phase SVs in 10X reads                                                             | Hanlee Ji at 10X symposium |
 
 
 [bxt]: https://github.com/walaj/bxtools
@@ -37,3 +39,5 @@ feel free to dump it in here.
 [hc2]: https://github.com/vibansal/HapCUT2
 [ema]: https://github.com/arshajii/ema
 [zoomx]: https://bitbucket.org/charade/zoomx
+[bazam]: https://github.com/ssadedin/bazam
+[gemtools]: https://github.com/sgreer77/gemtools
