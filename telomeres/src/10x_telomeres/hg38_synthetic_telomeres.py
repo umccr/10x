@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-import re
-import sys
-import click
 import gzip
 from typing import List
 from pathlib import Path
@@ -27,36 +24,8 @@ def find_N_boundary(seq: str):
 
     return pos
 
-def determine_hexamer(seq: str):
-    if 'ccctaa' in seq:
-        return 'ccctaa'
-    elif 'ttaggg' in seq:
-        return 'ttaggg'
-
-def build_hexamer_table(hexamer: str, hexamer_table: dict):
-    ''' Builds a table containing hexamers and all its possible rotations.
-        Useful to determine boundary conditions between N-regions and telomeric
-        repeats on the reference genome(s).
-    '''
-    # Seed table with first non-rotated "canonical" hexamer
-    hexamer_table[hexamer] = hexamer
-
-    dq = deque(hexamer)
-    rotated = []
-    for rot in range(1, len(hexamer)):
-        dq.rotate(rot)
-        rotated.append(''.join(dq))
-    
-    hexamer_table[hexamer] = rotated
-
-    return hexamer_table
 
 def main(genome_build='../../data/processed/hg38_synthetic/new_hg38.fa.gz'):
-    hexamer_table = defaultdict(list)
-
-    hexamer_table = build_hexamer_table('ccctaa', hexamer_table)
-    hexamer_table = build_hexamer_table('ttaggg', hexamer_table)
-
     new_seq  = ""
 
     with gzip.open(genome_build, "rt") as hg38_fa:
