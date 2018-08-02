@@ -1,5 +1,5 @@
 import os
-from os.path import dirname, abspath, join, basename, splitext
+from os.path import dirname, abspath, join, basename, splitext, isfile, islink
 from ngs_utils.file_utils import splitext_plus
 
 shell.executable(os.environ.get('SHELL', "bash"))
@@ -181,21 +181,26 @@ rule prep_ref_folder:
         bwa_dir = dirname(bwa_fa)
     output:
         ref_base + '.fa',
-        ref_base + '.dict',
         ref_base + '.fa.amb',
         ref_base + '.fa.ann',
         ref_base + '.fa.bwt',
         ref_base + '.fa.fai',
-        ref_base + '.fa.gz',
-        ref_base + '.fa.gz.fai',
-        ref_base + '.fa.gz.gzi',
         ref_base + '.fa.pac',
         ref_base + '.fa.sa'
     params:
         ref_dir = 'ref'
-    shell:
-        'ln -s {input.fa_dir}/* {params.ref_dir} && ln -s {input.bwa_dir}/* {params.ref_dir}'
-
+    run:
+        for fn in output:
+            if not islink(fn):
+                try:
+                    shell('ln -s ' + join(input.fa_dir, basename(fn)) + ' ' + fn)
+                except:
+                    pass
+            if not islink(fn):
+                try:
+                    shell('ln -s ' + join(input.bwa_dir, basename(fn)) + ' ' + fn)
+                except:
+                    pass
 
 
 # rule align_fastq:
