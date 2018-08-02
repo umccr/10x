@@ -45,14 +45,15 @@ ema.py /data/cephfs/punim0010/data/FASTQ/180312_A00130_0041_AHCLLMDMXX/Chromium_
 @click.option('-s', '--sample', 'sample_name', help='Sample name; required', required=True)
 @click.option('--bins', help='Number of bins to split fastqs', default=500)
 @click.option('-c', '--cluster-auto', 'cluster', is_flag=True, help='Submit jobs to cluster')
-@click.option('-g', '--genome', help='Genome build (GRCh37 or hg38)', type=click.Choice(['GRCh37', 'hg38']), default='GRCh37')
+@click.option('-g', '--genome', help='Genome build (GRCh37, hg38, or path to fasta and BWA prefix)')
 @click.option('--unlock', is_flag=True, help='Propagaded to snakemake')
 @click.option('--bc-whitelist', help='Whitelist of 10x barcodes')
-@click.option('--bcbio-genomes', help='Path to bcbio-nextgen reference data (e.g. /bcbio/genomes; '
-              'Hsapiens/{genome}/seq/{genome}.fa(.fai) and Hsapiens/{genome}/validation/giab-NA12878/truth_regions.bed are used)')
+@click.option('--bcbio-genomes', help='Path to bcbio-nextgen reference data (e.g. /bcbio/genomes')
+@click.option('--lr-ref', help='Longranger reference bundle')
 @click.option('--trim', '--trim-polyg', is_flag=True, help='Trim polyG in input reads')
 def main(r1_fastq_paths, output_dir=None, jobs=None, sample_name=None, bins=None,
-         cluster=False, genome=None, unlock=False, bc_whitelist=None, bcbio_genomes=None, trim_polyg=False):
+         cluster=False, genome=None, unlock=False, bc_whitelist=None, bcbio_genomes=None, lr_ref=None,
+         trim_polyg=False):
     """
 EMA wrapper.\n
 r1_fastq_paths: paths to R1 fastq files for each sample\n
@@ -77,6 +78,7 @@ r1_fastq_paths: paths to R1 fastq files for each sample\n
     #### Setting ref paths ####
     ref_fa = None
     bwa_fa = None
+
     # Looking for reference fasta in bcbio_genomes folder?
     if bcbio_genomes:
         for subdir in [join(bcbio_genomes, f'Hsapiens/{genome}'),
@@ -92,6 +94,14 @@ r1_fastq_paths: paths to R1 fastq files for each sample\n
             critical(f'Not found seq/{genome}.fa in bcbio genomes directory {bcbio_genomes}')
         if not bwa_fa:
             critical(f'Not found BWA indices bwa/{genome}.fa* in bcbio genomes directory {bcbio_genomes}')
+
+    # Longranger bundle?
+    elif lr_ref:
+        ref_fa = bwa_fa = verify_file(join(lr_ref, 'genome.fa'), is_critical=True)
+
+    # Path provided directly?
+    elif genome and isfile(genome):
+        ref_fa = bwa_fa = genome
 
     # Reference files not provided, but we are on known host?
     if not ref_fa:
