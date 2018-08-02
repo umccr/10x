@@ -6,7 +6,8 @@ from pathlib import Path
 from collections import defaultdict, deque
 from itertools import islice, tee
 from Bio import SeqIO
-from Bio.Seq import MutableSeq
+from Bio.Seq import MutableSeq, Seq
+from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import generic_dna
 
 import logging
@@ -24,9 +25,9 @@ def find_N_boundary(seq: str):
 
     return pos
 
-
 def main(genome_build='../../data/processed/hg38_synthetic/new_hg38.fa.gz'):
     new_seq  = ""
+    new_hg38 = [] # just a list of records
     cnt = 0
 
     with gzip.open(genome_build, "rt") as hg38_fa:
@@ -34,6 +35,8 @@ def main(genome_build='../../data/processed/hg38_synthetic/new_hg38.fa.gz'):
         for _, chrom_attrs in record_dict.items():
             # Original and new (mutable) sequence
             sequence = chrom_attrs.seq
+            seq_id = chrom_attrs.id
+
             chrom_length = len(sequence)
             new_seq = sequence.tomutable()
 
@@ -43,9 +46,9 @@ def main(genome_build='../../data/processed/hg38_synthetic/new_hg38.fa.gz'):
             else:
                 hexamer = sequence[N_repeats_pos:N_repeats_pos+6]
                 
-                print("{} ... {} ... {}".format(sequence[0:10],
-                                                sequence[N_repeats_pos-10:N_repeats_pos+10],
-                                                sequence[chrom_length-20:chrom_length]))
+                # print("{} ... {} ... {}".format(sequence[0:10],
+                #                                 sequence[N_repeats_pos-10:N_repeats_pos+10],
+                #                                 sequence[chrom_length-20:chrom_length]))
 
                 pos = N_repeats_pos
                 pos2 = N_repeats_pos
@@ -55,11 +58,16 @@ def main(genome_build='../../data/processed/hg38_synthetic/new_hg38.fa.gz'):
                     pos2 = pos2 - len(hexamer)
                     cnt = cnt+1
 
-                print("{} ... {} ... {}\t\t\t{}".format(new_seq[0:10],
-                                                new_seq[N_repeats_pos-10:N_repeats_pos+10],
-                                                new_seq[chrom_length-20:chrom_length],
-                                                [N_repeats_pos, pos, pos2, chrom_length, cnt]))
-        print (cnt)
+                # print("{} ... {} ... {}\t\t\t{}".format(new_seq[0:10],
+                #                                         new_seq[N_repeats_pos-10:N_repeats_pos+10],
+                #                                         new_seq[chrom_length-20:chrom_length],
+                #                                         [N_repeats_pos, pos, pos2, chrom_length, cnt]))
+
+
+                new_hg38.append(SeqRecord(new_seq.toseq(), id=seq_id, name=seq_id, description=seq_id))
+
+        with open("hg38_elongated_telomeres.fasta", "w") as output_handle:
+            SeqIO.write(new_hg38, output_handle, "fasta")
         
 if __name__ == "__main__":
     main()
