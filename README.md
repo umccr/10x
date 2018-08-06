@@ -26,9 +26,9 @@ feel free to dump it in here.
 | Name               | Description                                                                          | Notes               |
 | ------------------ | ------------------------------------------------------------------------------------ | ------------------- |
 | [bxtools][bxt]     | light-weight tools for 10X data                                                      | has conda package   |
-| [longranger][lr]   | 10X official pipeline for WGS/WES read alignment, SNP/Indel/SV calling and phasing   | -                   |
+| [longranger][lr]   | 10X official pipeline for WGS/WES read alignment, SNP/Indel/SV calling and phasing   | has [docker](https://hub.docker.com/r/umccr/longranger/)                   |
 | [HapCut2][hc2]     | haplotype assembly                                                                   | -                   |
-| [EMA][ema]         | align 10X reads                                                                      | -                   |
+| [EMA][ema]         | align 10X reads                                                                      | has conda package                   |
 | [ZoomX][zoomx]     | somatic SV calling                                                                   | on bitbucket        |
 | [bazam][bazam]     | extract paired reads in FASTQ format from coordinate sorted BAM files                | Simon Sadedin at 10X symposium |
 | [gemtools][gemtools] | phase SVs in 10X reads                                                             | Hanlee Ji at 10X symposium |
