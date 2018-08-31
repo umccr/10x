@@ -222,11 +222,11 @@ For comparison, this is how a regular region looks:
 
 Here, we swtich to the strategy with performed with DiploidNeverResponder sample, and will use cancer COLO829-10x sample.
 
-We use the `filter_unmapped_bam.py` script to extract long high-quality reads (length >= 125, average qual >= 25, minimal quality >= 10, correct BX tags), and their mates:
+We use the [`filter_bam_good_discordant_mates.py` script](https://github.com/umccr/oncoviruses/blob/master/filter_bam_good_discordant_mates.py) to extract long high-quality reads (length >= 125, average qual >= 25, minimal quality >= 10, correct BX tags), and their mates:
 
 ```
 mkdir with_bx_lng_hqual
-./filter_unmapped_bam.py COLO829-10x.namesorted.bam with_bx_lng_hqual/COLO829-10x.bam --10x
+./filter_bam_good_discordant_mates.py COLO829-10x.namesorted.bam with_bx_lng_hqual/COLO829-10x.bam --10x
 samtools stats COLO829-10x.bam > COLO829-10x.stats
 
 cd with_bx_lng_hqual
@@ -353,11 +353,11 @@ HPV21  7779   15484  298.573
 HPV51  7808   14453  277.658
 ```
 
-The results are still quite similar. (TODO: try the updates to `filter_unmapped_bam.py`: remove pairs where the mapped read is low quality)
+The results are still quite similar. (TODO: try the updates to `filter_bam_good_discordant_reads.py`: remove pairs where the mapped read is low quality)
 
 ### Extra filtering of viral BAM
 
-We also try to do extra filtering of the viral BAM: remove very short alignments (below 60):
+We also try to do [extra filtering of the viral BAM]([`filter_bam_good_discordant_mates.py` script](https://github.com/umccr/oncoviruses/blob/master/filter_viral_bam.py) ): remove very short alignments (below 60):
 
 ```
 python filter_viral_bam.py viral_mapping/COLO829_good_alignment_viral.bam viral_mapping/COLO829_good_alignment_viral.GOOD.bam
@@ -510,7 +510,7 @@ Trying to use pysam to filter reads with BX:
 
 ```
 mkdir with_bx ; mkdir with_bx_lng_hqual
-./filter_unmapped_bam.py NA12878_WGS.bam
+./filter_bam_good_discordant_mates.py NA12878_WGS.bam
 
 Total:                  21,750,049
 bx_i:                   19,613,313
