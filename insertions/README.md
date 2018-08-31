@@ -1,4 +1,4 @@
-# Exploring novel insertions
+# Exploring novel insertions with 10X
 
 Some insertions in human samples cannot be reconstructed by human genome alignment because they have an external origin, for example [oncoviruses](https://en.wikipedia.org/wiki/Oncovirus) that got integrated into a human genome. We want to explore such novel insertions and see if 10x data can help us with identifying and reconstructing those sequences as well as their integration sites.
 
@@ -17,7 +17,7 @@ Some insertions in human samples cannot be reconstructed by human genome alignme
 
 ## Oncoviruses in DiploidNeverResponder
 
-First, we experimented with a regular non-10x dataset which is was known for a high viral content. See this [document](DiploidViruses.md) for the exploration details and results.
+First, we experimented with a regular non-10x dataset which is was known for a high viral content. See this [document](https://github.com/umccr/oncoviruses) for the exploration details and results.
 
 ## Strategies
 
