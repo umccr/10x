@@ -20,3 +20,5 @@ bamf_hqual_f.close()
 
 print('Done. Stats:')
 
+# Using this command instead:
+# sambamba view -f bam -F "unmapped or mate_is_unmapped" -t 20 diploid_tumor-ready.bam | samtools sort -n -@ 10 > diploid_tumor-unmapped_or_mate.namesorted.bam

@@ -17,7 +17,7 @@ Some insertions in human samples cannot be reconstructed by human genome alignme
 
 ## Oncoviruses in DiploidNeverResponder
 
-First, we experimented with a regular non-10x dataset which is was known for a high viral content. See this [document](https://github.com/umccr/oncoviruses) for the exploration details and results.
+First, we experimented with a regular non-10x dataset which is was known for a high viral content. See this [document](https://github.com/umccr/oncoviruses/blob/master/NeverResponder_with_commands.md) for the exploration details and results.
 
 ## Strategies
 
@@ -222,11 +222,11 @@ For comparison, this is how a regular region looks:
 
 Here, we swtich to the strategy with performed with DiploidNeverResponder sample, and will use cancer COLO829-10x sample.
 
-We use the `assemble/filter_bam.py` script to extract long high-quality reads (length >= 125, average qual >= 25, minimal quality >= 10, correct BX tags), and their mates:
+We use the `filter_unmapped_bam.py` script to extract long high-quality reads (length >= 125, average qual >= 25, minimal quality >= 10, correct BX tags), and their mates:
 
 ```
 mkdir with_bx_lng_hqual
-./filter_bam.py COLO829-10x.namesorted.bam with_bx_lng_hqual/COLO829-10x.bam --10x
+./filter_unmapped_bam.py COLO829-10x.namesorted.bam with_bx_lng_hqual/COLO829-10x.bam --10x
 samtools stats COLO829-10x.bam > COLO829-10x.stats
 
 cd with_bx_lng_hqual
@@ -510,7 +510,7 @@ Trying to use pysam to filter reads with BX:
 
 ```
 mkdir with_bx ; mkdir with_bx_lng_hqual
-./filter_bam.py NA12878_WGS.bam
+./filter_unmapped_bam.py NA12878_WGS.bam
 
 Total:                  21,750,049
 bx_i:                   19,613,313
