@@ -15,18 +15,25 @@ import logging
 pattern1 = 'ccctaa'
 pattern2 = 'ttaggg'
 
-def find_N_boundary(seq: str):
-    ''' Go through the N's until we find some base
+def find_N_boundaries(seq: str):
+    ''' Returns all N-boundaries in a sequence via tuple: (first, second)
     '''
-    pos = 0
+    first_found = False
+    pos = first = second = 0
 
     for base in seq:
         if 'N' in base:
+            # first N boundary found
             pos = pos+1
-        else:
-            break
+        elif not first_found:
+            first_found = True
+            first = pos
+            pos = pos+1
+        elif first_found:
+            second = pos
+            pos = pos+1
 
-    return pos
+    return (first, second)
 
 def determine_hexamer(hexamer: str, hextable: defaultdict):
     ''' Takes the sequence seq and tries to find which hexamer pattern it has
@@ -75,7 +82,8 @@ def main(genome_build='data/processed/hg38_synthetic/new_hg38.fa.gz'):
             chrom_length = len(sequence)
             new_seq = sequence.tomutable()
 
-            N_repeats_pos = find_N_boundary(sequence)
+            # XXX: Continue with tests, fixing this code for good
+            N_repeats_pos = find_N_boundaries(sequence)
 
             if N_repeats_pos == 0: # sequence with all N's
                 pass
@@ -86,7 +94,8 @@ def main(genome_build='data/processed/hg38_synthetic/new_hg38.fa.gz'):
                 print("Detected hexamer: {}".format(detected_hexamer))
 
                 if detected_hexamer is None:
-                    print("Cannot detect telomeric hexamer within sequence")
+                    print("Cannot detect telomeric hexamer within sequence, skipping")
+                    continue
                 else:
                     hexamer = detected_hexamer
 
@@ -96,6 +105,8 @@ def main(genome_build='data/processed/hg38_synthetic/new_hg38.fa.gz'):
 
                 pos = N_repeats_pos
                 pos2 = N_repeats_pos
+
+                # XXX: Why 4? Re-visit invariant/thinking behind this
                 while (pos > 4 or pos2 > 4):
                     pos = pos - len(hexamer)
                     new_seq[pos:pos2] = hexamer

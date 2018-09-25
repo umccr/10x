@@ -502,6 +502,8 @@ hg38_new_unmapped_bwa = alt.Chart(colo829bl_elongated_bwa).mark_bar().encode(
 # 3. ~~Keep forward/reverse columns in mind: infer from coordinates (i.e: chr1:0-60000 should be 'forward').~~
 # 4. ~~Re-align COLO829BL with BWA against hg38_new, not only EMA.~~
 # 5. Fill up the missing chroms (6,8, etc...) with 0 counts for consistent plots?
-# 6. Revisit new_hg38_elongator.py so that it elongates the N regions with known telomeric sequences, not just the last hexamer before the N boundary.
-# 7. Make sure only telomeric repeats are elongated, not other arbitrary sequences.
+# 6. ~~Revisit new_hg38_elongator.py so that it elongates the N regions with known telomeric sequences, not just the last hexamer before the N boundary.~~
+# 7. ~~Make sure only telomeric repeats are elongated, not other arbitrary sequences.~~
 # 8. Revisit non-forward sections.
+
+
