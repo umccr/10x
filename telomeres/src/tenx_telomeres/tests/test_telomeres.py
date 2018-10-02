@@ -3,7 +3,7 @@
 import logging
 import unittest
 
-from tenx_telomeres.hg38_synthetic_telomeres import find_N_boundaries, elongate_forward_sequence
+from tenx_telomeres.hg38_synthetic_telomeres import find_N_boundaries, elongate_forward_sequence, elongate_reverse_sequence
 
 # Set log level
 loglevel = logging.INFO
@@ -15,7 +15,8 @@ class TestStringMethods(unittest.TestCase):
     def setUp(self):
                       # 0               16                33          47
         self.src_seq = 'NNNNNNNNNNNNNNNNTAACCCTAACCCTAACCCNNNNNNNNNNNNN'
-        self.dst_seq = 'ACCCTAACCCTAACCCTAACCCTAACCCTAACCCNNNNNNNNNNNNN'
+        self.fwd_seq = 'ACCCTAACCCTAACCCTAACCCTAACCCTAACCCNNNNNNNNNNNNN'
+        self.rev_seq = 'NNNNNNNNNNNNNNNNTAACCCTAACCCTAACCCTAACCCTAACCCT'
         self.no_patt = 'NNNNNNNNNNNNNNNNATCATAAtAaaaaccCCANNNNNNNNNNNNN'
         self.kmer_k = 6
 
@@ -26,11 +27,14 @@ class TestStringMethods(unittest.TestCase):
     def test_elongate_forward_sequence(self):
         tst_seq = elongate_forward_sequence(self.src_seq)
 
-        self.assertEqual(len(tst_seq), len(self.dst_seq))
-        self.assertEqual(tst_seq, self.dst_seq)
+        self.assertEqual(len(tst_seq), len(self.fwd_seq))
+        self.assertEqual(tst_seq, self.fwd_seq)
 
     def test_elongate_reverse_sequence(self):
-        pass
+        tst_seq = elongate_reverse_sequence(self.src_seq)
+
+        #self.assertEqual(len(tst_seq), len(self.rev_seq))
+        self.assertEqual(tst_seq, self.rev_seq)
 
 if __name__ == '__main__':
     unittest.main()

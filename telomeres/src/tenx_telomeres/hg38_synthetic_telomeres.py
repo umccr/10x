@@ -56,13 +56,41 @@ def elongate_forward_sequence(seq):
     tmp_seq = kmer_seq_r
     
     # Build forward sequence
-    for cnk in range(0, chunks - 2): # XXX 2?
+    for _ in range(0, chunks - 2): # XXX 2?
         tmp_seq = tmp_seq + kmer_seq
 
     # Attach inner pattern
-    tst_seq = tmp_seq + seq[boundary:boundary_r] + seq[boundary_r:]
+    tmp_seq = tmp_seq + seq[boundary:boundary_r] + seq[boundary_r:]
+
+    return tmp_seq
+
+def elongate_reverse_sequence(seq):
+    # Determine N boundaries in the sequence
+    boundary, boundary_r = find_N_boundaries(seq)
+
+    # K-mer telomeric sequence right before the N boundary
+    kmer_seq = seq[boundary_r - kmer_k:boundary_r]
+
+    # How many chunks to elongate and remainder
+    chunks = len(seq[boundary_r:]) % kmer_k
+    chunks_r = len(seq[boundary_r:]) / kmer_k
+
+    # Start with the N boundary
+    tst_seq = seq[0:boundary]
+
+    # Attach inner pattern
+    tst_seq = tst_seq + seq[boundary:boundary_r]
+
+    # Build reverse sequence
+    for _ in range(0, chunks):
+        tst_seq = tst_seq + kmer_seq
+
+    # Capture remainder of the pattern to fit in sequence
+    kmer_seq_r = kmer_seq[0:math.floor(chunks_r)]
+    tst_seq = tst_seq + kmer_seq_r
 
     return tst_seq
+
 
 
 def determine_hexamer(hexamer: str, hextable: defaultdict):
