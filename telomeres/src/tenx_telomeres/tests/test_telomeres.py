@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import math
 import logging
 import unittest
 
@@ -13,7 +14,7 @@ log = logging.getLogger(__name__)
 class TestStringMethods(unittest.TestCase):
 
     def setUp(self):
-                      # 0               16                33          47 
+                      # 0               16                33          47
         self.src_seq = 'NNNNNNNNNNNNNNNNTAACCCTAACCCTAACCCNNNNNNNNNNNNN'
         self.dst_seq = 'ACCCTAACCCTAACCCTAACCCTAACCCTAACCCNNNNNNNNNNNNN'
         self.no_patt = 'NNNNNNNNNNNNNNNNATCATAAtAaaaaccCCANNNNNNNNNNNNN'
@@ -28,16 +29,28 @@ class TestStringMethods(unittest.TestCase):
         pos = 0
         boundaries = find_N_boundaries(self.src_seq)
         boundary = boundaries[0]
+        boundary_r = boundaries[1]
 
         kmer_seq = self.src_seq[boundary:boundary + self.kmer_k]
-        chunks = len(self.src_seq[0:boundary]) % self.kmer_k
 
-        for pos, chunk in zip(range(0, boundary, self.kmer_k), range(1, chunks)):
-            posi = boundary - self.kmer_k * chunk
-            log.info(self.src_seq[boundary:posi])
-            #log.info(self.tst_seq)
+        # How many chunks to elongate and remainder
+        chunks = len(self.src_seq[0:boundary]) % self.kmer_k
+        chunks_r = len(self.src_seq[0:boundary]) / self.kmer_k
+
+        # Capture remainder of the pattern to fit in sequence
+        kmer_seq_r = kmer_seq[math.floor(chunks_r):]
+        tmp_seq = kmer_seq_r
         
-        #self.assertEqual(self.tst_seq, self.dst_seq)
+        # Build forward sequence
+        for cnk in range(0, chunks - 2):
+            tmp_seq = tmp_seq + kmer_seq
+
+        # Attach inner pattern
+        tst_seq = tmp_seq + self.src_seq[boundary:boundary_r] + self.src_seq[boundary_r:]
+        tst_seq
+
+        self.assertEqual(len(tst_seq), len(self.dst_seq))
+        self.assertEqual(tst_seq, self.dst_seq)
 
     def test_elongate_reverse_sequence(self):
         pass
