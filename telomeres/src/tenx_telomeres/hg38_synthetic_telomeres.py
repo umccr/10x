@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import math
 import gzip
 from typing import List
 from pathlib import Path
@@ -12,6 +13,10 @@ from Bio.Alphabet import generic_dna
 
 import logging
 
+# Telomeric hexamer
+kmer_k = 6
+
+# Human telomeric hexamers
 pattern1 = 'ccctaa'
 pattern2 = 'ttaggg'
 
@@ -34,6 +39,31 @@ def find_N_boundaries(seq: str):
             pos = pos+1
 
     return (first, second)
+
+def elongate_forward_sequence(seq):
+    # Determine N boundaries in the sequence
+    boundary, boundary_r = find_N_boundaries(seq)
+
+    # K-mer telomeric sequence right after the N boundary
+    kmer_seq = seq[boundary:boundary + kmer_k]
+
+    # How many chunks to elongate and remainder
+    chunks = len(seq[0:boundary]) % kmer_k
+    chunks_r = len(seq[0:boundary]) / kmer_k
+
+    # Capture remainder of the pattern to fit in sequence
+    kmer_seq_r = kmer_seq[math.floor(chunks_r):]
+    tmp_seq = kmer_seq_r
+    
+    # Build forward sequence
+    for cnk in range(0, chunks - 2): # XXX 2?
+        tmp_seq = tmp_seq + kmer_seq
+
+    # Attach inner pattern
+    tst_seq = tmp_seq + seq[boundary:boundary_r] + seq[boundary_r:]
+
+    return tst_seq
+
 
 def determine_hexamer(hexamer: str, hextable: defaultdict):
     ''' Takes the sequence seq and tries to find which hexamer pattern it has
