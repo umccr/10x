@@ -13,12 +13,19 @@ from Bio.Alphabet import generic_dna
 
 import logging
 
+# Set log level
+loglevel = logging.INFO
+logging.basicConfig(level=loglevel)
+log = logging.getLogger(__name__)
+
+
+## Global
 # Telomeric hexamer
-kmer_k = 6
+KMER_K = 6
 
 # Human telomeric hexamers
-pattern1 = 'ccctaa'
-pattern2 = 'ttaggg'
+PATTERN1 = 'ccctaa'
+PATTERN2 = 'ttaggg'
 
 def find_N_boundaries(seq: str):
     ''' Returns all N-boundaries in a sequence via tuple: (first, second)
@@ -40,16 +47,18 @@ def find_N_boundaries(seq: str):
 
     return (first, second)
 
+
+# Elongate forward and backward N's, respecting telomeric patterns
 def elongate_forward_sequence(seq):
     # Determine N boundaries in the sequence
     boundary, boundary_r = find_N_boundaries(seq)
 
     # K-mer telomeric sequence right after the N boundary
-    kmer_seq = seq[boundary:boundary + kmer_k]
+    kmer_seq = seq[boundary:boundary + KMER_K]
 
     # How many chunks to elongate and remainder
-    chunks = len(seq[0:boundary]) % kmer_k
-    chunks_r = len(seq[0:boundary]) / kmer_k
+    chunks = len(seq[0:boundary]) % KMER_K
+    chunks_r = len(seq[0:boundary]) / KMER_K
 
     # Capture remainder of the pattern to fit in sequence
     kmer_seq_r = kmer_seq[math.floor(chunks_r):]
@@ -69,11 +78,11 @@ def elongate_reverse_sequence(seq):
     boundary, boundary_r = find_N_boundaries(seq)
 
     # K-mer telomeric sequence right before the N boundary
-    kmer_seq = seq[boundary_r - kmer_k:boundary_r]
+    kmer_seq = seq[boundary_r - KMER_K:boundary_r]
 
     # How many chunks to elongate and remainder
-    chunks = len(seq[boundary_r:]) % kmer_k
-    chunks_r = len(seq[boundary_r:]) / kmer_k
+    chunks = len(seq[boundary_r:]) % KMER_K
+    chunks_r = len(seq[boundary_r:]) / KMER_K
 
     # Start with the N boundary
     tst_seq = seq[0:boundary]
@@ -92,92 +101,54 @@ def elongate_reverse_sequence(seq):
     return tst_seq
 
 
+def determine_hexamer(seq: str):
+    ''' 
+    Builds a table containing hexamers and all its possible rotations.
+    
+    Useful to determine boundary conditions between N-regions and telomeric
+    repeats on the reference genome(s).
 
-def determine_hexamer(hexamer: str, hextable: defaultdict):
-    ''' Takes the sequence seq and tries to find which hexamer pattern it has
+    Also takes the sequence seq and tries to find which hexamer pattern it has
     '''
-    for k, v in hextable.items():
-        for kmer in v:
-            if str(hexamer) in str(kmer):
-                return k
+    hexamer_table = defaultdict(list)
+    rotated = []
+
+    # Seed table with first non-rotated "canonical" hexamer
+    hexamer_table[PATTERN1] = PATTERN1
+    hexamer_table[PATTERN2] = PATTERN2
+
+    for pat in [PATTERN1, PATTERN2]:
+        dq = deque(pat)
+        for rot in range(1, len(pat)):
+            dq.rotate(rot)
+            rotated.append(''.join(dq))
+
+        hexamer_table[pat] = rotated
+
+        for k, v in hexamer_table.items():
+            for kmer in v:
+                if str(str.upper(kmer)) in str(str.upper(seq)):
+                    return str.upper(k)
+    
     return None
 
-def build_hexamer_table(hexamer: str, hexamer_table: dict):
-    ''' Builds a table containing hexamers and all its possible rotations.
-        Useful to determine boundary conditions between N-regions and telomeric
-        repeats on the reference genome(s).
-    '''
-    # Seed table with first non-rotated "canonical" hexamer
-    hexamer_table[hexamer] = hexamer
-
-    dq = deque(hexamer)
-    rotated = []
-    for rot in range(1, len(hexamer)):
-        dq.rotate(rot)
-        rotated.append(''.join(dq))
-    
-    hexamer_table[hexamer] = rotated
-
-    return hexamer_table
 
 def main(genome_build='data/processed/hg38_synthetic/new_hg38.fa.gz'):
     new_seq  = ""
     new_hg38 = [] # just a list of records
     hextable = defaultdict(list)
 
-    hextable = build_hexamer_table(pattern1, hextable)
-    hextable = build_hexamer_table(pattern2, hextable)
-
-    cnt = 0
+    hextable = build_hexamer_table(PATTERN1, hextable)
+    hextable = build_hexamer_table(PATTERN2, hextable)
 
     with gzip.open(genome_build, "rt") as hg38_fa:
         record_dict = SeqIO.to_dict(SeqIO.parse(hg38_fa, "fasta"))
         for _, chrom_attrs in record_dict.items():
-            # Original and new_seq (mutable) sequence
             sequence = chrom_attrs.seq
             seq_id = chrom_attrs.id
-
             chrom_length = len(sequence)
-            new_seq = sequence.tomutable()
-
-            # XXX: Continue with tests, fixing this code for good
             N_repeats_pos = find_N_boundaries(sequence)
-
-            if N_repeats_pos == 0: # sequence with all N's
-                pass
-            else:
-                hexamer = sequence[N_repeats_pos:N_repeats_pos+6]
-                #XXX: Make sure this works in reverse?
-                detected_hexamer = determine_hexamer(new_seq[N_repeats_pos:N_repeats_pos+len(hexamer)], hextable)
-                print("Detected hexamer: {}".format(detected_hexamer))
-
-                if detected_hexamer is None:
-                    print("Cannot detect telomeric hexamer within sequence, skipping")
-                    continue
-                else:
-                    hexamer = detected_hexamer
-
-                print("{} ... {} ... {}".format(sequence[0:10],                                 # first chars of sequence
-                                                sequence[N_repeats_pos-10:N_repeats_pos+10],    # Chars around the (filled?) N boundary
-                                                sequence[chrom_length-20:chrom_length]))        # last chars of sequence
-
-                pos = N_repeats_pos
-                pos2 = N_repeats_pos
-
-                # XXX: Why 4? Re-visit invariant/thinking behind this
-                while (pos > 4 or pos2 > 4):
-                    pos = pos - len(hexamer)
-                    new_seq[pos:pos2] = hexamer
-                    pos2 = pos2 - len(hexamer)
-                    cnt = cnt+1
-
-                print("{} ... {} ... {}\t\t\t{}".format(new_seq[0:10],
-                                                        new_seq[N_repeats_pos-10:N_repeats_pos+10],
-                                                        new_seq[chrom_length-20:chrom_length],
-                                                        [N_repeats_pos, pos, pos2, chrom_length, cnt])) # "pointer" information
-
-
-                new_hg38.append(SeqRecord(new_seq.toseq(), id=seq_id, name=seq_id, description=seq_id))
+            detected_hexamer = determine_hexamer(sequence)
 
         with open("hg38_elongated_telomeres.fasta", "w") as output_handle:
             SeqIO.write(new_hg38, output_handle, "fasta")

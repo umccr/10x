@@ -3,7 +3,7 @@
 import logging
 import unittest
 
-from tenx_telomeres.hg38_synthetic_telomeres import find_N_boundaries, elongate_forward_sequence, elongate_reverse_sequence
+from tenx_telomeres.hg38_synthetic_telomeres import PATTERN1, PATTERN2, find_N_boundaries, elongate_forward_sequence, elongate_reverse_sequence, determine_hexamer
 
 # Set log level
 loglevel = logging.INFO
@@ -33,8 +33,14 @@ class TestStringMethods(unittest.TestCase):
     def test_elongate_reverse_sequence(self):
         tst_seq = elongate_reverse_sequence(self.src_seq)
 
-        #self.assertEqual(len(tst_seq), len(self.rev_seq))
+        self.assertEqual(len(tst_seq), len(self.rev_seq))
         self.assertEqual(tst_seq, self.rev_seq)
+
+    def test_determine_hexamer(self):
+        tst_seq = determine_hexamer(self.src_seq)
+
+        log.info(tst_seq)
+        
 
 if __name__ == '__main__':
     unittest.main()
