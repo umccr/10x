@@ -20,12 +20,13 @@ log = logging.getLogger(__name__)
 
 
 ## Global
+FA_IDX = "hg38.fa.idx"
+
 # Telomeric hexamer
 KMER_K = 6
 
-# Human telomeric hexamers
-PATTERN1 = 'ccctaa'
-PATTERN2 = 'ttaggg'
+# Human telomeric hexamers and complementary sequences
+TELO_HEXAMERS = ['CCCTAA', 'TTAGGG', 'TAACCC']
 
 
 def find_N_boundaries(seq: str):
@@ -121,39 +122,55 @@ def determine_hexamer(seq: str):
     rotated = []
 
     # Seed table with first non-rotated "canonical" hexamer
-    hexamer_table[PATTERN1] = PATTERN1
-    hexamer_table[PATTERN2] = PATTERN2
+    for pattern in TELO_HEXAMERS:
+        hexamer_table[pattern] = pattern
 
-    for pat in [PATTERN1, PATTERN2]:
-        dq = deque(pat)
-        for rot in range(1, len(pat)):
+    # Rotate the telomeric pattern to match boundaries
+    for pattern in TELO_HEXAMERS:
+        dq = deque(pattern)
+        for rot in range(1, len(pattern)):
             dq.rotate(rot)
             rotated.append(''.join(dq))
 
-        hexamer_table[pat] = rotated
+        hexamer_table[pattern] = rotated
 
         for k, v in hexamer_table.items():
             for kmer in v:
-                if str(str.upper(kmer)) in str(str.upper(seq)):
-                    return str.upper(k)
+                if kmer in str.upper(str(seq)):
+                    return v
+                else:
+                    return None
     
     return None
 
+def fasta_idx(filename):
+    ''' Indexes a fasta filename, since SeqIO.to_dict is not very efficient for
+        big files, see: https://github.com/biopython/biopython/pull/959 and
+        related issues.
+    '''
+    with gzip.open(filename, 'wt') as hg38_idx:
+        SeqIO.index_db(filename, hg38_idx, 'fasta')
 
+
+def main(genome_build='../../data/external/hg38.fa.gz'):
 #def main(genome_build='../../data/processed/hg38_synthetic/new_hg38.fa.gz'):
-def main(genome_build='../../data/external/chr11.fa.gz'):
+#def main(genome_build='../../data/external/chr11.fa.gz'):
     with gzip.open(genome_build, "rt") as hg38_fa:
         record_dict = SeqIO.to_dict(SeqIO.parse(hg38_fa, "fasta"))
         for _, chrom_attrs in record_dict.items():
             sequence = chrom_attrs.seq
             seq_id = chrom_attrs.id
 
+            # Discard _KI_random and _alt assemblies, disregard chrM too
+            # since there are no relevant telomeres there (circular sequence)
             if "_" not in seq_id:
-                if "chr11" in seq_id:
+                if "chrM" not in seq_id:
+                    #print(chrom_attrs)
                     boundaries = find_N_boundaries(sequence)
-                    print("{}\t{}:\t\t{}\t...\t{}\t...\t{}".format(seq_id.split(':')[0], boundaries, sequence[boundaries[0]:boundaries[0] + KMER_K + 30], sequence[boundaries[1] - KMER_K - 30:boundaries[1]], len(sequence)))
+                    detected_hexamer = determine_hexamer(sequence)
+                    print("{}\t{}:\t\t{}\t...\t{}\t...\t{}\t{}".format(seq_id.split(':')[0], boundaries, sequence[boundaries[0]:boundaries[0] + KMER_K + 30], sequence[boundaries[1] - KMER_K - 30:boundaries[1]], len(sequence), detected_hexamer))
 
-            #detected_hexamer = determine_hexamer(sequence)
+            
 
             #final_seq = elongate_forward_sequence(sequence)
             #final_seq = elongate_reverse_sequence(final_seq)

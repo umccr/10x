@@ -3,7 +3,7 @@
 import logging
 import unittest
 
-from tenx_telomeres.hg38_synthetic_telomeres import PATTERN1, PATTERN2, find_N_boundaries, elongate_forward_sequence, elongate_reverse_sequence, determine_hexamer
+from tenx_telomeres.hg38_synthetic_telomeres import TELO_HEXAMERS, find_N_boundaries, elongate_forward_sequence, elongate_reverse_sequence, determine_hexamer
 
 # Set log level
 loglevel = logging.INFO
@@ -44,10 +44,14 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(tst_seq, self.rev_seq)
 
     def test_determine_hexamer(self):
+        # Will find know pattern CCCTAA in sequence
         tst_seq = determine_hexamer(self.src_seq)
+        self.assertEqual(TELO_HEXAMERS[0], tst_seq)
 
-        log.info(tst_seq)
-        
+        # Should not find any pattern in sequence
+        tst_seq = determine_hexamer(self.no_patt)
+        self.assertNotIn(tst_seq, TELO_HEXAMERS)
+        self.assertEqual(tst_seq, None)
 
 if __name__ == '__main__':
     unittest.main()
