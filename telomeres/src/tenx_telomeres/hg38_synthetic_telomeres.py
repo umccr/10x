@@ -27,23 +27,30 @@ KMER_K = 6
 PATTERN1 = 'ccctaa'
 PATTERN2 = 'ttaggg'
 
+
 def find_N_boundaries(seq: str):
     ''' Returns all N-boundaries in a sequence via tuple: (first, second)
     '''
-    first_found = False
     pos = first = second = 0
 
+    # first N stretch
     for base in seq:
         if 'N' in base:
-            # first N boundary found
-            pos = pos+1
-        elif not first_found:
-            first_found = True
+            pos = pos + 1
+        else:
             first = pos
-            pos = pos+1
-        elif first_found:
-            second = pos
-            pos = pos+1
+            break
+
+    base = None
+    pos = 0
+
+    # last N stretch
+    for base in reversed(seq):
+        if 'N' in base:
+            pos = pos + 1
+        else:
+            second = len(seq) - pos - 1
+            break
 
     return (first, second)
 
@@ -133,25 +140,26 @@ def determine_hexamer(seq: str):
     return None
 
 
-def main(genome_build='data/processed/hg38_synthetic/new_hg38.fa.gz'):
-    new_seq  = ""
-    new_hg38 = [] # just a list of records
-    hextable = defaultdict(list)
-
-    hextable = build_hexamer_table(PATTERN1, hextable)
-    hextable = build_hexamer_table(PATTERN2, hextable)
-
+#def main(genome_build='../../data/processed/hg38_synthetic/new_hg38.fa.gz'):
+def main(genome_build='../../data/external/chr11.fa.gz'):
     with gzip.open(genome_build, "rt") as hg38_fa:
         record_dict = SeqIO.to_dict(SeqIO.parse(hg38_fa, "fasta"))
         for _, chrom_attrs in record_dict.items():
             sequence = chrom_attrs.seq
             seq_id = chrom_attrs.id
-            chrom_length = len(sequence)
-            N_repeats_pos = find_N_boundaries(sequence)
-            detected_hexamer = determine_hexamer(sequence)
 
-        with open("hg38_elongated_telomeres.fasta", "w") as output_handle:
-            SeqIO.write(new_hg38, output_handle, "fasta")
-        
+            if "_" not in seq_id:
+                if "chr11" in seq_id:
+                    boundaries = find_N_boundaries(sequence)
+                    print("{}\t{}:\t\t{}\t...\t{}\t...\t{}".format(seq_id.split(':')[0], boundaries, sequence[boundaries[0]:boundaries[0] + KMER_K + 30], sequence[boundaries[1] - KMER_K - 30:boundaries[1]], len(sequence)))
+
+            #detected_hexamer = determine_hexamer(sequence)
+
+            #final_seq = elongate_forward_sequence(sequence)
+            #final_seq = elongate_reverse_sequence(final_seq)
+
+#        with open("hg38_elongated_telomeres.fasta", "w") as output_handle:
+#            SeqIO.write(new_hg38, output_handle, "fasta")
+
 if __name__ == "__main__":
     main()

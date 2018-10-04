@@ -13,16 +13,23 @@ log = logging.getLogger(__name__)
 class TestStringMethods(unittest.TestCase):
 
     def setUp(self):
-                      # 0               16                33          47
+                      # 0               16               33          46
         self.src_seq = 'NNNNNNNNNNNNNNNNTAACCCTAACCCTAACCCNNNNNNNNNNNNN'
         self.fwd_seq = 'ACCCTAACCCTAACCCTAACCCTAACCCTAACCCNNNNNNNNNNNNN'
         self.rev_seq = 'NNNNNNNNNNNNNNNNTAACCCTAACCCTAACCCTAACCCTAACCCT'
         self.no_patt = 'NNNNNNNNNNNNNNNNATCATAAtAaaaaccCCANNNNNNNNNNNNN'
+        self.mdl_nnn = 'NNNNNNNNNNNNNNNNCACACANNNNNNCACACANNNNNNNNNNNNN'
         self.kmer_k = 6
 
     def test_N_boundary_positions(self):
         boundaries = find_N_boundaries(self.src_seq)
         self.assertTupleEqual(boundaries, (16, 33))
+
+        boundaries = find_N_boundaries(self.fwd_seq)
+        self.assertTupleEqual(boundaries, (0, 33))
+
+        boundaries = find_N_boundaries(self.rev_seq)
+        self.assertTupleEqual(boundaries, (16, 46))
 
     def test_elongate_forward_sequence(self):
         tst_seq = elongate_forward_sequence(self.src_seq)
