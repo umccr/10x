@@ -44,7 +44,7 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(tst_seq, self.rev_seq)
 
     def test_determine_hexamer(self):
-        # Will find know pattern CCCTAA in sequence
+        # Will find known pattern CCCTAA in sequence
         tst_seq = determine_hexamer(self.src_seq)
         self.assertEqual(TELO_HEXAMERS[0], tst_seq)
 

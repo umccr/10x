@@ -134,13 +134,13 @@ def determine_hexamer(seq: str):
 
         hexamer_table[pattern] = rotated
 
-        for k, v in hexamer_table.items():
-            for kmer in v:
-                if kmer in str.upper(str(seq)):
-                    return v
-                else:
-                    return None
-    
+    for k, v in hexamer_table.items():
+        for kmer in v:
+            if kmer in str.upper(str(seq)):
+                return k 
+            else:
+                return None
+
     return None
 
 def fasta_idx(filename):
@@ -152,7 +152,7 @@ def fasta_idx(filename):
         SeqIO.index_db(filename, hg38_idx, 'fasta')
 
 
-def main(genome_build='../../data/external/hg38.fa.gz'):
+def main(genome_build='/Users/romanvg/dev/10x/telomeres/data/external/hg38.fa.gz'):
 #def main(genome_build='../../data/processed/hg38_synthetic/new_hg38.fa.gz'):
 #def main(genome_build='../../data/external/chr11.fa.gz'):
     with gzip.open(genome_build, "rt") as hg38_fa:
