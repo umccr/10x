@@ -6,6 +6,7 @@ from typing import List
 from pathlib import Path
 from collections import defaultdict, deque
 from itertools import islice, tee
+from pymer import ExactKmerCounter
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
@@ -114,18 +115,14 @@ def elongate_reverse_sequence(seq):
 
     return tst_seq
 
-
-def determine_hexamer(seq: str, boundaries: tuple):
-    ''' 
+def build_hexamer_table():
+    '''
     Builds a table containing hexamers and all its possible rotations.
     
     Useful to determine boundary conditions between N-regions and telomeric
     repeats on the reference genome(s).
-
-    Also takes the sequence seq and tries to find which hexamer pattern it has
     '''
     hexamer_table = defaultdict(list)
-    fwd_boundary, rev_boundary = boundaries
     rotated = []
 
     # Rotate the telomeric pattern to match boundaries
@@ -137,19 +134,51 @@ def determine_hexamer(seq: str, boundaries: tuple):
 
         hexamer_table[pattern] = rotated
 
-    # Scan for known telomeric sequences around boundaries
-    # XXX: Should detect forward *and* reverse sequences, not halt at the first where it finds them!
-    for _, v in hexamer_table.items():
-        for kmer in v:
-            if kmer in str.upper(str(seq[0:fwd_boundary + O_OFFSET])):        # fwd
-                return kmer, "fwd"
-            elif kmer in str.upper(str(seq[rev_boundary - O_OFFSET:])):       # rev
-                return kmer, "rev"
-            else:
-                return None, None
+    return hexamer_table
 
-    # Should never end up here (tm)
-    raise ValueError("Error in parsing telomeric subsequences")
+
+def determine_hexamer(seq: str, boundaries: tuple, hexamer_table: dict):
+    '''
+    Also takes the sequence seq and tries to find which hexamer pattern it has
+    '''
+    # XXX: Just use khmer/KMER algo between boundaries, grab top nearest candidate
+    # instead of this wasteful linear search. To optimize.
+    detected = [None, None]
+    fwd_boundary, rev_boundary = boundaries
+
+    kc_fwd = ExactKmerCounter(KMER_K)
+    kc_rev = ExactKmerCounter(KMER_K) 
+    
+    kc_fwd.consume(str(seq[fwd_boundary:fwd_boundary + O_OFFSET]))
+    kc_rev.consume(str(seq[rev_boundary - O_OFFSET:rev_boundary]))
+
+    # print(kc_fwd[HUMAN_TELOMERE])
+    # print(kc_rev[HUMAN_TELOMERE])
+
+    if (kc_fwd[HUMAN_TELOMERE] == 0):
+        detected[0] = None
+    else:
+        detected[0] = kc_fwd[HUMAN_TELOMERE]
+
+    if (kc_rev[HUMAN_TELOMERE] == 0):
+        detected[1] = None
+    else:
+        detected[1] = kc_rev[HUMAN_TELOMERE]
+        
+
+    return detected
+
+    # detected = [None, None] # Positional encoding for hits: [fwd, rev]
+    # # Scan for known telomeric sequences around boundaries
+    # for _, v in hexamer_table.items():
+    #     for kmer in v:
+    #         detected = [None, None] # Positional encoding for hits: [fwd, rev]
+    #         if kmer in str.upper(str(seq[fwd_boundary:fwd_boundary + O_OFFSET])):         # fwd
+    #             detected[0] = kmer
+    #         if kmer in str.upper(str(seq[rev_boundary - O_OFFSET:rev_boundary])):          # rev
+    #             detected[1] = kmer
+
+    # return detected
 
 def fasta_idx(filename):
     ''' Indexes a fasta filename, since SeqIO.to_dict is not very efficient for
@@ -160,8 +189,11 @@ def fasta_idx(filename):
         SeqIO.index_db(filename, hg38_idx, 'fasta')
 
 
-#def main(genome_build='../../data/external/hg38.fa.gz'):
-def main(genome_build='../../data/external/chr11.fa.gz'):
+def main(genome_build='data/external/hg38.fa.gz'):
+#def main(genome_build='data/external/chr11.fa.gz'):
+
+    hexamer_table = build_hexamer_table()
+
     with gzip.open(genome_build, "rt") as hg38_fa:
         record_dict = SeqIO.to_dict(SeqIO.parse(hg38_fa, "fasta"))
         for _, chrom_attrs in record_dict.items():
@@ -169,23 +201,25 @@ def main(genome_build='../../data/external/chr11.fa.gz'):
             seq_id = chrom_attrs.id
             detected_hexamer = None
 
-            # Discard _KI_random and _alt assemblies, disregard chrM too
-            # since there are no relevant telomeres there (circular sequence)
+            # Discard _KI_random and _alt assemblies (filter "_"). Also disregard chrM
+            # since there are no biologically relevant telomeres there (circular sequence).
             if "_" not in seq_id:
                 if "chrM" not in seq_id:
                     fwd_boundary, rev_boundary = find_N_boundaries(sequence)
-                    detected_hexamer = determine_hexamer(sequence, (fwd_boundary, rev_boundary))
+                    detected_hexamer = determine_hexamer(sequence, (fwd_boundary, rev_boundary), hexamer_table)
 
-                    #chr1    (10000, 248946421):             taaccctaaccctaaccctaaccctaaccctaaccc    ...     ttagggttagggttagggttaagggttagggttagg    ...     248956422       (TTAGGG, rev)
+                    # chr11   (60000, 135076621):             GAATTCTACATTAGAAAAATAAACCATAGCCTCATC    ...     gggttagggttagggttagggttagggttagggtta    ...     135086622       [None, 'GGGTTA']
                     print("{}\t{}:\t\t{}\t...\t{}\t...\t{}\t{}".format(seq_id.split(':')[0],
                                                                       (fwd_boundary, rev_boundary),
                                                                       sequence[fwd_boundary:fwd_boundary + KMER_K + 30],
                                                                       sequence[rev_boundary - KMER_K - 30:rev_boundary],
                                                                       len(sequence), detected_hexamer))
 
+    # Finally, build the synthetically elongated hg38 build
+
             #final_seq = elongate_forward_sequence(sequence)
             #final_seq = elongate_reverse_sequence(final_seq)
-
+# Seq(HUMAN_TELOMERE, generic_dna)
 #        with open("hg38_elongated_telomeres.fasta", "w") as output_handle:
 #            SeqIO.write(new_hg38, output_handle, "fasta")
 
