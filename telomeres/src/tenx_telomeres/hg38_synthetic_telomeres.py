@@ -139,12 +139,11 @@ def build_hexamer_table():
 
 def determine_hexamer(seq: str, boundaries: tuple, hexamer_table: dict):
     '''
-    Also takes the sequence seq and tries to find which hexamer pattern it has
+    Takes the sequence seq and finds telomeric kmers in it. Keeps the count
+    of found kmers in each direction.
     '''
-    # XXX: Just use khmer/KMER algo between boundaries, grab top nearest candidate
-    # instead of this wasteful linear search. To optimize.
-    detected = [None, None]
     fwd_boundary, rev_boundary = boundaries
+    fwd_detected, rev_detected = defaultdict(), defaultdict()
 
     kc_fwd = ExactKmerCounter(KMER_K)
     kc_rev = ExactKmerCounter(KMER_K) 
@@ -152,33 +151,16 @@ def determine_hexamer(seq: str, boundaries: tuple, hexamer_table: dict):
     kc_fwd.consume(str(seq[fwd_boundary:fwd_boundary + O_OFFSET]))
     kc_rev.consume(str(seq[rev_boundary - O_OFFSET:rev_boundary]))
 
-    # print(kc_fwd[HUMAN_TELOMERE])
-    # print(kc_rev[HUMAN_TELOMERE])
+    for _, v in hexamer_table.items():
+        for telo in v:
+            if kc_fwd[telo] != 0:
+                fwd_detected[telo] = kc_fwd[telo]
+            if kc_rev[telo] != 0:
+                rev_detected[telo] = kc_rev[telo]
 
-    if (kc_fwd[HUMAN_TELOMERE] == 0):
-        detected[0] = None
-    else:
-        detected[0] = kc_fwd[HUMAN_TELOMERE]
-
-    if (kc_rev[HUMAN_TELOMERE] == 0):
-        detected[1] = None
-    else:
-        detected[1] = kc_rev[HUMAN_TELOMERE]
-        
+    detected = [fwd_detected, rev_detected]
 
     return detected
-
-    # detected = [None, None] # Positional encoding for hits: [fwd, rev]
-    # # Scan for known telomeric sequences around boundaries
-    # for _, v in hexamer_table.items():
-    #     for kmer in v:
-    #         detected = [None, None] # Positional encoding for hits: [fwd, rev]
-    #         if kmer in str.upper(str(seq[fwd_boundary:fwd_boundary + O_OFFSET])):         # fwd
-    #             detected[0] = kmer
-    #         if kmer in str.upper(str(seq[rev_boundary - O_OFFSET:rev_boundary])):          # rev
-    #             detected[1] = kmer
-
-    # return detected
 
 def fasta_idx(filename):
     ''' Indexes a fasta filename, since SeqIO.to_dict is not very efficient for
@@ -208,11 +190,10 @@ def main(genome_build='data/external/hg38.fa.gz'):
                     fwd_boundary, rev_boundary = find_N_boundaries(sequence)
                     detected_hexamer = determine_hexamer(sequence, (fwd_boundary, rev_boundary), hexamer_table)
 
-                    # chr11   (60000, 135076621):             GAATTCTACATTAGAAAAATAAACCATAGCCTCATC    ...     gggttagggttagggttagggttagggttagggtta    ...     135086622       [None, 'GGGTTA']
                     print("{}\t{}:\t\t{}\t...\t{}\t...\t{}\t{}".format(seq_id.split(':')[0],
                                                                       (fwd_boundary, rev_boundary),
-                                                                      sequence[fwd_boundary:fwd_boundary + KMER_K + 30],
-                                                                      sequence[rev_boundary - KMER_K - 30:rev_boundary],
+                                                                      sequence[fwd_boundary:fwd_boundary + KMER_K],
+                                                                      sequence[rev_boundary - KMER_K:rev_boundary],
                                                                       len(sequence), detected_hexamer))
 
     # Finally, build the synthetically elongated hg38 build
