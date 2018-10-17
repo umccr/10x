@@ -209,6 +209,8 @@ def main(genome_build='data/external/hg38.fa.gz'):
                                                                       len(sequence), detected_hexamer))
 
     # Finally, build the synthetically elongated hg38 build
+    # XXX: Modify elongate so that it doesn't blindly take the boundary kmer but uses
+    #      the one determined from determine_hexamers
 
             #final_seq = elongate_forward_sequence(sequence)
             #final_seq = elongate_reverse_sequence(final_seq)
