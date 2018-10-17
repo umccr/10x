@@ -158,9 +158,21 @@ def determine_hexamer(seq: str, boundaries: tuple, hexamer_table: dict):
             if kc_rev[telo] != 0:
                 rev_detected[telo] = kc_rev[telo]
 
-    detected = [fwd_detected, rev_detected]
+    # find most frequent one and use it as best choice for elongate later
+    total_detected = [None, None]
 
-    return detected
+    # ValueError: max() arg is an empty sequence
+    try:
+        total_detected[0] = max(fwd_detected)
+    except ValueError:
+        pass
+
+    try:
+        total_detected[1] = max(rev_detected)
+    except ValueError:
+        pass
+
+    return total_detected
 
 def fasta_idx(filename):
     ''' Indexes a fasta filename, since SeqIO.to_dict is not very efficient for
@@ -192,8 +204,8 @@ def main(genome_build='data/external/hg38.fa.gz'):
 
                     print("{}\t{}:\t\t{}\t...\t{}\t...\t{}\t{}".format(seq_id.split(':')[0],
                                                                       (fwd_boundary, rev_boundary),
-                                                                      sequence[fwd_boundary:fwd_boundary + KMER_K],
-                                                                      sequence[rev_boundary - KMER_K:rev_boundary],
+                                                                      sequence[fwd_boundary - 3:fwd_boundary + KMER_K + 10],
+                                                                      sequence[rev_boundary - KMER_K - 10:rev_boundary + 4],
                                                                       len(sequence), detected_hexamer))
 
     # Finally, build the synthetically elongated hg38 build
