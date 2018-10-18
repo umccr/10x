@@ -32,7 +32,7 @@ class TestStringMethods(unittest.TestCase):
         boundaries = find_N_boundaries(self.rev_seq)
         self.assertTupleEqual(boundaries, (16, 46))
 
-    def test_elongate_forward_sequence_naive(self):
+    def test_elongate_forward_sequence(self):
         boundaries = find_N_boundaries(self.src_seq)
         hexamer_table = build_hexamer_table()
 
@@ -42,12 +42,32 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(len(tst_seq), len(self.fwd_seq))
         self.assertEqual(tst_seq, self.fwd_seq)
 
-    def test_elongate_reverse_sequence_naive(self):
+    def test_elongate_reverse_sequence(self):
         boundaries = find_N_boundaries(self.src_seq)
         hexamer_table = build_hexamer_table()
 
         hexamer_pair = determine_hexamers(self.src_seq, boundaries, hexamer_table)
         tst_seq = elongate_reverse_sequence(self.src_seq, hexamer_pair[1], "naive_mode")
+
+        self.assertEqual(len(tst_seq), len(self.rev_seq))
+        self.assertEqual(tst_seq, self.rev_seq)
+
+    def test_elongate_forward_sequence_kmer_mode(self):
+        boundaries = find_N_boundaries(self.src_seq)
+        hexamer_table = build_hexamer_table()
+
+        hexamer_pair = determine_hexamers(self.src_seq, boundaries, hexamer_table)
+        tst_seq = elongate_forward_sequence(self.src_seq, hexamer_pair[0], "kmer_mode")
+
+        self.assertEqual(len(tst_seq), len(self.fwd_seq))
+        self.assertEqual(tst_seq, self.fwd_seq)
+ 
+    def test_elongate_reverse_sequence_kmer_mode(self):
+        boundaries = find_N_boundaries(self.src_seq)
+        hexamer_table = build_hexamer_table()
+
+        hexamer_pair = determine_hexamers(self.src_seq, boundaries, hexamer_table)
+        tst_seq = elongate_reverse_sequence(self.src_seq, hexamer_pair[1], "kmer_mode")
 
         self.assertEqual(len(tst_seq), len(self.rev_seq))
         self.assertEqual(tst_seq, self.rev_seq)

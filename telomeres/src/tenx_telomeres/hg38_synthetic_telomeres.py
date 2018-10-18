@@ -123,6 +123,7 @@ def elongate_reverse_sequence(seq: str, kmer: str, mode: str):
         if kmer[1] is not None:
             kmer_seq = kmer[1] # override kmer sequence
             kmer_seq_r = kmer_seq[0:math.floor(chunks_r)]
+
         else: # just leave N's as they are since no suitable telomeric kmer was found
             kmer_seq = 'N' * KMER_K
 
