@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 import logging
+import pymer
 import unittest
 
-from tenx_telomeres.hg38_synthetic_telomeres import TELO_HEXAMERS, find_N_boundaries, elongate_forward_sequence, elongate_reverse_sequence, determine_hexamer
+from tenx_telomeres.hg38_synthetic_telomeres import TELO_HEXAMERS, find_N_boundaries, elongate_forward_sequence, elongate_reverse_sequence, determine_hexamers, build_hexamer_table
 
 # Set log level
 loglevel = logging.INFO
@@ -32,28 +33,38 @@ class TestStringMethods(unittest.TestCase):
         self.assertTupleEqual(boundaries, (16, 46))
 
     def test_elongate_forward_sequence(self):
-        tst_seq = elongate_forward_sequence(self.src_seq)
+        boundaries = find_N_boundaries(self.src_seq)
+        hexamer_table = build_hexamer_table()
+
+        hexamer_pair = determine_hexamers(self.src_seq, boundaries, hexamer_table)
+        tst_seq = elongate_forward_sequence(self.src_seq, hexamer_pair[0], "naive_mode")
 
         self.assertEqual(len(tst_seq), len(self.fwd_seq))
         self.assertEqual(tst_seq, self.fwd_seq)
 
     def test_elongate_reverse_sequence(self):
-        tst_seq = elongate_reverse_sequence(self.src_seq)
+        boundaries = find_N_boundaries(self.src_seq)
+        hexamer_table = build_hexamer_table()
+
+        hexamer_pair = determine_hexamers(self.src_seq, boundaries, hexamer_table)
+        tst_seq = elongate_reverse_sequence(self.src_seq, hexamer_pair[1], "naive_mode")
 
         self.assertEqual(len(tst_seq), len(self.rev_seq))
         self.assertEqual(tst_seq, self.rev_seq)
 
     def test_determine_hexamer(self):
         boundaries = find_N_boundaries(self.src_seq)
+        hexamer_table = build_hexamer_table()
 
         # Will find known pattern CCCTAA in sequence
-        tst_seq = determine_hexamer(self.src_seq, boundaries)
-        self.assertEqual(TELO_HEXAMERS[0], tst_seq)
+        hexamer_pair = determine_hexamers(self.src_seq, boundaries, hexamer_table)
+        self.assertEqual('TAACCC', hexamer_pair[0])
+        self.assertEqual('TAACCC', hexamer_pair[1])
 
         # Should not find any pattern in sequence
-        tst_seq = determine_hexamer(self.no_patt, boundaries)
-        self.assertNotIn(tst_seq, TELO_HEXAMERS)
-        self.assertEqual(tst_seq, None)
+        hexamer_pair = determine_hexamers(self.no_patt, boundaries, hexamer_table)
+        self.assertNotIn('TAACCC', hexamer_pair)
+        self.assertEqual(hexamer_pair, [None, None])
 
 if __name__ == '__main__':
     unittest.main()

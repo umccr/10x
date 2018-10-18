@@ -5,7 +5,7 @@ from distutils.core import setup
 setup(
     name='tenx_telomeres',
     packages=[],
-    version='0.0.1',
+    version='0.0.2',
     description='10X hg38 telomeric region fixes',
     author='Roman Valls Guimera',
     license='GPLv3',

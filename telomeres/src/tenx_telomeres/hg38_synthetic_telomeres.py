@@ -206,6 +206,7 @@ def fasta_idx(filename):
 #def main(genome_build='data/external/hg38.fa.gz'):
 def main(genome_build='data/external/chr11.fa.gz'):
 
+    new_hg38 = []
     final_seq = None
     hexamer_table = build_hexamer_table()
 
@@ -230,13 +231,13 @@ def main(genome_build='data/external/chr11.fa.gz'):
                                                                       len(sequence), detected_hexamer_pair))
 
             # Finally, build the synthetically elongated hg38 build
-
             final_seq = elongate_forward_sequence(sequence, detected_hexamer_pair, "kmer_mode")
             final_seq = elongate_reverse_sequence(final_seq, detected_hexamer_pair, "kmer_mode")
 
-    final_seq = Seq(final_seq, generic_dna) # convert str to BioPython Seq
+            new_hg38.append(SeqRecord(Seq(final_seq, generic_dna), id=seq_id, name=seq_id, description=seq_id))
+
     with open("hg38_elongated_telomeres.fasta", "w") as output_handle:
-        SeqIO.write(final_seq, output_handle, "fasta")
+        SeqIO.write(new_hg38, output_handle, "fasta")
 
 if __name__ == "__main__":
     main()
