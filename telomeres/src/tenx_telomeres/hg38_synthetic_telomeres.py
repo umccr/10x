@@ -100,9 +100,6 @@ def elongate_reverse_sequence(seq: str, kmer: str, mode: str):
     # Determine N boundaries in the sequence
     boundary, boundary_r = find_N_boundaries(seq)
 
-    # K-mer telomeric sequence right before the N boundary on the reverse side
-    kmer_seq = seq[boundary_r - KMER_K:boundary_r]
-
     # How many chunks to elongate and remainder
     chunks = len(seq[boundary_r:]) % KMER_K
     chunks_r = len(seq[boundary_r:]) / KMER_K
@@ -114,14 +111,18 @@ def elongate_reverse_sequence(seq: str, kmer: str, mode: str):
     tmp_seq = tmp_seq + seq[boundary:boundary_r]
 
     if mode == "naive_mode":
+        # K-mer telomeric sequence right before the N boundary on the reverse side
+        kmer_seq = seq[boundary_r - KMER_K:boundary_r]
+
         # Just capture remainder of the pattern from the boundary to fit in sequence
-        kmer_seq_r = kmer_seq[math.floor(chunks_r):]
-        tmp_seq = kmer_seq_r
+        #kmer_seq_r = kmer_seq[math.floor(chunks_r):]
+        kmer_seq_r = kmer_seq[0:math.floor(chunks_r)]
+
     elif mode == "kmer_mode":
         # XXX: fairly blunt kmer/pattern transition here
         if kmer[1] is not None:
-            #tmp_seq = kmer[1]
-            kmer_seq = kmer[1]
+            kmer_seq = kmer[1] # override kmer sequence
+            kmer_seq_r = kmer_seq[0:math.floor(chunks_r)]
         else: # just leave N's as they are since no suitable telomeric kmer was found
             kmer_seq = 'N' * KMER_K
 
@@ -130,7 +131,6 @@ def elongate_reverse_sequence(seq: str, kmer: str, mode: str):
         tmp_seq = tmp_seq + kmer_seq
 
     # Capture remainder of the pattern to fit in sequence
-    kmer_seq_r = kmer_seq[0:math.floor(chunks_r)]
     tmp_seq = tmp_seq + kmer_seq_r
 
     return tmp_seq

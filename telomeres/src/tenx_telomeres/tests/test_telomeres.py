@@ -47,7 +47,7 @@ class TestStringMethods(unittest.TestCase):
         hexamer_table = build_hexamer_table()
 
         hexamer_pair = determine_hexamers(self.src_seq, boundaries, hexamer_table)
-        tst_seq = elongate_reverse_sequence(self.src_seq, hexamer_pair[1], "kmer_mode")
+        tst_seq = elongate_reverse_sequence(self.src_seq, hexamer_pair[1], "naive_mode")
 
         self.assertEqual(len(tst_seq), len(self.rev_seq))
         self.assertEqual(tst_seq, self.rev_seq)
