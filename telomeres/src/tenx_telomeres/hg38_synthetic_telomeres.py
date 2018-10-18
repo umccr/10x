@@ -120,10 +120,10 @@ def elongate_reverse_sequence(seq: str, kmer: str, mode: str):
     elif mode == "kmer_mode":
         # XXX: fairly blunt kmer/pattern transition here
         if kmer[1] is not None:
-            tmp_seq = kmer[1]
+            #tmp_seq = kmer[1]
             kmer_seq = kmer[1]
         else: # just leave N's as they are since no suitable telomeric kmer was found
-            tmp_seq = 'N' * KMER_K
+            kmer_seq = 'N' * KMER_K
 
     # Build reverse sequence
     for _ in range(0, chunks):
