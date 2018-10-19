@@ -25,12 +25,17 @@ class TestStringMethods(unittest.TestCase):
     def test_N_boundary_positions(self):
         boundaries = find_N_boundaries(self.src_seq)
         self.assertTupleEqual(boundaries, (16, 33))
+        self.assertEqual(self.src_seq[16], 'T')
+        self.assertEqual(self.src_seq[33], 'C')
 
         boundaries = find_N_boundaries(self.fwd_seq)
         self.assertTupleEqual(boundaries, (0, 33))
 
         boundaries = find_N_boundaries(self.rev_seq)
         self.assertTupleEqual(boundaries, (16, 46))
+        self.assertEqual(self.rev_seq[46], 'T')
+        self.assertEqual(self.rev_seq[33], 'C')
+
 
     def test_elongate_forward_sequence(self):
         boundaries = find_N_boundaries(self.src_seq)

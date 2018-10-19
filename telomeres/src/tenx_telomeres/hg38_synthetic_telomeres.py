@@ -72,57 +72,58 @@ def elongate_forward_sequence(seq: str, kmer: str, mode: str):
     kmer_seq = seq[boundary:boundary + KMER_K]
 
     # How many chunks to elongate and remainder
-    chunks = len(seq[0:boundary]) % KMER_K
-    chunks_r = len(seq[0:boundary]) / KMER_K
+    chunks = int(len(seq[0:boundary]) / KMER_K)
+    chunks_r = len(seq[0:boundary]) % KMER_K
 
-    if mode == "naive_mode":
-        # Just capture remainder of the pattern from the boundary to fit in sequence
-        kmer_seq_r = kmer_seq[math.floor(chunks_r):]
-        tmp_seq = kmer_seq_r
-    elif mode == "kmer_mode":
+    if mode == "kmer_mode":
         # XXX: fairly blunt kmer/pattern transition here
-        if kmer[0] is not None:
-            tmp_seq = kmer[0]
-            kmer_seq = kmer[0]
+        if kmer is not None:
+            kmer_seq = kmer
+            print(kmer)
         else: # just leave N's as they are since no suitable telomeric kmer was found
-            tmp_seq = 'N' * KMER_K
+            kmer_seq = 'N' * KMER_K
+
+    kmer_seq_r = kmer_seq[KMER_K-chunks_r:]
+    tmp_seq = kmer_seq_r
 
     # Build forward sequence
-    for _ in range(0, chunks - 2): # XXX 2?
+    for _ in range(0, chunks):
         tmp_seq = tmp_seq + kmer_seq
 
     # Attach inner pattern
     tmp_seq = tmp_seq + seq[boundary:boundary_r] + seq[boundary_r:]
+    print(chunks_r)
+    print(tmp_seq)
 
     return tmp_seq
 
 def elongate_reverse_sequence(seq: str, kmer: str, mode: str):
     # Determine N boundaries in the sequence
-    boundary, boundary_r = find_N_boundaries(seq)
+    _, boundary_r = find_N_boundaries(seq)
 
     # How many chunks to elongate and remainder
-    chunks = len(seq[boundary_r:]) % KMER_K
-    chunks_r = len(seq[boundary_r:]) / KMER_K
+    chunks = int(len(seq[boundary_r:]) / KMER_K)
+    chunks_r = len(seq[boundary_r:]) % KMER_K
 
-    # Start with bases present in the forward side
-    tmp_seq = seq[0:boundary]
-
-    # Attach inner pattern
-    tmp_seq = tmp_seq + seq[boundary:boundary_r]
+    # Attach sequence until reverse boundary
+    tmp_seq = seq[0:boundary_r + 1]
+    print(boundary_r)
+    print(tmp_seq)
 
     if mode == "naive_mode":
         # K-mer telomeric sequence right before the N boundary on the reverse side
-        kmer_seq = seq[boundary_r - KMER_K:boundary_r]
+        kmer_seq = seq[boundary_r - KMER_K + 1:boundary_r + 1]
+        print(kmer_seq)
 
         # Just capture remainder of the pattern from the boundary to fit in sequence
         #kmer_seq_r = kmer_seq[math.floor(chunks_r):]
-        kmer_seq_r = kmer_seq[0:math.floor(chunks_r)]
+        kmer_seq_r = kmer_seq[0:chunks_r - 1]
 
     elif mode == "kmer_mode":
         # XXX: fairly blunt kmer/pattern transition here
-        if kmer[1] is not None:
-            kmer_seq = kmer[1] # override kmer sequence
-            kmer_seq_r = kmer_seq[0:math.floor(chunks_r)]
+        if kmer is not None:
+            kmer_seq = kmer # override kmer sequence
+            kmer_seq_r = kmer_seq[0:chunks_r - 1]
 
         else: # just leave N's as they are since no suitable telomeric kmer was found
             kmer_seq = 'N' * KMER_K
@@ -232,8 +233,8 @@ def main(genome_build='data/external/chr11.fa.gz'):
                                                                       len(sequence), detected_hexamer_pair))
 
             # Finally, build the synthetically elongated hg38 build
-            final_seq = elongate_forward_sequence(sequence, detected_hexamer_pair, "kmer_mode")
-            final_seq = elongate_reverse_sequence(final_seq, detected_hexamer_pair, "kmer_mode")
+            final_seq = elongate_forward_sequence(sequence, detected_hexamer_pair[0], "kmer_mode")
+            final_seq = elongate_reverse_sequence(final_seq, detected_hexamer_pair[1], "kmer_mode")
 
             new_hg38.append(SeqRecord(Seq(final_seq, generic_dna), id=seq_id, name=seq_id, description=seq_id))
 
