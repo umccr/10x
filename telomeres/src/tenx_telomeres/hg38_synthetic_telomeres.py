@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import math
+import sys
 import gzip
 from typing import List
 from pathlib import Path
@@ -79,7 +79,6 @@ def elongate_forward_sequence(seq: str, kmer: str, mode: str):
         # XXX: fairly blunt kmer/pattern transition here
         if kmer is not None:
             kmer_seq = kmer
-            print(kmer)
         else: # just leave N's as they are since no suitable telomeric kmer was found
             kmer_seq = 'N' * KMER_K
 
@@ -92,8 +91,6 @@ def elongate_forward_sequence(seq: str, kmer: str, mode: str):
 
     # Attach inner pattern
     tmp_seq = tmp_seq + seq[boundary:boundary_r] + seq[boundary_r:]
-    print(chunks_r)
-    print(tmp_seq)
 
     return tmp_seq
 
@@ -104,28 +101,25 @@ def elongate_reverse_sequence(seq: str, kmer: str, mode: str):
     # How many chunks to elongate and remainder
     chunks = int(len(seq[boundary_r:]) / KMER_K)
     chunks_r = len(seq[boundary_r:]) % KMER_K
+    kmer_seq = ""
+    kmer_seq_r = ""
 
     # Attach sequence until reverse boundary
     tmp_seq = seq[0:boundary_r + 1]
-    print(boundary_r)
-    print(tmp_seq)
 
     if mode == "naive_mode":
         # K-mer telomeric sequence right before the N boundary on the reverse side
         kmer_seq = seq[boundary_r - KMER_K + 1:boundary_r + 1]
-        print(kmer_seq)
-
-        # Just capture remainder of the pattern from the boundary to fit in sequence
-        #kmer_seq_r = kmer_seq[math.floor(chunks_r):]
+        # Capture remainder of the pattern from the boundary to fit in sequence
         kmer_seq_r = kmer_seq[0:chunks_r - 1]
 
     elif mode == "kmer_mode":
-        # XXX: fairly blunt kmer/pattern transition here
+        # XXX: fairly blunt kmer/pattern transition here?
         if kmer is not None:
             kmer_seq = kmer # override kmer sequence
             kmer_seq_r = kmer_seq[0:chunks_r - 1]
 
-        else: # just leave N's as they are since no suitable telomeric kmer was found
+        else: # Leave N's as they are since no suitable telomeric kmer was found
             kmer_seq = 'N' * KMER_K
 
     # Build reverse sequence
@@ -173,6 +167,9 @@ def determine_hexamers(seq: str, boundaries: tuple, hexamer_table: dict):
     kc_fwd.consume(str(seq[fwd_boundary:fwd_boundary + O_OFFSET]))
     kc_rev.consume(str(seq[rev_boundary - O_OFFSET:rev_boundary]))
 
+    # XXX: review the ranking, some chroms are not reported right, i.e:
+    # chr10 on forward, "NNNctaaccctaaccctaa" detected as 'TTAGGG'
+    # 
     for _, v in hexamer_table.items():
         for telo in v:
             if kc_fwd[telo] != 0:
@@ -205,8 +202,8 @@ def fasta_idx(filename):
         SeqIO.index_db(filename, hg38_idx, 'fasta')
 
 
-#def main(genome_build='data/external/hg38.fa.gz'):
-def main(genome_build='data/external/chr11.fa.gz'):
+def main(genome_build='data/external/hg38.fa.gz'):
+#def main(genome_build='data/external/chr11.fa.gz'):
 
     new_hg38 = []
     final_seq = None
@@ -232,13 +229,18 @@ def main(genome_build='data/external/chr11.fa.gz'):
                                                                       sequence[rev_boundary - KMER_K - 10:rev_boundary + 4],
                                                                       len(sequence), detected_hexamer_pair))
 
-            # Finally, build the synthetically elongated hg38 build
-            final_seq = elongate_forward_sequence(sequence, detected_hexamer_pair[0], "kmer_mode")
-            final_seq = elongate_reverse_sequence(final_seq, detected_hexamer_pair[1], "kmer_mode")
+                    # Finally, build the synthetically elongated hg38 build
+                    final_seq = elongate_forward_sequence(sequence, detected_hexamer_pair[0], "kmer_mode")
+                    final_seq = elongate_reverse_sequence(final_seq, detected_hexamer_pair[1], "kmer_mode")
 
-            new_hg38.append(SeqRecord(Seq(final_seq, generic_dna), id=seq_id, name=seq_id, description=seq_id))
+                    print("{}\t{}:\t\t{}\t...\t{}\t...\t{}\t{}".format(seq_id, (fwd_boundary, rev_boundary),
+                                                                    final_seq[fwd_boundary - 3:fwd_boundary + KMER_K + 10],
+                                                                    final_seq[rev_boundary - KMER_K - 10:rev_boundary + 4],
+                                                                    len(final_seq), detected_hexamer_pair))
 
-    with open("hg38_elongated_telomeres.fasta", "w") as output_handle:
+                    new_hg38.append(SeqRecord(Seq(str(final_seq), generic_dna), id=seq_id, name=seq_id, description=seq_id))
+
+    with open("hg38_elongated_telomeres.fa", "w") as output_handle:
         SeqIO.write(new_hg38, output_handle, "fasta")
 
 if __name__ == "__main__":
