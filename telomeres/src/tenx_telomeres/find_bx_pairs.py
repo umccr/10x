@@ -13,18 +13,21 @@ Collects all the possible spans and makes a histogram
 '''
 # XXX: Filter by a reasonable MAPQ value
 # XXX: Filter for max 10X molecule length
-for read in samfile.fetch(CHR_FOCUS, 10, 20000):
-    start = read.reference_start    # current read coordinates
-    end = read.next_reference_start # mate read coordinates
+for read in samfile.fetch(CHR_FOCUS, 1, 120000):
+    current = read.reference_start    # current read coordinates
+    mate = read.next_reference_start # mate read coordinates
     if read.has_tag('BX'):
         if read.next_reference_name == CHR_FOCUS:
-            if end - start < 100: # Arbitrary, just don't want close linked reads
-                break
-            else:
-                linked_reads[read.get_tag('BX')].append((start, end))
+#            if mate - current < 100: # Arbitrary, just don't want close linked reads
+#                break
+#            else:
+           linked_reads[read.get_tag('BX')].append((current, mate))
 
 samfile.close()
 
 # Construct a CSV with the information gathered
+print("barcode,10X_molecule_length")
 for tag, coordinates in linked_reads.items():
-    print("{}, {}".format(tag, coordinates))
+    # Make sure that we follow the 10X molecule read chain all the way up to get the total linked read length,
+    # thanks @alhsu! :)
+    print("{}, {}".format(tag, coordinates[-1][1] - coordinates[0][0]))
