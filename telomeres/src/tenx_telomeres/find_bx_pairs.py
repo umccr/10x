@@ -1,33 +1,31 @@
 #!/usr/bin/env python
+"""
+Use BX tag to match linked reads: https://support.10xgenomics.com/genome-exome/software/pipelines/latest/output/bam
+Collects all the possible spans and makes a histogram
+"""
 import sys
 import pysam
 from collections import defaultdict
 
 CHR_FOCUS = 'chr5'
 linked_reads = defaultdict(list)
-samfile = pysam.AlignmentFile("telomeres/data/interim/chr5_hg38_elongated.bam", "rb")
+samfile = pysam.AlignmentFile("telomeres/data/interim/{}_hg38_elongated.bam".format(CHR_FOCUS), "rb")
 
-'''
-Use BX tag to match linked reads: https://support.10xgenomics.com/genome-exome/software/pipelines/latest/output/bam
-Collects all the possible spans and makes a histogram
-'''
-# XXX: Filter by a reasonable MAPQ value
-# XXX: Filter for max 10X molecule length
+# XXX: Filter by a reasonable MAPQ value?
 for read in samfile.fetch(CHR_FOCUS, 1, 120000):
     current = read.reference_start    # current read coordinates
-    mate = read.next_reference_start # mate read coordinates
+    #mate = read.next_reference_start # mate read coordinates
+    mate_chrom = read.next_reference_name
     if read.has_tag('BX'):
         if read.next_reference_name == CHR_FOCUS:
-#            if mate - current < 100: # Arbitrary, just don't want close linked reads
-#                break
-#            else:
-           linked_reads[read.get_tag('BX')].append((current, mate))
+           linked_reads[read.get_tag('BX')].append(current)
+        else:
+           linked_reads_other_chroms[read.get_tag]
+           # XXX: Rethink data structure for other chroms 
 
 samfile.close()
 
 # Construct a CSV with the information gathered
-print("barcode,10X_molecule_length")
+print("barcode,10X_molecule_length,reads_per_BX_barcode,mate_is_in_chrom")
 for tag, coordinates in linked_reads.items():
-    # Make sure that we follow the 10X molecule read chain all the way up to get the total linked read length,
-    # thanks @alhsu! :)
-    print("{}, {}".format(tag, coordinates[-1][1] - coordinates[0][0]))
+    print("{}, {}, {}".format(tag, max(coordinates) - min(coordinates), len(coordinates)))
