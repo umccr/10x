@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext_format_version: '1.2'
@@ -28,9 +29,10 @@ from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
 
-alt.__version__
+print(alt.__version__)
 #!pip install selenium # to save as SVG plots
 UMCCR_PALETTE=["#A1C9F4", "#FFB482"]
+alt.data_transformers.enable('json')
 # -
 
 # ## Curated telomeric coordinates, multimapped reads found within BEDfile limits
@@ -491,19 +493,80 @@ hg38_new_unmapped_bwa = alt.Chart(colo829bl_elongated_bwa).mark_bar().encode(
         color = alt.Color('unmapped:Q', scale=alt.Scale(range=UMCCR_PALETTE)),
 )
 
+# TODO: Fill up the missing chroms (6,8, etc...) with 0 counts for consistent plots?
 
 ( hg38_new_mapped_EMA | hg38_new_unmapped_EMA ) & ( hg38_new_mapped_bwa | hg38_new_unmapped_bwa )
 # -
 
+# ## Elongated hg38, aligned with LongRanger 2.2.2
+
+# Reality check/fair point with Arthur at this point: If telomerase is a global event, does it still make sense to tackle the initial research question at all? In other words, in which cases are we really interested in chromosome level length of telomeres if they (allegedly?) shorten/span "globally"?
+
+# Lets extract the first 1-120000 bases from the forward sections of each chromosome from the longranger run:
+
+# ```
+# sambamba index -p -t 40 pos_sorted_bam.bam
+# for i in `seq 1 22`; do samtools view pos_sorted_bam.bam chr${i}:1-120000 -O bam > interim/chr${i}_hg38_elongated.bam; done
+# ```
+
+# Then run/filter those regions with a simple pysam script:
+
+!cat ~/dev/10x/telomeres/src/tenx_telomeres/find_bx_pairs.py
+
+# +
+# Extracted CSVs with:
+# for i in `seq 1 22`; do ./telomeres/src/tenx_telomeres/find_bx_pairs.py chr${i} > telomeres/data/interim/chr${i}_hg38_elongated.csv; done
+
+linked_reads_spans = pd.read_csv("../data/interim/chr5_hg38_elongated.csv", dtype={"10X_molecule_length": np.int64, 
+                                                                                   "reads_per_BX_barcode": np.int64,
+                                                                                   "total_mates_in_other_chroms": np.int64})
+
+# Not interested in barcodes having N molecule lengths
+linked_reads_spans=linked_reads_spans[linked_reads_spans['10X_molecule_length'] > 0]
+# -
+
+# ## 10X molecule length distribution
+
+# +
+linked_reads_molecules = alt.Chart(linked_reads_spans).mark_bar().encode(
+        alt.X(field='10X_molecule_length', bin={"step": 1500}, type='nominal'),
+        alt.Y('count()')
+)
+
+linked_reads_molecules
+# -
+
+# ## Number of reads per BX barcode
+
+# +
+linked_reads_molecules = alt.Chart(linked_reads_spans).mark_bar().encode(
+        alt.X(field='reads_per_BX_barcode', bin={"step": 15}, type='nominal'),
+        alt.Y('count()')
+)
+
+linked_reads_molecules
+# -
+
+# ## Which proportion of reads go to other chromosomes?
+
+# Distribution of linked reads spanning to **other** chromosomes instead of the current one. I.e: if current read is `chr5`, how many mates end up in other non-`chr5`-“contained” reads.
+
+# +
+linked_reads_molecules = alt.Chart(linked_reads_spans).mark_circle().encode(
+        alt.X(field='total_mates_in_other_chroms', bin={"step": 1}, type='nominal'),
+        alt.Y('count()'),
+        size='count()',
+        color='average(total_mates_in_other_chroms):Q'
+)
+
+linked_reads_molecules
+# -
+
 # TODO:
 #
-# 1. ~~Plot hg38 vs hg38_new counts (as in "before vs after" comparison), by columns.~~
-# 2. ~~Order by chromosome number (get rid of specific BED coordinates on the chr name (s/chr3:0-60000/chr3/))~~
-# 3. ~~Keep forward/reverse columns in mind: infer from coordinates (i.e: chr1:0-60000 should be 'forward').~~
-# 4. ~~Re-align COLO829BL with BWA against hg38_new, not only EMA.~~
-# 5. Fill up the missing chroms (6,8, etc...) with 0 counts for consistent plots?
-# 6. ~~Revisit new_hg38_elongator.py so that it elongates the N regions with known telomeric sequences, not just the last hexamer before the N boundary.~~
-# 7. ~~Make sure only telomeric repeats are elongated, not other arbitrary sequences.~~
-# 8. Revisit non-forward sections.
-
-
+# * Telomere lengths per chrom on the new LR dataset?
+# * Add elongated telomeres to **every** chromosome! QUESTION: Which telomeric sequence to select on those where there is no sequence?
+# * ~~If not in the same chromosome, where did they go? Distribution.~~
+# * ~~How many reads per BX barcode.~~
+# * ~~10X molecule size distribution.~~
+# * ~~1-10k, 10k-65k, 65k-120k. X length, Y frequency~~
