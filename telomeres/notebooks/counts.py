@@ -564,9 +564,5 @@ linked_reads_molecules
 
 # TODO:
 #
-# * Telomere lengths per chrom on the new LR dataset?
+# * ~~Telomere lengths per chrom on the new LR dataset?~~: well, it's just the previous curated coordinates plus the elongated segment, which is ~10000 bases per chrom?
 # * Add elongated telomeres to **every** chromosome! QUESTION: Which telomeric sequence to select on those where there is no sequence?
-# * ~~If not in the same chromosome, where did they go? Distribution.~~
-# * ~~How many reads per BX barcode.~~
-# * ~~10X molecule size distribution.~~
-# * ~~1-10k, 10k-65k, 65k-120k. X length, Y frequency~~

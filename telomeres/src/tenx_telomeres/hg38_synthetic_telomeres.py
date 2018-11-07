@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 
 
 ## Global
-FA_IDX = "hg38.fa.idx"
+# Used to determine hexamers: how many bases to take into account before making the call?
 O_OFFSET = 1000
 
 # Telomeric hexamer
@@ -221,7 +221,7 @@ def main(genome_build='data/external/hg38.fa.gz'):
             if "_" not in seq_id:
                 if "chrM" not in seq_id:
                     fwd_boundary, rev_boundary = find_N_boundaries(sequence)
-                    detected_hexamer_pair = determine_hexamers(sequence, (fwd_boundary, rev_boundary), hexamer_table)
+                    #detected_hexamer_pair = determine_hexamers(sequence, (fwd_boundary, rev_boundary), hexamer_table)
 
                     print("{}\t{}:\t\t{}\t...\t{}\t...\t{}\t{}".format(seq_id.split(':')[0],
                                                                       (fwd_boundary, rev_boundary),
@@ -230,8 +230,13 @@ def main(genome_build='data/external/hg38.fa.gz'):
                                                                       len(sequence), detected_hexamer_pair))
 
                     # Finally, build the synthetically elongated hg38 build
-                    final_seq = elongate_forward_sequence(sequence, detected_hexamer_pair[0], "kmer_mode")
-                    final_seq = elongate_reverse_sequence(final_seq, detected_hexamer_pair[1], "kmer_mode")
+                    ## Elongate only those chromosomes that have a sensible prior telomeric sequence
+                    # final_seq = elongate_forward_sequence(sequence, detected_hexamer_pair[0], "kmer_mode")
+                    # final_seq = elongate_reverse_sequence(final_seq, detected_hexamer_pair[1], "kmer_mode")
+                    ## Elongate all chromosomes
+                    final_seq = elongate_forward_sequence(sequence, 'TAACCC', "kmer_mode")
+                    final_seq = elongate_reverse_sequence(final_seq, 'TTAGGG', "kmer_mode")
+ 
 
                     print("{}\t{}:\t\t{}\t...\t{}\t...\t{}\t{}".format(seq_id, (fwd_boundary, rev_boundary),
                                                                     final_seq[fwd_boundary - 3:fwd_boundary + KMER_K + 10],

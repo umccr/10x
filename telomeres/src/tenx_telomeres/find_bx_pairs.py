@@ -19,7 +19,7 @@ for read in samfile.fetch(CHR_FOCUS, 1, 120000):
     if read.has_tag('BX'):
         if mate_chrom == CHR_FOCUS:
            linked_reads[read.get_tag('BX')]['reads'].append(current)
-        elif mate_chrom is not None: # XXX: What does it mean None in this context? No mate? Orphans?
+        elif mate_chrom is not None: # XXX: What does it mean None in this context? No mate? Orphans?: (None if no AlignmentFile is associated)
            linked_reads[read.get_tag('BX')]['mates'].append(mate_chrom)
         #else:
         #   linked_reads[read.get_tag('BX')]['orphans'].append(current)
