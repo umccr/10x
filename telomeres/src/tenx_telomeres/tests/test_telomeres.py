@@ -4,7 +4,7 @@ import logging
 import pymer
 import unittest
 
-from tenx_telomeres.hg38_synthetic_telomeres import TELO_HEXAMERS, find_N_boundaries, elongate_forward_sequence, elongate_reverse_sequence, determine_hexamers, build_hexamer_table
+from tenx_telomeres.hg38_synthetic_telomeres import TELO_HEXAMERS, HUMAN_TELOMERE, find_N_boundaries, elongate_forward_sequence, elongate_reverse_sequence, determine_hexamers, build_hexamer_table
 
 # Set log level
 loglevel = logging.INFO
@@ -18,6 +18,7 @@ class TestStringMethods(unittest.TestCase):
         self.src_seq = 'NNNNNNNNNNNNNNNNTAACCCTAACCCTAACCCNNNNNNNNNNNNN'
         self.fwd_seq = 'ACCCTAACCCTAACCCTAACCCTAACCCTAACCCNNNNNNNNNNNNN'
         self.rev_seq = 'NNNNNNNNNNNNNNNNTAACCCTAACCCTAACCCTAACCCTAACCCT'
+        self.fix_seq = 'NNNNNNNNNNTAACCCTAACCCTAACCCTAACCCNNNNNNNNNNNNN'
         self.no_patt = 'NNNNNNNNNNNNNNNNATCATAAtAaaaaccCCANNNNNNNNNNNNN'
         self.mdl_nnn = 'NNNNNNNNNNNNNNNNCACACANNNNNNCACACANNNNNNNNNNNNN'
         self.kmer_k = 6
@@ -76,6 +77,12 @@ class TestStringMethods(unittest.TestCase):
 
         self.assertEqual(len(tst_seq), len(self.rev_seq))
         self.assertEqual(tst_seq, self.rev_seq)
+
+    def test_elongate_forward_sequence_fixed_length_mode(self):
+        tst_seq = elongate_forward_sequence(self.src_seq, HUMAN_TELOMERE, "fixed_length", 1)
+
+        self.assertEqual(len(tst_seq), len(self.fwd_seq))
+        self.assertEqual(tst_seq, self.fix_seq)
 
     def test_determine_hexamer(self):
         boundaries = find_N_boundaries(self.src_seq)

@@ -31,6 +31,9 @@ KMER_K = 6
 HUMAN_TELOMERE = 'TTAGGG'
 TELO_HEXAMERS = defaultdict(list)
 
+# Manually curated telomeric coordinates for hg38
+CURATED_HG38 = 'data/processed/hg38_igv_manual_by_side.bed'
+
 # Seed hexamers with all possible orientations
 TELO_HEXAMERS[HUMAN_TELOMERE] = [HUMAN_TELOMERE, str(Seq(HUMAN_TELOMERE, generic_dna).complement()), 
                                                  str(Seq(HUMAN_TELOMERE, generic_dna).reverse_complement())]
@@ -64,7 +67,7 @@ def find_N_boundaries(seq: str):
 
 # XXX: Generalize/merge both elongate functions
 # Elongate forward and backward N's, respecting telomeric patterns
-def elongate_forward_sequence(seq: str, kmer: str, mode: str):
+def elongate_forward_sequence(seq: str, kmer: str, mode: str, telsize=None):
     # Determine N boundaries in the sequence
     boundary, boundary_r = find_N_boundaries(seq)
 
@@ -75,22 +78,33 @@ def elongate_forward_sequence(seq: str, kmer: str, mode: str):
     chunks = int(len(seq[0:boundary]) / KMER_K)
     chunks_r = len(seq[0:boundary]) % KMER_K
 
-    if mode == "kmer_mode":
+    if mode == "fixed_length":
+        chunks = int(telsize / KMER_K) + 1
+        chunks_r = telsize % KMER_K - 1
+
+    elif mode == "kmer_mode":
         # XXX: fairly blunt kmer/pattern transition here
         if kmer is not None:
             kmer_seq = kmer
         else: # just leave N's as they are since no suitable telomeric kmer was found
             kmer_seq = 'N' * KMER_K
 
+    # XXX: Sth about the remainder of the seq, cannot remember
     kmer_seq_r = kmer_seq[KMER_K-chunks_r:]
     tmp_seq = kmer_seq_r
 
     # Build forward sequence
     for _ in range(0, chunks):
         tmp_seq = tmp_seq + kmer_seq
+    
+    # XXX: Fixed length mode should elongate N's all the way towards 0 after the seq
 
     # Attach inner pattern
+    Ns = len(seq[0:boundary]) - len(tmp_seq)
     tmp_seq = tmp_seq + seq[boundary:boundary_r] + seq[boundary_r:]
+
+    if mode == "fixed_length":
+        tmp_seq = 'N'*Ns + tmp_seq
 
     return tmp_seq
 
@@ -202,12 +216,38 @@ def fasta_idx(filename):
         SeqIO.index_db(filename, hg38_idx, 'fasta')
 
 
+def get_curated_lengths(bedfname, direction=None):
+    ''' Just take a BED, return as dict with some filtering
+    '''
+    # XXX: Perhaps the worst way ever to parse a bedfile? Refactor with pybedtools
+    with open(bedfname) as bedfile:
+        curated_len_diff = {}
+        curated_len_diff_direction = {}
+
+        bed_ary = bedfile.read().replace('\n', '\t').split('\t')
+        try:
+            for i in range(0, len(bed_ary), 3):
+                curated_len_diff[bed_ary[i]] = int(bed_ary[i+2]) - int(bed_ary[i+1])
+        except IndexError:
+            for key, value in curated_len_diff.items():
+                if direction == 'forward':
+                    if "_f" in key:
+                        key = key.replace('_f', '')
+                        curated_len_diff_direction[key] = value
+                elif direction == 'reverse':
+                    if "_r" in key:
+                        key = key.replace('_r', '')
+                        curated_len_diff_direction[key] = value
+                else:
+                    curated_len_diff = curated_len_diff_direction
+
+            return curated_len_diff
+
 def main(genome_build='data/external/hg38.fa.gz'):
 #def main(genome_build='data/external/chr11.fa.gz'):
 
     new_hg38 = []
     final_seq = None
-    hexamer_table = build_hexamer_table()
 
     with gzip.open(genome_build, "rt") as hg38_fa:
         record_dict = SeqIO.to_dict(SeqIO.parse(hg38_fa, "fasta"))
@@ -234,14 +274,29 @@ def main(genome_build='data/external/hg38.fa.gz'):
                     # final_seq = elongate_forward_sequence(sequence, detected_hexamer_pair[0], "kmer_mode")
                     # final_seq = elongate_reverse_sequence(final_seq, detected_hexamer_pair[1], "kmer_mode")
                     ## Elongate all chromosomes
-                    final_seq = elongate_forward_sequence(sequence, 'TAACCC', "kmer_mode")
-                    final_seq = elongate_reverse_sequence(final_seq, 'TTAGGG', "kmer_mode")
- 
+                    # final_seq = elongate_forward_sequence(sequence, 'TAACCC', "kmer_mode")
+                    # final_seq = elongate_reverse_sequence(final_seq, 'TTAGGG', "kmer_mode")
+                    ## Elongate so that there's only 10kb of telomeric sequence for each region,
+                    ## concatenating synthetic telomeres with those already present in the chromosome.
+
+                    curated_lengths = get_curated_lengths(CURATED_HG38, 'forward')
+                    if seq_id in curated_lengths:
+                        final_seq = elongate_forward_sequence(sequence, 'TAACCC', mode='fixed_length', telsize=curated_lengths[seq_id]-10000)
+                    else:
+                        raise(ValueError("Chromosome not found in curated list: {}".format(seq_id)))
+
+
+                    curated_lengths = get_curated_lengths(CURATED_HG38, 'reverse')
+                    if seq_id in curated_lengths:
+                        final_seq = elongate_forward_sequence(sequence, 'TTAGGG', mode='fixed_length', telsize=curated_lengths[seq_id]-10000)
+                    else:
+                        raise(ValueError("Chromosome not found in curated list: {}".format(seq_id)))
+
 
                     print("{}\t{}:\t\t{}\t...\t{}\t...\t{}\t{}".format(seq_id, (fwd_boundary, rev_boundary),
-                                                                    final_seq[fwd_boundary - 3:fwd_boundary + KMER_K + 10],
-                                                                    final_seq[rev_boundary - KMER_K - 10:rev_boundary + 4],
-                                                                    len(final_seq), detected_hexamer_pair))
+                                                                       final_seq[fwd_boundary - 3:fwd_boundary + KMER_K + 10],
+                                                                       final_seq[rev_boundary - KMER_K - 10:rev_boundary + 4],
+                                                                       len(final_seq), detected_hexamer_pair))
 
                     new_hg38.append(SeqRecord(Seq(str(final_seq), generic_dna), id=seq_id, name=seq_id, description=seq_id))
 
