@@ -295,7 +295,7 @@ def main(genome_build='data/external/hg38.fa.gz'):
                     curated_length = get_curated_length(CURATED_HG38, seq_id, 'forward')
                     final_seq = elongate_forward_sequence(sequence, 'TAACCC', mode='fixed_length', telsize=10000-curated_length)
 
-                    curated_length = get_curated_length(CURATED_HG38, 'reverse')
+                    curated_length = get_curated_length(CURATED_HG38, seq_id, 'reverse')
                     final_seq = elongate_reverse_sequence(final_seq, 'TTAGGG', mode='fixed_length', telsize=10000-curated_length)
 
 
