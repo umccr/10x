@@ -65,6 +65,8 @@ def rewrite_chrs(df, col):
 
 
 # +
+# XXX Make sure to use this instead: https://www.marsja.se/pandas-read-csv-tutorial-to-csv/
+
 colo829bl_10x = pd.read_csv("../data/processed/manual_telomere_coords/COLO829BL-10X-hg38.hist.csv", dtype={"mmap_count": np.int})
 colo829t_10x = pd.read_csv("../data/processed/manual_telomere_coords/COLO829T-10X-hg38.hist.csv", dtype={"mmap_count": np.int})
 colo829bl = pd.read_csv("../data/processed/manual_telomere_coords/COLO829BL-hg38.hist.csv", dtype={"mmap_count": np.int})
@@ -553,7 +555,7 @@ linked_reads_molecules
 
 # +
 linked_reads_molecules = alt.Chart(linked_reads_spans).mark_circle().encode(
-        alt.X(field='total_mates_in_other_chroms', bin={"step": 1}, type='nominal'),
+        alt.X(field='total_mates_in_other_chroms', type='nominal'),
         alt.Y('count()'),
         size='count()',
         color='average(total_mates_in_other_chroms):Q'
@@ -562,7 +564,101 @@ linked_reads_molecules = alt.Chart(linked_reads_spans).mark_circle().encode(
 linked_reads_molecules
 # -
 
-# TODO:
+# ## How are the telomeric ends actually elongated with static hexamers?
+
+#!pip install tzlocal rpy2
+# %load_ext rpy2.ipython
+
+# + {"active": "ipynb", "language": "R"}
+# #install.packages(c("dplyr", "tidyr", "karyoploteR", "fs", "git2r", "usethis", "devtools"))
+# #library("devtools")
+# #install_github("https://github.com/bladedancer-256/plotTelo")
+# library(plotTelo)
+# library(tidyr)
+# library(dplyr)
+# library(karyoploteR)
 #
-# * ~~Telomere lengths per chrom on the new LR dataset?~~: well, it's just the previous curated coordinates plus the elongated segment, which is ~10000 bases per chrom?
-# * Add elongated telomeres to **every** chromosome! QUESTION: Which telomeric sequence to select on those where there is no sequence?
+# #from rpy2.robjects.packages import importr
+# #grdevices = importr('grDevices')
+#
+# #grdevices.x11(width=512, height=512)
+# plotTelo('https://raw.githubusercontent.com/umccr/10x/master/telomeres/data/processed/hg38_igv_manual_by_side.bed')
+# #grdevices.dev_off()
+# -
+
+# ```
+# chr      N boundaries                   forward section                 reverse section                 chrom_len       determined_hexamers
+# ===========================================================================================================================================
+#
+# chr1    (10000, 248946421):             NNNtaaccctaaccctaac     ...     aagggttagggttagggNNN    ...     248956422       [None, None]   <-- pre-elongation
+# chr1    (10000, 248946421):             CCCtaaccctaaccctaac     ...     aagggttagggttagggTTA    ...     248956422       [None, None]   <-- post-elongation
+# chr10   (10000, 133787421):             NNNctaaccctaaccctaa     ...     gagggttagggttagggNNN    ...     133797422       [None, None]
+# chr10   (10000, 133787421):             CCCctaaccctaaccctaa     ...     gagggttagggttagggTTA    ...     133797422       [None, None]
+# chr11   (60000, 135076621):             NNNGAATTCTACATTAGAA     ...     gttagggttagggttagNNN    ...     135086622       [None, None]
+# chr11   (60000, 135076621):             CCCGAATTCTACATTAGAA     ...     gttagggttagggttagTTA    ...     135086622       [None, None]
+# chr12   (10000, 133265308):             NNNctaaccctaaccctaa     ...     gttagggttagggttagNNN    ...     133275309       [None, None]
+# chr12   (10000, 133265308):             CCCctaaccctaaccctaa     ...     gttagggttagggttagTTA    ...     133275309       [None, None]
+# chr13   (16000000, 114354327):          NNNAGcattctgagaaatt     ...     gttagggttagggttagNNN    ...     114364328       [None, None]
+# chr13   (16000000, 114354327):          CCCAGcattctgagaaatt     ...     gttagggttagggttagTTA    ...     114364328       [None, None]
+# chr14   (16000000, 106883717):          NNNAGcattctgagaaatt     ...     gccctgcgaggcgcctcNNN    ...     107043718       [None, None]
+# chr14   (16000000, 106883717):          CCCAGcattctgagaaatt     ...     gccctgcgaggcgcctcTTA    ...     107043718       [None, None]
+# chr15   (17000000, 101981188):          NNNCTCAcacagagctgac     ...     ggttagggttagggttaNNN    ...     101991189       [None, None]
+# chr15   (17000000, 101981188):          CCCCTCAcacagagctgac     ...     ggttagggttagggttaTTA    ...     101991189       [None, None]
+# chr16   (10000, 90228344):              NNNtaaccctaaccctaac     ...     tctattcatgagggatcNNN    ...     90338345        [None, None]
+# chr16   (10000, 90228344):              CCCtaaccctaaccctaac     ...     tctattcatgagggatcTTA    ...     90338345        [None, None]
+# chr17   (60000, 83247440):              NNNGATCATGCAGCTCTTC     ...     gtgggtgtgggtgTGGTNNN    ...     83257441        [None, None]
+# chr17   (60000, 83247440):              CCCGATCATGCAGCTCTTC     ...     gtgggtgtgggtgTGGTTTA    ...     83257441        [None, None]
+# chr18   (10000, 80263284):              NNNccctaaccctaaccct     ...     gttagggttagggttagNNN    ...     80373285        [None, None]
+# chr18   (10000, 80263284):              CCCccctaaccctaaccct     ...     gttagggttagggttagTTA    ...     80373285        [None, None]
+# chr19   (60000, 58607615):              NNNGATCACAGAGGCTGGG     ...     gggttagggttagggttNNN    ...     58617616        [None, None]
+# chr19   (60000, 58607615):              CCCGATCACAGAGGCTGGG     ...     gggttagggttagggttTTA    ...     58617616        [None, None]
+# chr2    (10000, 242183528):             NNNCGTATcccacacacca     ...     gttagggttagggttagNNN    ...     242193529       [None, None]
+# chr2    (10000, 242183528):             CCCCGTATcccacacacca     ...     gttagggttagggttagTTA    ...     242193529       [None, None]
+# chr20   (60000, 64334166):              NNNTGTTCAGTCGGGCAGG     ...     atagaattccgcGGATCNNN    ...     64444167        [None, None]
+# chr20   (60000, 64334166):              CCCTGTTCAGTCGGGCAGG     ...     atagaattccgcGGATCTTA    ...     64444167        [None, None]
+# chr21   (5010000, 46699982):            NNNgatccacccgccttgg     ...     tagggttagggttagggNNN    ...     46709983        [None, None]
+# chr21   (5010000, 46699982):            CCCgatccacccgccttgg     ...     tagggttagggttagggTTA    ...     46709983        [None, None]
+# chr22   (10510000, 50808467):           NNNGAATTCTTGTGTTTAT     ...     ggttagggttagggttaNNN    ...     50818468        [None, None]
+# chr22   (10510000, 50808467):           CCCGAATTCTTGTGTTTAT     ...     ggttagggttagggttaTTA    ...     50818468        [None, None]
+# chr3    (10000, 198235558):             NNNctaaccctaaccctaa     ...     ACAGTTTCTAGGAATTCNNN    ...     198295559       [None, None]
+# chr3    (10000, 198235558):             CCCctaaccctaaccctaa     ...     ACAGTTTCTAGGAATTCTTA    ...     198295559     [None, None]
+# chr4    (10000, 190204554):             NNNaccctaaccctaaccc     ...     gttagggttagggttagNNN    ...     190214555     [None, None]
+# chr4    (10000, 190204554):             CCCaccctaaccctaaccc     ...     gttagggttagggttagTTA    ...     190214555     [None, None]
+# chr5    (10000, 181478258):             NNNtaaccctaaccctaac     ...     atacaaATTCTCAGATCNNN    ...     181538259     [None, None]
+# chr5    (10000, 181478258):             CCCtaaccctaaccctaac     ...     atacaaATTCTCAGATCTTA    ...     181538259     [None, None]
+# chr6    (60000, 170745978):             NNNGATCTTATATAACTGT     ...     GTAACAAAATTGGGATCNNN    ...     170805979     [None, None]
+# chr6    (60000, 170745978):             CCCGATCTTATATAACTGT     ...     GTAACAAAATTGGGATCTTA    ...     170805979       [None, None]
+# chr7    (10000, 159335972):             NNNctaaccctaaccctaa     ...     tagggttagggttagggNNN    ...     159345973       [None, None]
+# chr7    (10000, 159335972):             CCCctaaccctaaccctaa     ...     tagggttagggttagggTTA    ...     159345973       [None, None]
+# chr8    (60000, 145078635):             NNNGCAATTATGACACAAA     ...     tattgggtgcatatataNNN    ...     145138636       [None, None]
+# chr8    (60000, 145078635):             CCCGCAATTATGACACAAA     ...     tattgggtgcatatataTTA    ...     145138636       [None, None]
+# chr9    (10000, 138334716):             NNNtaaccctaaccctaac     ...     agtgtttgttggaattcNNN    ...     138394717       [None, None]
+# chr9    (10000, 138334716):             CCCtaaccctaaccctaac     ...     agtgtttgttggaattcTTA    ...     138394717       [None, None]
+# chrX    (10000, 156030894):             NNNctaaccctaaccctaa     ...     tggtgtgtgggtgtggTNNN    ...     156040895       [None, None]
+# chrX    (10000, 156030894):             CCCctaaccctaaccctaa     ...     tggtgtgtgggtgtggTTTA    ...     156040895       [None, None]
+# chrY    (10000, 57217414):              NNNctaaccctaaccctaa     ...     tggtgtgtgggtgtggTNNN    ...     57227415        [None, None]
+# chrY    (10000, 57217414):              CCCctaaccctaaccctaa     ...     tggtgtgtgggtgtggTTTA    ...     57227415        [None, None]
+# ```
+
+# From the curated list, there are those "real telomeric sequence lenghts" from the N boundary until the pattern breaks down or another non-telomeric sequence takes place:
+#
+# ```bash
+# $ grep "_f" hg38_igv_manual_by_side.bed | awk -P '{print $1, $3 - $2}'
+# chr10_f 427
+# chr12_f 583
+# chr16_f 51
+# chr18_f 626
+# chr1_f 466
+# chr2_f 410
+# chr3_f 975
+# chr4_f 191
+# chr5_f 1815
+# chr6_f 0
+# chr8_f 0
+# chr14_f 0
+# chr20_f 0
+# chr7_f 240
+# chr9_f 361
+# chrX_f 35
+# chrY_f 35
+# ```
