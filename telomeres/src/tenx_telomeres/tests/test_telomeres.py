@@ -87,7 +87,7 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(tst_seq, self.fix_seq)
 
     def test_elongate_forward_sequence_fixed_length_mode_full(self):
-        tst_seq = elongate_forward_sequence(self.src_seq, HUMAN_TELOMERE, "fixed_length", 16)
+        tst_seq = elongate_forward_sequence(self.src_seq, HUMAN_TELOMERE, "fixed_length", 20)
 
         self.assertEqual(len(tst_seq), len(self.fwd_seq))
         self.assertEqual(tst_seq, self.fwd_seq)
@@ -99,7 +99,7 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(tst_seq, self.rix_seq)
 
     def test_elongate_reverse_sequence_fixed_length_mode_full(self):
-        tst_seq = elongate_reverse_sequence(self.src_seq, 'TAACCC', "fixed_length", 16)
+        tst_seq = elongate_reverse_sequence(self.src_seq, 'TAACCC', "fixed_length", 20)
 
         self.assertEqual(len(tst_seq), len(self.rix_seq))
         self.assertEqual(tst_seq, self.rev_seq)

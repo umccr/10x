@@ -80,6 +80,9 @@ def elongate_forward_sequence(seq: str, kmer: str, mode: str, telsize=None):
 
     # Ignoring/overriding the post-bondaries in fixed_length mode
     if mode == "fixed_length":
+        if telsize > boundary:
+            telsize = boundary 
+ 
         chunks = int(telsize / KMER_K)
         chunks_r = telsize % KMER_K
 
