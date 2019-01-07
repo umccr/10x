@@ -117,14 +117,20 @@ def elongate_reverse_sequence(seq: str, kmer: str, mode: str, telsize=None):
     kmer_seq = ""
     kmer_seq_r = ""
 
-    if mode == "fixed_length":
-        chunks = int(telsize / KMER_K)
-        chunks_r = telsize % KMER_K
-        kmer_seq = str(Seq(HUMAN_TELOMERE, generic_dna).reverse_complement())
-        kmer_seq_r = str(Seq(HUMAN_TELOMERE, generic_dna).reverse_complement()) + 'X'
-
     # Attach sequence until reverse boundary
     tmp_seq = seq[0:boundary_r + 1]
+
+    if mode == "fixed_length":
+        max_seq = len(seq) - boundary_r - 1
+
+        if telsize > max_seq:
+            telsize = max_seq
+
+        hardcoded = 'TAACCC' # XXX
+        chunks = int(telsize / KMER_K)
+        chunks_r = telsize % KMER_K
+        kmer_seq = hardcoded
+        kmer_seq_r = hardcoded[0:chunks_r]
 
     if mode == "naive_mode":
         # K-mer telomeric sequence right before the N boundary on the reverse side
@@ -148,8 +154,9 @@ def elongate_reverse_sequence(seq: str, kmer: str, mode: str, telsize=None):
     # Attach remainder of the pattern at the end of the sequence
     tmp_seq = tmp_seq + kmer_seq_r
 
-    Ns = len(seq[boundary_r:]) - len(tmp_seq)
     if mode == "fixed_length":
+        # Fill up the rest with Ns
+        Ns = len(seq[boundary_r+telsize:]) - 1 
         tmp_seq = tmp_seq + 'N'*Ns
 
     return tmp_seq
