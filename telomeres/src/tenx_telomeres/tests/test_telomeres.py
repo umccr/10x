@@ -19,6 +19,7 @@ class TestStringMethods(unittest.TestCase):
         self.fwd_seq = 'ACCCTAACCCTAACCCTAACCCTAACCCTAACCCNNNNNNNNNNNNN'
         self.rev_seq = 'NNNNNNNNNNNNNNNNTAACCCTAACCCTAACCCTAACCCTAACCCT'
         self.fix_seq = 'NNNNNNNNNNTAACCCTAACCCTAACCCTAACCCNNNNNNNNNNNNN'
+        self.rix_seq = 'NNNNNNNNNNNNNNNNTAACCCTAACCCTAACCCTAACCCNNNNNNN'
         self.no_patt = 'NNNNNNNNNNNNNNNNATCATAAtAaaaaccCCANNNNNNNNNNNNN'
         self.mdl_nnn = 'NNNNNNNNNNNNNNNNCACACANNNNNNCACACANNNNNNNNNNNNN'
         self.kmer_k = 6
@@ -78,11 +79,23 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(len(tst_seq), len(self.rev_seq))
         self.assertEqual(tst_seq, self.rev_seq)
 
-    def test_elongate_forward_sequence_fixed_length_mode(self):
-        tst_seq = elongate_forward_sequence(self.src_seq, HUMAN_TELOMERE, "fixed_length", 1)
+    def test_elongate_forward_sequence_fixed_length_mode_partial(self):
+        tst_seq = elongate_forward_sequence(self.src_seq, HUMAN_TELOMERE, "fixed_length", 6)
 
         self.assertEqual(len(tst_seq), len(self.fwd_seq))
         self.assertEqual(tst_seq, self.fix_seq)
+
+    def test_elongate_forward_sequence_fixed_length_mode_full(self):
+        tst_seq = elongate_forward_sequence(self.src_seq, HUMAN_TELOMERE, "fixed_length", 16)
+
+        self.assertEqual(len(tst_seq), len(self.fwd_seq))
+        self.assertEqual(tst_seq, self.fwd_seq)
+
+    def test_elongate_reverse_sequence_fixed_length_mode_partial(self):
+        tst_seq = elongate_reverse_sequence(self.src_seq, 'TAACCC', "fixed_length", 6)
+
+        self.assertEqual(len(tst_seq), len(self.rev_seq))
+        self.assertEqual(tst_seq, self.rix_seq)
 
     def test_determine_hexamer(self):
         boundaries = find_N_boundaries(self.src_seq)

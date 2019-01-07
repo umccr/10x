@@ -78,11 +78,12 @@ def elongate_forward_sequence(seq: str, kmer: str, mode: str, telsize=None):
     chunks = int(len(seq[0:boundary]) / KMER_K)
     chunks_r = len(seq[0:boundary]) % KMER_K
 
+    # Ignoring/overriding the post-bondaries in fixed_length mode
     if mode == "fixed_length":
-        chunks = int(telsize / KMER_K) + 1
-        chunks_r = telsize % KMER_K - 1
+        chunks = int(telsize / KMER_K)
+        chunks_r = telsize % KMER_K
 
-    elif mode == "kmer_mode":
+    if mode == "kmer_mode":
         # XXX: fairly blunt kmer/pattern transition here
         if kmer is not None:
             kmer_seq = kmer
@@ -96,8 +97,6 @@ def elongate_forward_sequence(seq: str, kmer: str, mode: str, telsize=None):
     # Build forward sequence
     for _ in range(0, chunks):
         tmp_seq = tmp_seq + kmer_seq
-    
-    # XXX: Fixed length mode should elongate N's all the way towards 0 after the seq
 
     # Attach inner pattern
     Ns = len(seq[0:boundary]) - len(tmp_seq)
@@ -108,7 +107,7 @@ def elongate_forward_sequence(seq: str, kmer: str, mode: str, telsize=None):
 
     return tmp_seq
 
-def elongate_reverse_sequence(seq: str, kmer: str, mode: str):
+def elongate_reverse_sequence(seq: str, kmer: str, mode: str, telsize=None):
     # Determine N boundaries in the sequence
     _, boundary_r = find_N_boundaries(seq)
 
@@ -117,6 +116,12 @@ def elongate_reverse_sequence(seq: str, kmer: str, mode: str):
     chunks_r = len(seq[boundary_r:]) % KMER_K
     kmer_seq = ""
     kmer_seq_r = ""
+
+    if mode == "fixed_length":
+        chunks = int(telsize / KMER_K)
+        chunks_r = telsize % KMER_K
+        kmer_seq = str(Seq(HUMAN_TELOMERE, generic_dna).reverse_complement())
+        kmer_seq_r = str(Seq(HUMAN_TELOMERE, generic_dna).reverse_complement()) + 'X'
 
     # Attach sequence until reverse boundary
     tmp_seq = seq[0:boundary_r + 1]
@@ -140,8 +145,12 @@ def elongate_reverse_sequence(seq: str, kmer: str, mode: str):
     for _ in range(0, chunks):
         tmp_seq = tmp_seq + kmer_seq
 
-    # Capture remainder of the pattern to fit in sequence
+    # Attach remainder of the pattern at the end of the sequence
     tmp_seq = tmp_seq + kmer_seq_r
+
+    Ns = len(seq[boundary_r:]) - len(tmp_seq)
+    if mode == "fixed_length":
+        tmp_seq = tmp_seq + 'N'*Ns
 
     return tmp_seq
 
