@@ -4,9 +4,11 @@ import sys
 import gzip
 from typing import List
 from pathlib import Path
+from copy import deepcopy
 from collections import defaultdict, deque
 from itertools import islice, tee
 from pymer import ExactKmerCounter
+import pandas as pd
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
@@ -130,6 +132,7 @@ def elongate_reverse_sequence(seq: str, kmer: str, mode: str, telsize=None):
             telsize = max_seq
 
         hardcoded = 'TAACCC' # XXX
+        
         chunks = int(telsize / KMER_K)
         chunks_r = telsize % KMER_K
         kmer_seq = hardcoded
@@ -235,32 +238,18 @@ def fasta_idx(filename):
         SeqIO.index_db(filename, hg38_idx, 'fasta')
 
 
-def get_curated_lengths(bedfname, direction=None):
+def get_curated_length(bedfname, chromosome, direction=None):
     ''' Just take a BED, return as dict with some filtering
     '''
-    # XXX: Perhaps the worst way ever to parse a bedfile? Refactor with pybedtools
-    with open(bedfname) as bedfile:
-        curated_len_diff = {}
-        curated_len_diff_direction = {}
+    bedfile = pd.read_csv(bedfname, delimiter='\t', names=['chrom', 'start', 'end'])
+    bedfile['diff'] = bedfile['end'] - bedfile['start']
 
-        bed_ary = bedfile.read().replace('\n', '\t').split('\t')
-        try:
-            for i in range(0, len(bed_ary), 3):
-                curated_len_diff[bed_ary[i]] = int(bed_ary[i+2]) - int(bed_ary[i+1])
-        except IndexError:
-            for key, value in curated_len_diff.items():
-                if direction == 'forward':
-                    if "_f" in key:
-                        key = key.replace('_f', '')
-                        curated_len_diff_direction[key] = value
-                elif direction == 'reverse':
-                    if "_r" in key:
-                        key = key.replace('_r', '')
-                        curated_len_diff_direction[key] = value
-                else:
-                    curated_len_diff = curated_len_diff_direction
+    if direction == 'forward':
+        final = bedfile[bedfile['chrom'].str.contains('_f')]
+    elif direction == 'reverse':
+        final = bedfile[bedfile['chrom'].str.contains('_r')]
 
-            return curated_len_diff
+    return int(final['chromosome'])
 
 def main(genome_build='data/external/hg38.fa.gz'):
 #def main(genome_build='data/external/chr11.fa.gz'):
@@ -298,18 +287,11 @@ def main(genome_build='data/external/hg38.fa.gz'):
                     ## Elongate so that there's only 10kb of telomeric sequence for each region,
                     ## concatenating synthetic telomeres with those already present in the chromosome.
 
-                    curated_lengths = get_curated_lengths(CURATED_HG38, 'forward')
-                    if seq_id in curated_lengths:
-                        final_seq = elongate_forward_sequence(sequence, 'TAACCC', mode='fixed_length', telsize=curated_lengths[seq_id]-10000)
-                    else:
-                        raise(ValueError("Chromosome not found in curated list: {}".format(seq_id)))
+                    curated_length = get_curated_length(CURATED_HG38, seq_id, 'forward')
+                    final_seq = elongate_forward_sequence(sequence, 'TAACCC', mode='fixed_length', telsize=10000-curated_length)
 
-
-                    curated_lengths = get_curated_lengths(CURATED_HG38, 'reverse')
-                    if seq_id in curated_lengths:
-                        final_seq = elongate_forward_sequence(sequence, 'TTAGGG', mode='fixed_length', telsize=curated_lengths[seq_id]-10000)
-                    else:
-                        raise(ValueError("Chromosome not found in curated list: {}".format(seq_id)))
+                    curated_length = get_curated_length(CURATED_HG38, 'reverse')
+                    final_seq = elongate_reverse_sequence(final_seq, 'TTAGGG', mode='fixed_length', telsize=10000-curated_length)
 
 
                     print("{}\t{}:\t\t{}\t...\t{}\t...\t{}\t{}".format(seq_id, (fwd_boundary, rev_boundary),
