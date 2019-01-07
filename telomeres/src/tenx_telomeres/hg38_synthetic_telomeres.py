@@ -4,7 +4,6 @@ import sys
 import gzip
 from typing import List
 from pathlib import Path
-from copy import deepcopy
 from collections import defaultdict, deque
 from itertools import islice, tee
 from pymer import ExactKmerCounter
@@ -241,15 +240,21 @@ def fasta_idx(filename):
 def get_curated_length(bedfname, chromosome, direction=None):
     ''' Just take a BED, return as dict with some filtering
     '''
-    bedfile = pd.read_csv(bedfname, delimiter='\t', names=['chrom', 'start', 'end'])
+    bedfile = pd.read_csv(bedfname, delimiter='\t', names=['chrom', 'start', 'end', 'side', 'diff'])
     bedfile['diff'] = bedfile['end'] - bedfile['start']
 
-    if direction == 'forward':
-        final = bedfile[bedfile['chrom'].str.contains('_f')]
-    elif direction == 'reverse':
-        final = bedfile[bedfile['chrom'].str.contains('_r')]
+    for chrom in bedfile['chrom']:
+        if "_f" in chrom:
+            bedfile.loc[bedfile['chrom'] == chrom, 'side'] = "forward"
+        elif "_r":
+            bedfile.loc[bedfile['chrom'] == chrom, 'side'] = "reverse"
 
-    return int(final['chromosome'])
+    # Cleanup after enriching for sides
+    bedfile['chrom'] = bedfile['chrom'].str.replace('_f', '')
+    bedfile['chrom'] = bedfile['chrom'].str.replace('_r', '')
+
+    return int(bedfile[(bedfile['chrom'] == chromosome) &
+                       (bedfile['side'] == direction)]['diff'])
 
 def main(genome_build='data/external/hg38.fa.gz'):
 #def main(genome_build='data/external/chr11.fa.gz'):
