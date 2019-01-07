@@ -129,13 +129,11 @@ def elongate_reverse_sequence(seq: str, kmer: str, mode: str, telsize=None):
 
         if telsize > max_seq:
             telsize = max_seq
-
-        hardcoded = 'TAACCC' # XXX
         
         chunks = int(telsize / KMER_K)
         chunks_r = telsize % KMER_K
-        kmer_seq = hardcoded
-        kmer_seq_r = hardcoded[0:chunks_r]
+        kmer_seq = HUMAN_TELOMERE
+        kmer_seq_r = HUMAN_TELOMERE[0:chunks_r]
 
     if mode == "naive_mode":
         # K-mer telomeric sequence right before the N boundary on the reverse side
