@@ -234,13 +234,13 @@ def fasta_idx(filename):
     with gzip.open(filename, 'wt') as hg38_idx:
         SeqIO.index_db(filename, hg38_idx, 'fasta')
 
-
 def get_curated_length(bedfname, chromosome, direction=None):
     ''' Just take a BED, return as dict with some filtering
     '''
     bedfile = pd.read_csv(bedfname, delimiter='\t', names=['chrom', 'start', 'end', 'side', 'diff'])
     bedfile['diff'] = bedfile['end'] - bedfile['start']
 
+    # Encode direction on column for easier manipulation
     for chrom in bedfile['chrom']:
         if "_f" in chrom:
             bedfile.loc[bedfile['chrom'] == chrom, 'side'] = "forward"
@@ -248,8 +248,10 @@ def get_curated_length(bedfname, chromosome, direction=None):
             bedfile.loc[bedfile['chrom'] == chrom, 'side'] = "reverse"
 
     # Cleanup after enriching for sides
-    bedfile['chrom'] = bedfile['chrom'].str.replace('_f', '')
-    bedfile['chrom'] = bedfile['chrom'].str.replace('_r', '')
+    bedfile.replace({'chrom': r'chr(.*)_f'}, {'chrom': r'chr\1'}, regex=True, inplace=True)
+    bedfile.replace({'chrom': r'chr(.*)_r'}, {'chrom': r'chr\1'}, regex=True, inplace=True)
+    bedfile.drop(bedfile[bedfile['chrom'].str.contains('_f')].index.values, inplace=True)
+    bedfile.drop(bedfile[bedfile['chrom'].str.contains('_r')].index.values, inplace=True)
 
     return int(bedfile[(bedfile['chrom'] == chromosome) &
                        (bedfile['side'] == direction)]['diff'])
